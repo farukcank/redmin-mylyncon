@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description>
+      Provides Task List integration, offline support and rich editing
+for the open source Redmine project management.
+   </description>
+   <feature url="features/org.sven.redmine_3.0.0.200810141954.jar" id="org.sven.redmine" version="3.0.0.200810141954">
+      <category name="org.svenk.redmine.collaboration-tools"/>
+   </feature>
+   <category-def name="org.svenk.redmine.collaboration-tools" label="Collaboration Tools"/>
+</site>
