@@ -30,15 +30,23 @@
  *******************************************************************************/
 
 package org.svenk.redmine.ui.editor;
+import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
+import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormEditor;
+import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.RedmineCorePlugin;
 
 
 public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 
+	private final static String REQUIRED_MESSAGE_SUMMARY = "Please enter a subject before  submitting";
+	private final static String REQUIRED_MESSAGE_DESCRIPTION = "Please enter a description before submitting";
+	
 	public RedmineTaskEditorPage(TaskEditor editor) {
 		super(editor, RedmineCorePlugin.REPOSITORY_KIND);
 	}
@@ -58,4 +66,28 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 		return form;
 	}
 	
+	@Override
+	public void doSubmit() {
+		TaskAttribute attribute = getModel().getTaskData().getRoot().getMappedAttribute(RedmineAttribute.SUMMARY.getRedmineKey());
+		if (attribute != null && attribute.getValue().trim().length() == 0) {
+			getTaskEditor().setMessage(REQUIRED_MESSAGE_SUMMARY, IMessageProvider.ERROR);
+			AbstractTaskEditorPart part = getPart(ID_PART_SUMMARY);
+			if (part != null) {
+				part.setFocus();
+			}
+			return;
+		}
+
+		attribute = getModel().getTaskData().getRoot().getMappedAttribute(RedmineAttribute.DESCRIPTION.getRedmineKey());
+		if (attribute != null && attribute.getValue().trim().length() == 0) {
+			getTaskEditor().setMessage(REQUIRED_MESSAGE_DESCRIPTION, IMessageProvider.ERROR);
+			AbstractTaskEditorPart part = getPart(ID_PART_DESCRIPTION);
+			if (part != null) {
+				part.setFocus();
+			}
+			return;
+		}
+		
+		super.doSubmit();
+	}
 }
