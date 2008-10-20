@@ -56,6 +56,8 @@ import org.svenk.redmine.core.model.RedmineTicket.Key;
 
 abstract public class AbstractRedmineClient implements IRedmineClient {
 
+	private final static String REDMINE_VERSION = "0.7";
+	
 	private final HttpClient httpClient;
 	
 	protected AbstractWebLocation location;
@@ -70,6 +72,14 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		this.httpClient = new HttpClient();
 	}
 
+	public void checkClientConnection() throws RedmineException {
+		if (!checkClientVersion().startsWith(REDMINE_VERSION)) {
+			throw new RedmineException("This connector requires Redmine version 0.7.X");
+		}
+	}
+	
+	abstract protected String checkClientVersion() throws RedmineException;
+	
 	public int createTicket(RedmineTicket ticket, IProgressMonitor monitor) throws RedmineException {
 		PostMethod method = new PostMethod("/projects/" + ticket.getValue(Key.PROJECT) + TICKET_NEW_URL);
 		method.setRequestBody(this.ticket2HttpData(ticket));

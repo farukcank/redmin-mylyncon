@@ -45,6 +45,7 @@ import org.apache.xmlrpc.client.XmlRpcTransportFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
+import org.eclipse.mylyn.commons.net.AuthenticationType;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
 import org.svenk.redmine.core.model.RedmineIssueCategory;
@@ -61,6 +62,10 @@ import org.svenk.redmine.core.util.RedmineTransportFactory;
 
 public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmineClient {
 
+	private final static String RAILS_VERSION = "2.0.2";
+	
+	private final static String PLUGIN_VERSION = "v1";
+	
 	private final static String URL_ENDPOINT = "/eclipse_mylyn_connector/api";
 
 	private final static String RPC_TICKET_BY_ID = "Ticket.FindTicketById";
@@ -89,6 +94,8 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 
 	private final static String RPC_GET_PROJECT_ISSUE_CATEGORYS = "ProjectBased.GetIssueCategorysForProject";
 
+	private final static String RPC_GET_VERSION_INFORMATION = "Information.GetVersion";
+
 	private XmlRpcClientConfigImpl config;
 
 	private XmlRpcClient client;
@@ -113,7 +120,25 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	public RedmineClientData getClientData() {
 		return data;
 	}
-	
+
+	@Override
+	protected String checkClientVersion() throws RedmineException {
+		Object response = execute(RPC_GET_VERSION_INFORMATION);
+		if (response instanceof Object[]) {
+			Object[] object = (Object[])response;
+			if (object.length==3) {
+				if (!object[1].equals(RAILS_VERSION)) {
+					throw new RedmineException("This connector requires Rails version " + RAILS_VERSION + " (" + object[1] + ")");
+				}
+				if (!object[2].toString().endsWith(PLUGIN_VERSION)) {
+					throw new RedmineException("This connector requires Plugin version " + PLUGIN_VERSION + " (" + object[2] + ")");
+				}
+				return object[0].toString();
+			}
+		}
+		throw new RedmineException("Not possible to determine version information");
+	}
+
 	public RedmineTicket getTicket(int id, IProgressMonitor monitor) throws RedmineException {
 		RedmineTicket ticket =  parseResponse2Ticket(execute(RPC_TICKET_BY_ID, new Integer(id)));
 		completeTicket(ticket);

@@ -95,4 +95,5 @@ public interface IRedmineClient {
 	
 	public void updateTicket(RedmineTicket ticket, String comment) throws RedmineException;
 
+	public void checkClientConnection() throws RedmineException;
 }
