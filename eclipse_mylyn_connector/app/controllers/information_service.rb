@@ -2,14 +2,11 @@
 require File.dirname(__FILE__) + '/../api/information_api'
 
 class InformationService < ActionWebService::Base
+  
   web_service_api InformationApi
   
-  def get_redmine_version
-    Redmine::VERSION
-  end
-  
-  def get_rails_version
-    RAILS_GEM_VERSION
+  def get_version
+    return Array.[](Redmine::VERSION, RAILS_GEM_VERSION,  Redmine::Plugin.registered_plugins[:mylyn_connector].version)
   end
   
   def check_credentials username, password
