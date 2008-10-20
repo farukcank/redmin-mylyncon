@@ -34,11 +34,18 @@ package org.svenk.redmine.ui.wizard;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.mylyn.internal.tasks.core.TaskRepositoryManager;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.ui.AbstractRepositoryConnectorUi;
+import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.mylyn.tasks.ui.wizards.AbstractRepositorySettingsPage;
 import org.eclipse.swt.widgets.Composite;
+import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.RedmineCorePlugin;
+import org.svenk.redmine.core.RedmineRepositoryConnector;
+import org.svenk.redmine.core.exception.RedmineException;
 
 public class RedmineRepositorySettingsPage extends
 		AbstractRepositorySettingsPage {
@@ -46,6 +53,8 @@ public class RedmineRepositorySettingsPage extends
 	private static final String TITLE = "Redmine Repository Settings";
 
 	private static final String DESCRIPTION = "Example: www.your-domain.de/redmine";
+	
+	private String checkedUrl = null;
 
 	public RedmineRepositorySettingsPage(TaskRepository taskRepository) {
 		super(TITLE, DESCRIPTION, taskRepository);
@@ -53,18 +62,42 @@ public class RedmineRepositorySettingsPage extends
 		setNeedsAnonymousLogin(false);
 		setNeedsEncoding(false);
 		setNeedsTimeZone(false);
+		setNeedsAdvanced(false);
+		
+	}
+	
+	@Override
+	public void createControl(Composite parent) {
+		super.createControl(parent);
+		checkedUrl = getRepositoryUrl();
+	}
+	
+	@Override
+	public boolean isPageComplete() {
+		return super.isPageComplete() && checkedUrl!= null && checkedUrl.equals(getRepositoryUrl());
 	}
 
 	@Override
 	protected void createAdditionalControls(Composite parent) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
-	protected Validator getValidator(TaskRepository repository) {
-		// TODO Auto-generated method stub
-		return null;
+	protected Validator getValidator(final TaskRepository repository) {
+		return new Validator() {
+			@Override
+			public void run(IProgressMonitor monitor) throws CoreException {
+				// TODO Auto-generated method stub
+				RedmineRepositoryConnector connector = (RedmineRepositoryConnector)TasksUi.getRepositoryManager().getRepositoryConnector(RedmineCorePlugin.REPOSITORY_KIND);
+				IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
+				try {
+					client.checkClientConnection();
+				} catch (RedmineException e) {
+					throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
+				}
+				RedmineRepositorySettingsPage.this.checkedUrl = repository.getRepositoryUrl();
+			}
+		};
 	}
 
 	@Override
