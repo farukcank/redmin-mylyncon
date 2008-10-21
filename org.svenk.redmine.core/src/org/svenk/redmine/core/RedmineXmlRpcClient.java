@@ -46,6 +46,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.commons.net.AuthenticationType;
+import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
 import org.svenk.redmine.core.model.RedmineIssueCategory;
@@ -100,8 +101,8 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 
 	private XmlRpcClient client;
 	
-	public RedmineXmlRpcClient(AbstractWebLocation location, RedmineClientData clientData) {
-		super(location, clientData);
+	public RedmineXmlRpcClient(AbstractWebLocation location, RedmineClientData clientData, TaskRepository repository) {
+		super(location, clientData, repository);
 	}
 
 	private XmlRpcClient getClient() throws RedmineException {

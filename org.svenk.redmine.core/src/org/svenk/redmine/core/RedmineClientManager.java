@@ -76,7 +76,7 @@ public class RedmineClientManager implements IRepositoryListener {
 				dataByUrl.put(repositoryUrl, data);
 			}
 			
-			repository = RedmineClientFactory.createClient(location, data);
+			repository = RedmineClientFactory.createClient(location, data, taskRepository);
 			clientByUrl.put(taskRepository.getRepositoryUrl(), repository);
 		}
 		return repository;

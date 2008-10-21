@@ -48,6 +48,7 @@ import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.commons.net.AuthenticationType;
 import org.eclipse.mylyn.commons.net.UnsupportedRequestException;
 import org.eclipse.mylyn.commons.net.WebUtil;
+import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
@@ -63,13 +64,16 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	protected AbstractWebLocation location;
 	
 	protected RedmineClientData data;
+	
+	protected String characterEncoding;
 
 	protected RedmineTicket.Key attributeKeys[] = new RedmineTicket.Key[]{Key.ASSIGNED_TO, Key.PRIORITY, Key.VERSION, Key.CATEGORY, Key.STATUS, Key.TRACKER};
 
-	public AbstractRedmineClient(AbstractWebLocation location, RedmineClientData clientData) {
+	public AbstractRedmineClient(AbstractWebLocation location, RedmineClientData clientData, TaskRepository repository) {
 		this.location = location;
 		this.data = clientData;
 		this.httpClient = new HttpClient();
+		this.characterEncoding = repository.getCharacterEncoding();
 	}
 
 	public void checkClientConnection() throws RedmineException {
@@ -167,6 +171,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 
 	protected int performExecuteMethod(HttpMethod method, HostConfiguration hostConfiguration, IProgressMonitor monitor) throws RedmineException {
 		try {
+			method.setRequestHeader(new Header("Content-Type", "application/x-www-form-urlencoded; charset="+characterEncoding));
 			return WebUtil.execute(httpClient, hostConfiguration, method, monitor);
 		} catch (Exception e) {
 			if (e instanceof OperationCanceledException) {

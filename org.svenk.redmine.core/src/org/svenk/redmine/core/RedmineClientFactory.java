@@ -32,11 +32,12 @@
 package org.svenk.redmine.core;
 
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
+import org.eclipse.mylyn.tasks.core.TaskRepository;
 
 public class RedmineClientFactory {
 
-	public static IRedmineClient createClient(AbstractWebLocation location, RedmineClientData clientData) {
-		return new RedmineXmlRpcClient(location, clientData);
+	public static IRedmineClient createClient(AbstractWebLocation location, RedmineClientData clientData, TaskRepository repository) {
+		return new RedmineXmlRpcClient(location, clientData, repository);
 	}
 
 }
