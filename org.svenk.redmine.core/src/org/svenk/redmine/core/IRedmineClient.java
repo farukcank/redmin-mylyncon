@@ -56,7 +56,7 @@ public interface IRedmineClient {
 
 	public static final String TICKET_NEW_URL = "/issues/new";
 
-//	public static final String TICKET_EDIT_URL = "/issues/edit/";
+	public static final String TICKET_EDIT_URL = "/issues/edit/";
 //
 //	public static final String CUSTOM_QUERY_URL = "/query";
 //
@@ -93,7 +93,7 @@ public interface IRedmineClient {
 	
 	public int createTicket(RedmineTicket ticket, IProgressMonitor monitor) throws RedmineException;
 	
-	public void updateTicket(RedmineTicket ticket, String comment) throws RedmineException;
+	public void updateTicket(RedmineTicket ticket, String comment, IProgressMonitor monitor) throws RedmineException;
 
 	public void checkClientConnection() throws RedmineException;
 }

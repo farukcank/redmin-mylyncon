@@ -35,6 +35,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.NameParser;
+
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
@@ -86,8 +88,11 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	
 	public int createTicket(RedmineTicket ticket, IProgressMonitor monitor) throws RedmineException {
 		PostMethod method = new PostMethod("/projects/" + ticket.getValue(Key.PROJECT) + TICKET_NEW_URL);
-		method.setRequestBody(this.ticket2HttpData(ticket));
+		
+		List<NameValuePair> values = this.ticket2HttpData(ticket);
+		method.setRequestBody(values.toArray(new NameValuePair[values.size()]));
 
+		addPostHeader(method, false);
 		executeMethod(method, monitor);
 		
 		Header respHeader = method.getResponseHeader("location");
@@ -108,6 +113,16 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		
 		return -1;
 		
+	}
+	
+	public void updateTicket(RedmineTicket ticket, String comment, IProgressMonitor monitor) throws RedmineException {
+		PostMethod method = new PostMethod(TICKET_EDIT_URL + ticket.getId());
+
+		List<NameValuePair> values = this.ticket2HttpData(ticket, comment);
+		method.setRequestBody(values.toArray(new NameValuePair[values.size()]));
+
+		addPostHeader(method, false);
+		executeMethod(method, monitor);
 	}
 	
 	/**
@@ -171,7 +186,6 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 
 	protected int performExecuteMethod(HttpMethod method, HostConfiguration hostConfiguration, IProgressMonitor monitor) throws RedmineException {
 		try {
-			method.setRequestHeader(new Header("Content-Type", "application/x-www-form-urlencoded; charset="+characterEncoding));
 			return WebUtil.execute(httpClient, hostConfiguration, method, monitor);
 		} catch (Exception e) {
 			if (e instanceof OperationCanceledException) {
@@ -202,11 +216,11 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		}
 	}
 
-	protected NameValuePair[] ticket2HttpData(RedmineTicket ticket) {
+	protected List<NameValuePair> ticket2HttpData(RedmineTicket ticket) {
 		
 		Map<String, String> values = ticket.getValues();
-		List<NameValuePair> nameValuePair = new ArrayList<NameValuePair>(this.attributeKeys.length + 3);
-		
+		List<NameValuePair> nameValuePair = new ArrayList<NameValuePair>(this.attributeKeys.length + 2);
+
 		nameValuePair.add(new NameValuePair("issue[subject]", values.get(Key.SUBJECT.getKey())));
 		nameValuePair.add(new NameValuePair("issue[description]", values.get(Key.DESCRIPTION.getKey())));
 		
@@ -224,7 +238,20 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 			}
 		}
 		
-		return nameValuePair.toArray(new NameValuePair[nameValuePair.size()]);
+		return nameValuePair;
+	}
+	
+	protected List<NameValuePair> ticket2HttpData(RedmineTicket ticket, String comment) {
+		List<NameValuePair> nameValuePair = ticket2HttpData(ticket);
+		nameValuePair.add(new NameValuePair("notes", comment));
+		return nameValuePair;
+	}
+	
+	protected void addPostHeader(HttpMethod method, boolean fileupload) {
+		Header header = fileupload
+			? new Header("Content-Type", "multipart/formdata; charset="+characterEncoding)
+			: new Header("Content-Type", "application/x-www-form-urlencoded; charset="+characterEncoding);
+		method.setRequestHeader(header);
 	}
 	
 	private String redmineKey2ValueName(Key redmineKey) {

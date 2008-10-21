@@ -35,17 +35,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
-import org.apache.xmlrpc.client.XmlRpcTransportFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
-import org.eclipse.mylyn.commons.net.AuthenticationType;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
@@ -72,8 +68,6 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	private final static String RPC_TICKET_BY_ID = "Ticket.FindTicketById";
 
 	private final static String RPC_TICKET_SEARCH = "Ticket.SearchTickets";
-
-	private final static String RPC_TICKET_UPDATE = "Ticket.UpdateTicket";
 
 	private final static String RPC_GET_TICKET_JOURNALS = "Ticket.FindJournalsForIssue";
 
@@ -279,11 +273,6 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			// TODO log exception
 			throw new RedmineException(e);
 		}
-	}
-
-	public void updateTicket(RedmineTicket ticket, String comment) throws RedmineException {
-		Map<String, Object> ticketValues = parseTicket2Request(ticket);
-		execute(RPC_TICKET_UPDATE, new Object[]{ticketValues, comment});
 	}
 
 	private Object execute(String rpc, Object... params)
@@ -493,31 +482,6 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		return result;
 	}
 
-	private Map<String, Object> parseTicket2Request(RedmineTicket ticket) {
-		Map<String, Object> map = new HashMap<String, Object>(0);
-		
-		Map<String, String> values = ticket.getValues();
-		map.put("id", ticket.getId());
-		map.put("subject", values.get(Key.SUBJECT.getKey()));
-		map.put("description", values.get(Key.DESCRIPTION.getKey()));
-		
-		//Handle RedmineTicketAttributes / ProjectAttributes
-		String xmlRpcKey;
-		for (Key key : this.attributeKeys) {
-			if (key.isReadonly()) {
-				continue;
-			}
-			xmlRpcKey = redmineKey2XmlRpcKey(key);
-			String value = values.get(key.getKey());
-			if (value!=null) {
-				map.put(xmlRpcKey, values.get(key.getKey()));
-			}
-		}
-		
-		return map;
-	}
-
-	
 	private String redmineKey2XmlRpcKey(Key redmineKey) {
 		return redmineKey.name().toLowerCase() + "_id";
 	}

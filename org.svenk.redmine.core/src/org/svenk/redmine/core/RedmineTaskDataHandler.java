@@ -200,7 +200,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 			} else {
 				String comment = taskData.getRoot().getMappedAttribute(RedmineAttribute.COMMENT.getRedmineKey()).getValue();
 				comment = (comment==null) ? "" : comment.trim();
-				client.updateTicket(ticket, comment);
+				client.updateTicket(ticket, comment, monitor);
 				return new RepositoryResponse(ResponseKind.TASK_UPDATED, "" + ticket.getId());
 			}
 		} catch (RedmineException e) {
