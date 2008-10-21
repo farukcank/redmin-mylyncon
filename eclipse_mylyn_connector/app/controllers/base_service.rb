@@ -19,7 +19,6 @@ class BaseService < ActionWebService::Base
     @@authorizemap[IssueService][:find_journals_for_issue] = {:ctrl => :issues, :action => :show}
     @@authorizemap[IssueService][:search_tickets] = {:ctrl => :issues, :action => :index}
     @@authorizemap[IssueService][:find_tickets_by_last_update] = {:ctrl => :issues, :action => :show}
-    @@authorizemap[IssueService][:update_ticket] = {:ctrl => :issues, :action => :edit}
     
     @@authorizemap[ProjectBasedService] = Hash.new(nil)
     @@authorizemap[ProjectBasedService][:get_trackers_for_project] = {:ctrl => :issues, :action => :index}

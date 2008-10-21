@@ -27,7 +27,4 @@ class IssueApi < ActionWebService::API::Base
     :expects => [:int, :datetime],
     :returns => [[:int]]
   
-  api_method :update_ticket,
-    :expects => [IssueDto, :string],
-    :returns => [:boolean]
 end

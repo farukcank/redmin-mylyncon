@@ -16,9 +16,6 @@ class IssueService < BaseService
       @project = @querydecoder.project
     elsif rpcname==:find_tickets_by_last_update
       @project = Project.find(args[0])
-    elsif rpcname==:update_ticket
-      @issue = Issue.find(args[0]['id'])
-      @project = @issue.project
     else 
       @issue = Issue.find(args[0])
       @project = @issue.project
@@ -72,28 +69,4 @@ class IssueService < BaseService
     return issues.compact
  end
   
-  def update_ticket(issueDto, comment)
-    allowed_statuses = @issue.new_statuses_allowed_to(User.current)
-    edit_allowed = User.current.allowed_to?(:edit_issues, @project)
-    
-    # User can change issue attributes only if he has :edit permission or if a workflow transition is allowed
-    if (edit_allowed || !allowed_statuses.empty?)
-      attrs = IssueDto.to_hash(issueDto);
-    
-      attrs.delete_if {|k,v| !IssuesController::UPDATABLE_ATTRS_ON_TRANSITION.include?(k) } unless edit_allowed
-      attrs.delete('status_id') unless allowed_statuses.detect {|s| s.id.to_s == attrs['status_id'].to_s}
-    
-      journal = @issue.init_journal(User.current, comment)
-      @issue.attributes=attrs
-      res=@issue.save
-
-      if !journal.new_record?
-        # Only send notification if something was actually changed
-        Mailer.deliver_issue_edit(journal) if Setting.notified_events.include?('issue_updated')
-      end
-      
-      return res
-    end
-    return false
-  end
 end
