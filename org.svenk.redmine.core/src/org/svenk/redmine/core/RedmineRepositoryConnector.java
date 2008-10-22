@@ -52,6 +52,7 @@ import org.eclipse.mylyn.tasks.core.IRepositoryQuery;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.TaskRepositoryLocationFactory;
+import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentHandler;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskDataHandler;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
@@ -121,6 +122,11 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 		return (index>0) ? taskURl.substring(0, index) : null;
 	}
 
+	@Override
+	public AbstractTaskAttachmentHandler getTaskAttachmentHandler() {
+		return new RedmineTaskAttachmentHandler(this);
+	}
+	
 	@Override
 	public AbstractTaskDataHandler getTaskDataHandler() {
 		return taskDataHandler;

@@ -31,6 +31,8 @@
 
 package org.svenk.redmine.core;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +45,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -85,6 +88,16 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	}
 	
 	abstract protected String checkClientVersion() throws RedmineException;
+	
+	public InputStream getAttachmentContent(int attachmentId, IProgressMonitor monitor) throws RedmineException {
+		GetMethod method = new GetMethod(IRedmineClient.ATTACHMENT_URL + attachmentId);
+		try {
+			int statusCode = executeMethod(method, monitor);
+			return statusCode==HttpStatus.SC_OK ? method.getResponseBodyAsStream() : null;
+		} catch (IOException e) {
+			throw new RedmineException(e.getMessage(), e.getCause());
+		}
+	}
 	
 	public int createTicket(RedmineTicket ticket, IProgressMonitor monitor) throws RedmineException {
 		PostMethod method = new PostMethod("/projects/" + ticket.getValue(Key.PROJECT) + TICKET_NEW_URL);
@@ -133,6 +146,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	 * @throws RedmineException
 	 */
 	protected int executeMethod(HttpMethod method, IProgressMonitor monitor) throws RedmineException {
+		method.setFollowRedirects(false);
 		HostConfiguration hostConfiguration = WebUtil.createHostConfiguration(httpClient, location, monitor);
 		return executeMethod(method, hostConfiguration, monitor, false);
 	}

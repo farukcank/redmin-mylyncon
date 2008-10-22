@@ -31,6 +31,7 @@
 
 package org.svenk.redmine.core;
 
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
@@ -93,5 +94,7 @@ public interface IRedmineClient {
 	
 	public void updateTicket(RedmineTicket ticket, String comment, IProgressMonitor monitor) throws RedmineException;
 
+	public InputStream getAttachmentContent(int attachmentId, IProgressMonitor monitor) throws RedmineException;
+	
 	public void checkClientConnection() throws RedmineException;
 }

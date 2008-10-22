@@ -188,8 +188,8 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 				mapper.setContentType(attachment.getContentType());
 				mapper.setFileName(attachment.getFilename());
 				mapper.setLength((long)attachment.getFilesize());
-//				String url  = repository.getUrl() + IRedmineClient.ATTACHMENT_URL +  mapper.getAttachmentId();
-				mapper.setUrl(RedmineRepositoryConnector.getTaskURL(repository.getUrl(), ticket.getId()));
+				String url  = repository.getUrl() + IRedmineClient.ATTACHMENT_URL +  mapper.getAttachmentId();
+				mapper.setUrl(url);
 				
 				TaskAttribute attribute = data.getRoot().createAttribute(TaskAttribute.PREFIX_ATTACHMENT + mapper.getAttachmentId());
 				mapper.applyTo(attribute);

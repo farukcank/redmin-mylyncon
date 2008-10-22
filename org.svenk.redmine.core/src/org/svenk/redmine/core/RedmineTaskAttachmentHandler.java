@@ -39,14 +39,21 @@ import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentHandler;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentSource;
+import org.eclipse.mylyn.tasks.core.data.TaskAttachmentMapper;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
+import org.svenk.redmine.core.exception.RedmineException;
 
 public class RedmineTaskAttachmentHandler extends AbstractTaskAttachmentHandler {
 
+	private RedmineRepositoryConnector connector;
+	
+	RedmineTaskAttachmentHandler(RedmineRepositoryConnector connector) {
+		this.connector = connector;
+	}
+	
 	@Override
 	public boolean canGetContent(TaskRepository repository, ITask task) {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
@@ -59,8 +66,14 @@ public class RedmineTaskAttachmentHandler extends AbstractTaskAttachmentHandler 
 	public InputStream getContent(TaskRepository repository, ITask task,
 			TaskAttribute attachmentAttribute, IProgressMonitor monitor)
 			throws CoreException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
+		try {
+			TaskAttachmentMapper attachment = TaskAttachmentMapper.createFrom(attachmentAttribute);
+			return client.getAttachmentContent(Integer.parseInt(attachment.getAttachmentId()), monitor);
+		} catch (RedmineException e) {
+			throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
+		}
 	}
 
 	@Override
