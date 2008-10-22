@@ -5,6 +5,7 @@
 require File.dirname(__FILE__) + '/../struct/issue_dto'
 require File.dirname(__FILE__) + '/../struct/issue_status_dto'
 require File.dirname(__FILE__) + '/../struct/journal_dto'
+require File.dirname(__FILE__) + '/../struct/attachment_dto'
 
 class IssueApi < ActionWebService::API::Base
   api_method :find_ticket_by_id,
@@ -18,6 +19,10 @@ class IssueApi < ActionWebService::API::Base
   api_method :find_journals_for_issue,
     :expects => [:int],
     :returns => [[JournalDto]]
+
+    api_method :find_attachments_for_issue,
+    :expects => [:int],
+    :returns => [[AttachmentDto]]
 
   api_method :search_tickets,
     :expects => [:string],

@@ -6,6 +6,7 @@ require File.dirname(__FILE__) + '/../api/issue_api'
 require File.dirname(__FILE__) + '/../struct/issue_dto'
 require File.dirname(__FILE__) + '/../struct/issue_status_dto'
 require File.dirname(__FILE__) + '/../struct/journal_dto'
+require File.dirname(__FILE__) + '/../struct/attachment_dto'
 
 class IssueService < BaseService
   web_service_api IssueApi
@@ -43,6 +44,12 @@ class IssueService < BaseService
     journals = @issue.journals
     journals.collect! {|x|JournalDto.create(x)}
     return journals.compact
+  end
+  
+  def find_attachments_for_issue(id)
+    attachments = @issue.attachments
+    attachments.collect! {|x|AttachmentDto.create(x)}
+    return attachments
   end
   
   #project_id=2&set_filter=1&fields[]=start_date&operators[start_date]=t&values[start_date][]

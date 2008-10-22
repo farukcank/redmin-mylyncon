@@ -17,6 +17,7 @@ class BaseService < ActionWebService::Base
     @@authorizemap[IssueService][:find_ticket_by_id] = {:ctrl => :issues, :action => :show}
     @@authorizemap[IssueService][:find_allowed_statuses_for_issue] = {:ctrl => :issues, :action => :show}
     @@authorizemap[IssueService][:find_journals_for_issue] = {:ctrl => :issues, :action => :show}
+    @@authorizemap[IssueService][:find_attachments_for_issue] = {:ctrl => :issues, :action => :show}
     @@authorizemap[IssueService][:search_tickets] = {:ctrl => :issues, :action => :index}
     @@authorizemap[IssueService][:find_tickets_by_last_update] = {:ctrl => :issues, :action => :show}
     
