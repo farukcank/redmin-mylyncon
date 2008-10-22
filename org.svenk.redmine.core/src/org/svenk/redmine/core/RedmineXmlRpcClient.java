@@ -45,6 +45,7 @@ import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
+import org.svenk.redmine.core.model.RedmineAttachment;
 import org.svenk.redmine.core.model.RedmineIssueCategory;
 import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.model.RedminePriority;
@@ -70,6 +71,8 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	private final static String RPC_TICKET_SEARCH = "Ticket.SearchTickets";
 
 	private final static String RPC_GET_TICKET_JOURNALS = "Ticket.FindJournalsForIssue";
+
+	private final static String RPC_GET_TICKET_ATTACHMENTS = "Ticket.FindAttachmentsForIssue";
 
 	private final static String RPC_GET_TICKET_ALLOWED_STATUS = "Ticket.FindAllowedStatusesForIssue";
 
@@ -148,6 +151,10 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		return parseResponse2Journals(execute(RPC_GET_TICKET_JOURNALS, new Integer(id)));
 	}
 	
+	protected List<RedmineAttachment> getAttachmentsByTicket(int id) throws RedmineException {
+		return parseResponse2Attachment(execute(RPC_GET_TICKET_ATTACHMENTS, new Integer(id)));
+	}
+	
 	public void search(String searchParam, List<RedmineTicket> tickets)
 			throws RedmineException {
 		Object response = execute(RPC_TICKET_SEARCH, searchParam);
@@ -172,6 +179,13 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			}
 		}
 
+		List<RedmineAttachment> attachments = getAttachmentsByTicket(ticket.getId());
+		if (attachments!=null) {
+			for (RedmineAttachment attachment : attachments) {
+				ticket.addAttachment(attachment);
+			}
+		}
+		
 	}
 
 	public List<Integer> getChangedTicketId(Integer projectId, Date changedSince) throws RedmineException {
@@ -464,6 +478,32 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			}
 		}
 		return journals;
+	}
+	
+	private List<RedmineAttachment> parseResponse2Attachment(Object response) throws RedmineException {
+		List<RedmineAttachment> attachments = null;
+		if (response instanceof Object[]) {
+			Object[] maps = (Object[]) response;
+			attachments = new ArrayList<RedmineAttachment>(maps.length);
+			
+			RedmineAttachment attachment;
+			for (Object object : maps) {
+				if (object instanceof HashMap) {
+					HashMap<String, Object> map = (HashMap) object;
+					attachment = new RedmineAttachment(Integer.parseInt(map.get("id").toString()));
+					attachment.setCreated((Date)map.get("created_on"));
+					attachment.setAuthorId(Integer.parseInt(map.get("author_id").toString()));
+					attachment.setAuthorName(map.get("author_name").toString());
+					attachment.setFilename(map.get("filename").toString());
+					attachment.setFilesize(Integer.parseInt(map.get("filesize").toString()));
+					attachment.setContentType(map.get("content_type").toString());
+					attachment.setDigest(map.get("digest").toString());
+					attachment.setDescription(map.get("description").toString());
+					attachments.add(attachment);
+				}
+			}
+		}
+		return attachments;
 	}
 	
 	private List<Integer> parseResponse2IntegerList(Object response) throws RedmineException {

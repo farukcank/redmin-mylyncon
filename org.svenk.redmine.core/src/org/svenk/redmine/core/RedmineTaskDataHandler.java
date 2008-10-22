@@ -49,11 +49,13 @@ import org.eclipse.mylyn.tasks.core.RepositoryResponse;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.RepositoryResponse.ResponseKind;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskDataHandler;
+import org.eclipse.mylyn.tasks.core.data.TaskAttachmentMapper;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskAttributeMapper;
 import org.eclipse.mylyn.tasks.core.data.TaskCommentMapper;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.svenk.redmine.core.exception.RedmineException;
+import org.svenk.redmine.core.model.RedmineAttachment;
 import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.model.RedminePriority;
 import org.svenk.redmine.core.model.RedmineTicket;
@@ -175,6 +177,25 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 			}
 		}
 
+		RedmineAttachment[] attachments = ticket.getAttachments();
+		if (attachments != null) {
+			for (RedmineAttachment attachment : attachments) {
+				TaskAttachmentMapper mapper = new TaskAttachmentMapper();
+				mapper.setAttachmentId("" + attachment.getId());
+				mapper.setAuthor(repository.createPerson(attachment.getAuthorName()));
+				mapper.setDescription(attachment.getDescription());
+				mapper.setCreationDate(attachment.getCreated());
+				mapper.setContentType(attachment.getContentType());
+				mapper.setFileName(attachment.getFilename());
+				mapper.setLength((long)attachment.getFilesize());
+//				String url  = repository.getUrl() + IRedmineClient.ATTACHMENT_URL +  mapper.getAttachmentId();
+				mapper.setUrl(RedmineRepositoryConnector.getTaskURL(repository.getUrl(), ticket.getId()));
+				
+				TaskAttribute attribute = data.getRoot().createAttribute(TaskAttribute.PREFIX_ATTACHMENT + mapper.getAttachmentId());
+				mapper.applyTo(attribute);
+			}
+		}
+		
 		return changedAttributes;
 	}
 

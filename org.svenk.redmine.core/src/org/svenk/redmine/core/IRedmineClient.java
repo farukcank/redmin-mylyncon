@@ -60,8 +60,6 @@ public interface IRedmineClient {
 //
 //	public static final String CUSTOM_QUERY_URL = "/query";
 //
-//	public static final String TICKET_ATTACHMENT_URL = "/attachment/ticket/";
-//
 //	public static final String DEFAULT_USERNAME = "anonymous";
 //
 //	public static final String WIKI_URL = "/wiki/";
@@ -75,8 +73,8 @@ public interface IRedmineClient {
 //	public static final String MILESTONE_URL = "/milestone/";
 //
 //	public static final String BROWSER_URL = "/browser/";
-//
-//	public static final String ATTACHMENT_URL = "/attachment/ticket/";
+
+	public static final String ATTACHMENT_URL = "/attachments/download/";
 
 	public boolean hasAttributes();
 

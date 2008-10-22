@@ -119,6 +119,7 @@ public class RedmineTicket {
 	private Date created;
 	private Map<Key, String> valueByKey = new HashMap<Key, String>();
 	private List<RedmineTicketJournal> journals;
+	private List<RedmineAttachment> attachments;
 	private List<RedmineTicketStatus> statuses;
 	
 
@@ -189,6 +190,17 @@ public class RedmineTicket {
 	
 	public RedmineTicketJournal[] getJournals() {
 		return journals==null ? null : journals.toArray(new RedmineTicketJournal[0]);
+	}
+
+	public void addAttachment(RedmineAttachment attachment) {
+		if (attachments==null) {
+			attachments = new ArrayList<RedmineAttachment>();
+		}
+		attachments.add(attachment);
+	}
+	
+	public RedmineAttachment[] getAttachments() {
+		return attachments==null ? null : attachments.toArray(new RedmineAttachment[0]);
 	}
 
 	public List<RedmineTicketStatus> getStatuses() {
