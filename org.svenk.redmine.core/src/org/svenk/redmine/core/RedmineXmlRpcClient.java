@@ -498,7 +498,10 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 					attachment.setFilesize(Integer.parseInt(map.get("filesize").toString()));
 					attachment.setContentType(map.get("content_type").toString());
 					attachment.setDigest(map.get("digest").toString());
-					attachment.setDescription(map.get("description").toString());
+					Object description = map.get("description");
+					if (description!=null) {
+						attachment.setDescription(description.toString());
+					}
 					attachments.add(attachment);
 				}
 			}
