@@ -36,6 +36,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentSource;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.RedmineTicket;
 
@@ -95,6 +96,8 @@ public interface IRedmineClient {
 	public void updateTicket(RedmineTicket ticket, String comment, IProgressMonitor monitor) throws RedmineException;
 
 	public InputStream getAttachmentContent(int attachmentId, IProgressMonitor monitor) throws RedmineException;
+
+	public void uploadAttachment(int ticketId, String fileName, String comment, String description, AbstractTaskAttachmentSource source, IProgressMonitor monitor) throws RedmineException;
 	
 	public void checkClientConnection() throws RedmineException;
 }

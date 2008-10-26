@@ -41,6 +41,7 @@ import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentHandler;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentSource;
 import org.eclipse.mylyn.tasks.core.data.TaskAttachmentMapper;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
+import org.eclipse.mylyn.tasks.core.data.TaskAttributeMapper;
 import org.svenk.redmine.core.exception.RedmineException;
 
 public class RedmineTaskAttachmentHandler extends AbstractTaskAttachmentHandler {
@@ -58,8 +59,7 @@ public class RedmineTaskAttachmentHandler extends AbstractTaskAttachmentHandler 
 
 	@Override
 	public boolean canPostContent(TaskRepository repository, ITask task) {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
@@ -77,11 +77,32 @@ public class RedmineTaskAttachmentHandler extends AbstractTaskAttachmentHandler 
 	}
 
 	@Override
-	public void postContent(TaskRepository repository, ITask task,
-			AbstractTaskAttachmentSource source, String comment,
-			TaskAttribute attachmentAttribute, IProgressMonitor monitor)
-			throws CoreException {
-		// TODO Auto-generated method stub
+	public void postContent(TaskRepository repository, ITask task, AbstractTaskAttachmentSource source, String comment, TaskAttribute attachmentAttribute, IProgressMonitor monitor) throws CoreException {
+		String fileName = source.getName();
+		String description = "";
+		
+		if (attachmentAttribute!=null) {
+			TaskAttachmentMapper mapper = TaskAttachmentMapper.createFrom(attachmentAttribute);
+			if (mapper.getFileName() != null) {
+				fileName = mapper.getFileName();
+			}
+			if (mapper.getComment() != null) {
+				comment = mapper.getComment();
+			}
+			if (mapper.getDescription() != null) {
+				description = mapper.getDescription();
+			}
+		}
+		
+		IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
+		try {
+			client.uploadAttachment(Integer.parseInt(task.getTaskId()), fileName, comment, description, source, monitor);
+//		} catch (NumberFormatException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+		} catch (RedmineException e) {
+			throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
+		}
 
 	}
 

@@ -37,8 +37,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.naming.NameParser;
-
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
@@ -47,6 +45,10 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.multipart.FilePart;
+import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
+import org.apache.commons.httpclient.methods.multipart.Part;
+import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
@@ -54,9 +56,11 @@ import org.eclipse.mylyn.commons.net.AuthenticationType;
 import org.eclipse.mylyn.commons.net.UnsupportedRequestException;
 import org.eclipse.mylyn.commons.net.WebUtil;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
+import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentSource;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
+import org.svenk.redmine.core.util.internal.RedminePartSource;
 
 
 
@@ -71,6 +75,8 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	protected RedmineClientData data;
 	
 	protected String characterEncoding;
+	
+	protected boolean authenticated;
 
 	protected RedmineTicket.Key attributeKeys[] = new RedmineTicket.Key[]{Key.ASSIGNED_TO, Key.PRIORITY, Key.VERSION, Key.CATEGORY, Key.STATUS, Key.TRACKER};
 
@@ -79,6 +85,8 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		this.data = clientData;
 		this.httpClient = new HttpClient();
 		this.characterEncoding = repository.getCharacterEncoding();
+		
+		this.httpClient.getParams().setContentCharset(characterEncoding);
 	}
 
 	public void checkClientConnection() throws RedmineException {
@@ -99,13 +107,26 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		}
 	}
 	
+	public void uploadAttachment(int ticketId, String fileName, String comment, String description, AbstractTaskAttachmentSource source, IProgressMonitor monitor) throws RedmineException {
+		PostMethod method = new PostMethod(TICKET_EDIT_URL + ticketId);
+		
+		Part[] parts = new Part[]{
+				new FilePart("attachments[1][file]", new RedminePartSource(source, fileName)),
+				new StringPart("attachments[1][description]", description, characterEncoding),
+				new StringPart("notes", comment, characterEncoding)
+		};
+		
+		method.setRequestEntity(new MultipartRequestEntity(parts, method.getParams()));
+		
+		executeMethod(method, monitor);
+	}
+	
 	public int createTicket(RedmineTicket ticket, IProgressMonitor monitor) throws RedmineException {
 		PostMethod method = new PostMethod("/projects/" + ticket.getValue(Key.PROJECT) + TICKET_NEW_URL);
 		
 		List<NameValuePair> values = this.ticket2HttpData(ticket);
 		method.setRequestBody(values.toArray(new NameValuePair[values.size()]));
 
-		addPostHeader(method, false);
 		executeMethod(method, monitor);
 		
 		Header respHeader = method.getResponseHeader("location");
@@ -134,7 +155,6 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		List<NameValuePair> values = this.ticket2HttpData(ticket, comment);
 		method.setRequestBody(values.toArray(new NameValuePair[values.size()]));
 
-		addPostHeader(method, false);
 		executeMethod(method, monitor);
 	}
 	
@@ -162,7 +182,13 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	 * @throws RedmineException
 	 */
 	protected int executeMethod(HttpMethod method, HostConfiguration hostConfiguration, IProgressMonitor monitor, boolean authenticated) throws RedmineException {
+		if (!this.authenticated) {
+			performLogin(hostConfiguration, monitor);
+			this.authenticated = authenticated = true;
+		}
+
 		int statusCode = performExecuteMethod(method, hostConfiguration, monitor);
+
 		
 		if (statusCode==HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED) {
 			hostConfiguration = refreshCredentials(AuthenticationType.PROXY, method, monitor);
@@ -197,7 +223,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		
 		performExecuteMethod(method, hostConfiguration, monitor);
 	}
-
+	
 	protected int performExecuteMethod(HttpMethod method, HostConfiguration hostConfiguration, IProgressMonitor monitor) throws RedmineException {
 		try {
 			return WebUtil.execute(httpClient, hostConfiguration, method, monitor);
@@ -259,13 +285,6 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		List<NameValuePair> nameValuePair = ticket2HttpData(ticket);
 		nameValuePair.add(new NameValuePair("notes", comment));
 		return nameValuePair;
-	}
-	
-	protected void addPostHeader(HttpMethod method, boolean fileupload) {
-		Header header = fileupload
-			? new Header("Content-Type", "multipart/formdata; charset="+characterEncoding)
-			: new Header("Content-Type", "application/x-www-form-urlencoded; charset="+characterEncoding);
-		method.setRequestHeader(header);
 	}
 	
 	private String redmineKey2ValueName(Key redmineKey) {
