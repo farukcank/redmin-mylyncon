@@ -32,15 +32,21 @@
 package org.svenk.redmine.ui.wizard;
 
 import org.eclipse.mylyn.tasks.core.ITaskMapping;
-import org.eclipse.mylyn.tasks.core.TaskMapping;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
+import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.mylyn.tasks.ui.wizards.NewTaskWizard;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.INewWizard;
+import org.svenk.redmine.core.AbstractRedmineTaskMapping;
+import org.svenk.redmine.core.IRedmineClient;
+import org.svenk.redmine.core.RedmineCorePlugin;
+import org.svenk.redmine.core.RedmineRepositoryConnector;
 
 public class NewRedmineTaskWizard extends NewTaskWizard implements INewWizard {
 
 	private RedmineProjectPage projectPage;
+	
+	private RedmineTrackerPage trackerPage;
 	
 	public NewRedmineTaskWizard(TaskRepository taskRepository, ITaskMapping taskSelection) {
 		super(taskRepository, taskSelection);
@@ -53,18 +59,29 @@ public class NewRedmineTaskWizard extends NewTaskWizard implements INewWizard {
 	
 	@Override
 	public void addPages() {
-		projectPage = new RedmineProjectPage(getTaskRepository());
+		RedmineRepositoryConnector connector = (RedmineRepositoryConnector) TasksUi.getRepositoryManager().getRepositoryConnector(RedmineCorePlugin.REPOSITORY_KIND);
+		final IRedmineClient client = connector.getClientManager().getRedmineClient(getTaskRepository());
+
+		projectPage = new RedmineProjectPage(client, getTaskRepository());
+		trackerPage = new RedmineTrackerPage(client);
 		addPage(projectPage);
+		addPage(trackerPage);
 	}
 
 	@Override
 	protected ITaskMapping getInitializationData() {
 		final String product = projectPage.getSelectedProjectName();
-		return new TaskMapping() {
+		final String tracker = trackerPage.getSelectedTrackerName();
+		
+		return new AbstractRedmineTaskMapping() {
 			@Override
 			public String getProduct() {
 				return product;
 			}
+			public String getTracker() {
+				return tracker;
+			}
+			
 		};
 	}
 }

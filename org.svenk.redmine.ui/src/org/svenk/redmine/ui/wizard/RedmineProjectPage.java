@@ -7,7 +7,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
-import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -23,12 +22,11 @@ import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.RedmineClientData;
 import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.RedmineProjectData;
-import org.svenk.redmine.core.RedmineRepositoryConnector;
 import org.svenk.redmine.core.exception.RedmineException;
 
 public class RedmineProjectPage extends WizardPage {
 
-	private final static String PAGE_NAME = "ProjectSelection";
+	final static String PAGE_NAME = "ProjectSelection";
 
 	private final static String PAGE_TITLE = "Select a project";
 
@@ -38,16 +36,19 @@ public class RedmineProjectPage extends WizardPage {
 	
 	private TaskRepository taskRepository;
 	
+	private final IRedmineClient client;
+	
 	private RedmineClientData clientData;
 	
 	private List projectList;
 	
 	private Button updateButton;
 	
-	public RedmineProjectPage(TaskRepository taskRepository) {
+	public RedmineProjectPage(IRedmineClient client, TaskRepository taskRepository) {
 		super(PAGE_NAME);
 		setTitle(PAGE_TITLE);
 		setDescription(PAGE_DESCRIPTION);
+		this.client = client;
 		this.taskRepository = taskRepository;
 		
 	}
@@ -117,12 +118,6 @@ public class RedmineProjectPage extends WizardPage {
 	}
 	
 	private void updateProjectsFromRepository(final boolean force) {
-		RedmineRepositoryConnector connector = (RedmineRepositoryConnector) TasksUi
-				.getRepositoryManager().getRepositoryConnector(
-						RedmineCorePlugin.REPOSITORY_KIND);
-		final IRedmineClient client = connector.getClientManager()
-				.getRedmineClient(taskRepository);
-
 		if (force || !client.hasAttributes()) {
 			try {
 				IRunnableWithProgress runnable = new IRunnableWithProgress() {
