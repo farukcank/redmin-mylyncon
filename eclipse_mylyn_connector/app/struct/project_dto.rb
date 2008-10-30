@@ -20,6 +20,7 @@ class ProjectDto < ActionWebService::Struct
       :id => project.id,
       :name => project.name,
       :issue_edit_allowed => User.current.allowed_to?(:edit_issues, project)
+ #     :issueCustomFiels => project.custom_fields
     )
   end
 end

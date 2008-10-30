@@ -27,6 +27,7 @@ class BaseService < ActionWebService::Base
     @@authorizemap[ProjectBasedService][:get_members_for_project] = {:ctrl => :issues, :action => :index}
     @@authorizemap[ProjectBasedService][:get_versions_for_project] = {:ctrl => :issues, :action => :index}
     @@authorizemap[ProjectBasedService][:get_statuses_for_project] = {:ctrl => :issues, :action => :index}
+    @@authorizemap[ProjectBasedService][:get_issue_custom_fields_for_project] = {:ctrl => :issues, :action => :index}
   end
 
   def find_project rpcname, args

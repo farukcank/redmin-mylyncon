@@ -1,3 +1,5 @@
+require File.dirname(__FILE__) + '/custom_value_dto'
+
 class IssueDto < ActionWebService::Struct
 #:category, :status, :priority, :fixed_version, :start_date, :done_ration, :estimated_hours
   member :id, :int
@@ -13,8 +15,13 @@ class IssueDto < ActionWebService::Struct
   member :version_id, :int
   member :tracker_id, :int
   member :status_id, :int
+  member :custom_values, [CustomValueDto]
   
   def self.create issue
+    custom_values = issue.custom_values
+    custom_values.collect! { |x| CustomValueDto.create(x)}
+    custom_values.compact!
+    
     return IssueDto.new(
       :id => issue.id,
       :project_id => issue.project_id,
@@ -28,7 +35,8 @@ class IssueDto < ActionWebService::Struct
       :category_id => issue.category_id,
       :version_id => issue.fixed_version_id,
       :tracker_id => issue.tracker_id,
-      :status_id => issue.status_id
+      :status_id => issue.status_id,
+      :custom_values => custom_values
     )
 #    rescue
 #      nil

@@ -5,6 +5,7 @@ require File.dirname(__FILE__) + '/../struct/issue_category_dto'
 require File.dirname(__FILE__) + '/../struct/member_dto'
 require File.dirname(__FILE__) + '/../struct/version_dto'
 require File.dirname(__FILE__) + '/../struct/issue_status_dto'
+require File.dirname(__FILE__) + '/../struct/issue_custom_field_dto'
 
 class ProjectBasedService < BaseService
   web_service_api ProjectBasedApi
@@ -21,6 +22,12 @@ class ProjectBasedService < BaseService
     tmp.each { |element| 
       trackers.push(TrackerDto.create(element))
     }
+  end
+  
+  def get_issue_custom_fields_for_project id
+   custom_fields =  @project.all_custom_fields
+   custom_fields.collect! { |x| IssueCustomFieldDto.create(x) }
+   return custom_fields.compact
   end
   
   def get_issue_categorys_for_project id
