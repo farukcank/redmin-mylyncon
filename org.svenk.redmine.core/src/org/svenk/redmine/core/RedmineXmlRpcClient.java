@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -46,6 +47,7 @@ import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
 import org.svenk.redmine.core.model.RedmineAttachment;
+import org.svenk.redmine.core.model.RedmineCustomTicketField;
 import org.svenk.redmine.core.model.RedmineIssueCategory;
 import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.model.RedminePriority;
@@ -85,6 +87,8 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	private final static String RPC_PRIORITY_FIND_ALL = "Priority.GetAll";
 
 	private final static String RPC_GET_PROJECT_TRACKERS = "ProjectBased.GetTrackersForProject";
+
+	private final static String RPC_GET_PROJECT_CUSTOM_ISSUE_FIELDS = "ProjectBased.GetIssueCustomFieldsForProject";
 	
 	private final static String RPC_GET_PROJECT_MEMBERS = "ProjectBased.GetMembersForProject";
 
@@ -279,6 +283,12 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_MEMBERS, projId)) {
 				projData.members.add(parseResponse2Member(projResponse));
 			}
+			
+			projData.customTicketFields.clear();
+			for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_CUSTOM_ISSUE_FIELDS, projId)) {
+				projData.customTicketFields.add(parseResponse2CustomFields(projResponse));
+			}
+			
 			monitor.worked(1);
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
@@ -345,6 +355,19 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 					}
 				}
 				
+				//customValues
+				Object customValues = map.get("custom_values");
+				if (customValues != null && customValues instanceof Object[]) {
+					for (Object customValue : (Object[])customValues) {
+						if (customValue instanceof Map) {
+							Map customValueMap = (Map)customValue;
+							Integer customFieldId = (Integer)customValueMap.get("custom_field_id");
+							String customFieldValue = customValueMap.get("value").toString();
+							ticket.putCustomFieldValue(customFieldId, customFieldValue);
+						}
+					}
+				}
+				
 			}
 			return ticket;
 		} else {
@@ -400,6 +423,51 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		return tracker;
 	}
 
+	private RedmineCustomTicketField parseResponse2CustomFields(Object response)
+	throws RedmineException {
+		RedmineCustomTicketField customValue = null;
+		if (response instanceof HashMap) {
+			HashMap<String, Object> map = (HashMap) response;
+			int id = ((Integer)map.get("id")).intValue();
+			String type = map.get("type").toString();
+
+			//assigned trackers (id)
+			Object[] rawValues = (Object[])map.get("trackers");
+			int[] trackers = new int[rawValues.length];
+			for(int i=rawValues.length-1; i>=0; i--) {
+				if (rawValues[i] instanceof Integer) {
+					trackers[i] = ((Integer)rawValues[i]).intValue();
+				}
+			}
+			
+			//list-values
+			rawValues = (Object[])map.get("possible_values");
+			String[] listValues = null;
+			if (rawValues==null) {
+				listValues = new String[0];
+			} else {
+				listValues = new String[rawValues.length];
+				for(int i=rawValues.length-1; i>=0; i--) {
+					if (rawValues[i] instanceof String) {
+						listValues[i] = (String)rawValues[i];
+					}
+				}
+			}
+
+			customValue = new RedmineCustomTicketField(id, type);
+			customValue.setDefaultValue(map.get("default_value").toString());
+			customValue.setMax(((Integer)map.get("max")).intValue());
+			customValue.setMin(((Integer)map.get("min")).intValue());
+			customValue.setName(map.get("name").toString());
+			customValue.setRequired(((Boolean)map.get("is_required")).booleanValue());
+			customValue.setSupportFilter(((Boolean)map.get("is_filter")).booleanValue());
+			customValue.setValidationRegex(map.get("regex").toString());
+			customValue.setListValues(listValues);
+			customValue.setTrackerId(trackers);
+		}
+		return customValue;
+	}
+	
 	private List<RedmineTicketStatus> parseResponse2Statuses(Object response)
 			throws RedmineException {
 		

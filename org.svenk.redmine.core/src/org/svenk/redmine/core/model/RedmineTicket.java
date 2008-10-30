@@ -32,7 +32,6 @@
 package org.svenk.redmine.core.model;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -42,6 +41,8 @@ import java.util.Map;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.svenk.redmine.core.RedmineAttribute;
+import org.svenk.redmine.core.RedmineClientData;
+import org.svenk.redmine.core.RedmineProjectData;
 
 public class RedmineTicket {
 
@@ -118,6 +119,7 @@ public class RedmineTicket {
 	private Date lastChanged;
 	private Date created;
 	private Map<Key, String> valueByKey = new HashMap<Key, String>();
+	private Map<Integer, String> valueByCustomFieldId = new HashMap<Integer, String>();
 	private List<RedmineTicketJournal> journals;
 	private List<RedmineAttachment> attachments;
 	private List<RedmineTicketStatus> statuses;
@@ -149,12 +151,20 @@ public class RedmineTicket {
 		}
 	}
 	
+	public void putCustomFieldValue(Integer customFieldId, String value) {
+		valueByCustomFieldId.put(customFieldId, value);
+	}
+	
 	public Map<String, String> getValues() {
 		Map<String, String> result = new HashMap<String, String>();
 		for (Key key : valueByKey.keySet()) {
 			result.put(key.getKey(), valueByKey.get(key));
 		}
 		return result;
+	}
+	
+	public Map<Integer, String> getCustomValues() {
+		return Collections.unmodifiableMap(valueByCustomFieldId);
 	}
 
 	public Date getLastChanged() {
@@ -179,6 +189,10 @@ public class RedmineTicket {
 
 	public String getValue(Key key) {
 		return valueByKey.get(key);
+	}
+	
+	public int getIntValue(Key key) {
+		return Integer.parseInt(getValue(key));
 	}
 	
 	public void addJournal(RedmineTicketJournal journal) {
@@ -211,12 +225,14 @@ public class RedmineTicket {
 		this.statuses = statuses;
 	}
 	
-	public static RedmineTicket fromTaskData(TaskData taskData) {
+	public static RedmineTicket fromTaskData(TaskData taskData, RedmineClientData clientData) {
 		RedmineTicket ticket = taskData.getTaskId().equals("") 
 			? new RedmineTicket() 
 			: new RedmineTicket(Integer.parseInt(taskData.getTaskId()));
 		
 		Map<String, TaskAttribute> attributeValues = taskData.getRoot().getAttributes();
+		
+		//default attributes
 		for (RedmineAttribute redmineAttribute : RedmineAttribute.values()) {
 			if (redmineAttribute.isReadOnly()) {
 				continue;
@@ -227,7 +243,25 @@ public class RedmineTicket {
 				ticket.putBuiltinValue(redmineAttribute.getTicketKey(), taskAttribute.getValue());
 			}
 		}
+	
+		ticket.completeCustomFields(taskData, clientData);
 		
 		return ticket;
+	}
+	
+	private void completeCustomFields(TaskData taskData, RedmineClientData clientData) {
+		TaskAttribute rootAttribute = taskData.getRoot();
+		
+		TaskAttribute projAttr = rootAttribute.getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey());
+		RedmineProjectData projectData = clientData.getProjectFromName(projAttr.getValue());
+
+		int trackerId = Integer.parseInt(rootAttribute.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue());
+		List<RedmineCustomTicketField> ticketFields = projectData.getCustomTicketFields(trackerId); 
+		for (RedmineCustomTicketField customField :ticketFields) {
+			TaskAttribute taskAttribute = rootAttribute.getMappedAttribute(RedmineCustomTicketField.TASK_KEY_PREFIX + customField.getId());
+			if (taskAttribute != null) {
+				this.putCustomFieldValue(Integer.valueOf(customField.getId()), taskAttribute.getValue());
+			}
+		}
 	}
 }

@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.svenk.redmine.core.model.RedmineCustomTicketField;
 import org.svenk.redmine.core.model.RedmineIssueCategory;
 import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.model.RedmineProject;
@@ -44,8 +45,7 @@ import org.svenk.redmine.core.model.RedmineVersion;
 
 public class RedmineProjectData implements Serializable {
 	
-
-	private static final long serialVersionUID = -7263785468252846028L;
+	private static final long serialVersionUID = 2L;
 
 	RedmineProject project;
 	
@@ -55,7 +55,9 @@ public class RedmineProjectData implements Serializable {
 	
 	List<RedmineVersion> versions = new ArrayList<RedmineVersion>(); 
 	
-	List<RedmineMember> members = new ArrayList<RedmineMember>(); 
+	List<RedmineMember> members = new ArrayList<RedmineMember>();
+	
+	List<RedmineCustomTicketField> customTicketFields = new ArrayList<RedmineCustomTicketField>();
 	
 	RedmineProjectData(RedmineProject project) {
 		this.project = project;
@@ -79,6 +81,16 @@ public class RedmineProjectData implements Serializable {
 
 	public List<RedmineMember> getMembers() {
 		return Collections.unmodifiableList(members);
+	}
+	
+	public List<RedmineCustomTicketField> getCustomTicketFields(int trackerId) {
+		ArrayList<RedmineCustomTicketField> customTicketValues = new ArrayList<RedmineCustomTicketField>();
+		for (RedmineCustomTicketField v : this.customTicketFields) {
+			if (v.usableForTracker(trackerId)) {
+				customTicketValues.add(v);
+			}
+		}
+		return Collections.unmodifiableList(customTicketValues);
 	}
 	
 	public RedmineTracker getTracker(String name) {

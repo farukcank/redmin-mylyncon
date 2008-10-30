@@ -57,7 +57,9 @@ import org.eclipse.mylyn.commons.net.UnsupportedRequestException;
 import org.eclipse.mylyn.commons.net.WebUtil;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentSource;
+import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.svenk.redmine.core.exception.RedmineException;
+import org.svenk.redmine.core.model.RedmineCustomTicketField;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
 import org.svenk.redmine.core.util.internal.RedminePartSource;
@@ -277,6 +279,13 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 				nameValuePair.add(new NameValuePair(xmlRpcKey, values.get(key.getKey())));
 			}
 		}
+		
+		//CustomTicketFields
+		for (Map.Entry<Integer, String> customValue : ticket.getCustomValues().entrySet()) {
+			String name = "custom_fields[" + customValue.getKey() + "]";
+			nameValuePair.add(new NameValuePair(name, customValue.getValue()));
+		}
+		
 		
 		return nameValuePair;
 	}

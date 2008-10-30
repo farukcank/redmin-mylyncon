@@ -40,7 +40,7 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttributeMapper;
 public class RedmineAttributeMapper extends TaskAttributeMapper {
 
 	enum Flag {
-		READ_ONLY, HIDDEN
+		READ_ONLY, HIDDEN, CUSTOM_FIELD
 	}
 	
 	public RedmineAttributeMapper(TaskRepository taskRepository) {

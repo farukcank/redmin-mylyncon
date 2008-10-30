@@ -36,9 +36,9 @@ import java.util.EnumSet;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.svenk.redmine.core.RedmineAttributeMapper.Flag;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
-import static org.svenk.redmine.core.RedmineAttributeMapper.Flag;
 
 public enum RedmineAttribute {
+
 	ID(Key.ID, "<used by search engine>", null, TaskAttribute.TYPE_INTEGER, Flag.HIDDEN),
 	SUMMARY(Key.SUBJECT, "Summary:", TaskAttribute.SUMMARY, TaskAttribute.TYPE_SHORT_TEXT, Flag.HIDDEN),
 	REPORTER(Key.AUTHOR, "Reporter:", TaskAttribute.USER_REPORTER, TaskAttribute.TYPE_PERSON),
@@ -52,7 +52,7 @@ public enum RedmineAttribute {
 	VERSION(Key.VERSION, "Target version:", RedmineAttribute.TASK_KEY_VERSION, TaskAttribute.TYPE_SINGLE_SELECT),
 	TRACKER(Key.TRACKER, "Tracker:", RedmineAttribute.TASK_KEY_TRACKER, TaskAttribute.TYPE_SINGLE_SELECT),
 	STATUS(Key.STATUS, "Status:", TaskAttribute.STATUS, TaskAttribute.TYPE_SINGLE_SELECT),
-	COMMENT(Key.COMMENT, "Comment: ", TaskAttribute.COMMENT_NEW, TaskAttribute.TYPE_LONG_RICH_TEXT, Flag.HIDDEN),
+	COMMENT(Key.COMMENT, "Comment: ", TaskAttribute.COMMENT_NEW, TaskAttribute.TYPE_LONG_RICH_TEXT, Flag.HIDDEN)
 	; 
 
 	public final static String TASK_KEY_CATEGORY = "task.redmine.category";
@@ -70,7 +70,7 @@ public enum RedmineAttribute {
 	private final String type;
 	
 	private final EnumSet<Flag> flags;
-
+	
 	public static RedmineAttribute getByTaskKey(String taskKey) {
 		for (RedmineAttribute attribute : values()) {
 			if (taskKey.equals(attribute.getTaskKey())) {
@@ -147,4 +147,5 @@ public enum RedmineAttribute {
 	public String toString() {
 		return prettyName;
 	}
+
 }

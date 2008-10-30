@@ -55,12 +55,14 @@ import org.eclipse.mylyn.tasks.core.data.TaskCommentMapper;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.RedmineAttachment;
+import org.svenk.redmine.core.model.RedmineCustomTicketField;
 import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.model.RedminePriority;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicketAttribute;
 import org.svenk.redmine.core.model.RedmineTicketJournal;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
+import org.svenk.redmine.core.model.RedmineCustomTicketField.FieldType;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
 
 
@@ -194,6 +196,15 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 				mapper.applyTo(attribute);
 			}
 		}
+
+		//CustomTicketFields
+		for (Map.Entry<Integer, String> customValue : ticket.getCustomValues().entrySet()) {
+			TaskAttribute taskAttribute = data.getRoot().getAttribute(RedmineCustomTicketField.TASK_KEY_PREFIX + customValue.getKey().intValue());
+			if (taskAttribute != null) {
+				taskAttribute.setValue(customValue.getValue());
+			}
+		}
+		
 		
 		return changedAttributes;
 	}
@@ -204,8 +215,8 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 			IProgressMonitor monitor) throws CoreException {
 		// TODO Auto-generated method stub
 		
-		RedmineTicket ticket = RedmineTicket.fromTaskData(taskData);
 		IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
+		RedmineTicket ticket = RedmineTicket.fromTaskData(taskData, client.getClientData());
 		
 		try {
 			if (taskData.isNew() || taskData.getTaskId().equals("")) {
@@ -213,6 +224,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 				TaskAttribute projAttr = taskData.getRoot().getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey());
 				RedmineProjectData projectData = client.getClientData().getProjectFromName(projAttr.getValue());
 				ticket.putBuiltinValue(RedmineTicket.Key.PROJECT, projectData.getProject().getValue());
+				ticket.putBuiltinValue(RedmineTicket.Key.TRACKER, taskData.getRoot().getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue());
 				
 				int taskId = client.createTicket(ticket, monitor);
 				return new RepositoryResponse(ResponseKind.TASK_CREATED, "" + taskId);
@@ -240,23 +252,25 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		try {
 			IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
 			client.updateAttributes(monitor, false);
+			
+			//Input from wizard
 			RedmineProjectData projectData = client.getClientData().getProjectFromName(initializationData.getProduct());
+			int trackerId = projectData.getTracker(((IRedmineTaskMapping)initializationData).getTracker()).getValue();
 
+			//Initialize new ticket
 			RedmineTicket ticket = new RedmineTicket();
 			ticket.putBuiltinValue(RedmineTicket.Key.PROJECT, projectData.getProject().getValue());
-			
+			ticket.putBuiltinValue(RedmineTicket.Key.TRACKER, trackerId);
+
 			createDefaultAttributes(data, client, ticket, projectData);
-			
+
+			//set fixed values
 			TaskAttribute attr = data.getRoot().getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey());
 			attr.setValue(projectData.getProject().getName());
-			
-			//set Tracker to writable and select first value as default
 			attr = data.getRoot().getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey());
-			attr.getMetaData().setReadOnly(false);
-			for(String key : attr.getOptions().keySet()) {
-				attr.setValue(key);
-				break;
-			}
+			attr.setValue(""+projectData.getTracker(((IRedmineTaskMapping)initializationData).getTracker()).getValue());
+						
+			createCustomAttributes(data, client, ticket, projectData);
 			
 			//set default value for attributes Status and Priority
 			attr = data.getRoot().getMappedAttribute(RedmineAttribute.STATUS.getRedmineKey());
@@ -284,6 +298,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		int projectId = Integer.parseInt(ticket.getValues().get(Key.PROJECT.getKey()));
 		RedmineProjectData projectData = client.getClientData().getProjectFromId(projectId);
 		createDefaultAttributes(data, client, ticket, projectData);
+		createCustomAttributes(data, client, ticket, projectData);
 	}
 	
 	private static void createDefaultAttributes(TaskData data, IRedmineClient client, RedmineTicket ticket, RedmineProjectData projectData) {
@@ -311,6 +326,24 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		createAttribute(data, RedmineAttribute.ASSIGNED_TO, projectData.getMembers(), !existingTask);
 		createAttribute(data, RedmineAttribute.TRACKER, projectData.getTrackers(), false);
 		
+	}
+	
+	private static void createCustomAttributes(TaskData data, IRedmineClient client, RedmineTicket ticket, RedmineProjectData projectData) {
+		List<RedmineCustomTicketField> customValues = projectData.getCustomTicketFields(Integer.parseInt(ticket.getValue(Key.TRACKER)));
+		for (RedmineCustomTicketField customValue : customValues) {
+			TaskAttribute attr = data.getRoot().createAttribute(RedmineCustomTicketField.TASK_KEY_PREFIX + customValue.getId());
+			attr.getMetaData().setType(customValue.getType().getTaskAttributeType());
+			attr.getMetaData().setKind(TaskAttribute.KIND_DEFAULT);
+			attr.getMetaData().setLabel(customValue.getName());
+			attr.getMetaData().setReadOnly(false);
+
+			if (customValue.getType()==FieldType.LIST) {
+				attr.putOption("", "");
+				for (String option : customValue.getListValues()) {
+					attr.putOption(option, option);
+				}
+			}
+		}
 	}
 	
 	private static TaskAttribute createAttribute(TaskData data, RedmineAttribute redmineAttribute) {
