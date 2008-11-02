@@ -89,7 +89,6 @@ public interface IRedmineClient {
 	public void search(String searchParam, List<RedmineTicket> tickets) throws RedmineException;
 	
 	public void updateAttributes(IProgressMonitor monitor, boolean force) throws RedmineException;
-	public void updateProjectAttributes(IProgressMonitor monitor, RedmineProjectData projData) throws RedmineException;
 	
 	public int createTicket(RedmineTicket ticket, IProgressMonitor monitor) throws RedmineException;
 	

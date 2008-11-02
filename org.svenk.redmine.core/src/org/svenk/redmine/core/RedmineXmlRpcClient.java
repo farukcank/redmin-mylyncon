@@ -208,94 +208,84 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		if (!force && hasAttributes()) {
 			return;
 		}
-		
 
-		try {
-			Object projects[] = (Object[])execute(RPC_PROJECT_FIND_ALL);
-			monitor.beginTask("Updating attributes", 2+projects.length);
+		Object projects[] = (Object[])execute(RPC_PROJECT_FIND_ALL);
+		monitor.beginTask("Updating attributes", 2+projects.length);
 
-			data.priorities.clear();
-			for (Object response : (Object[]) execute(RPC_PRIORITY_FIND_ALL)) {
-				data.priorities.add(parseResponse2Priority(response));
-			}
-			monitor.worked(1);
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-
-			data.statuses.clear();
-			for (Object response : (Object[]) execute(RPC_STATUS_FIND_ALL)) {
-				data.statuses.add(parseResponse2Status(response));
-			}
-			monitor.worked(1);
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			
-			data.projects.clear();
-			for (Object response : projects) {
-				RedmineProject project = parseResponse2Project(response);
-				RedmineProjectData projData = new RedmineProjectData(project);
-				data.projects.add(projData);
-				updateProjectAttributes(monitor, projData);
-			}
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-
-			data.lastupdate=new Date().getTime();
-		} catch (RedmineException e) {
-			// TODO log exception
-			throw new RedmineException(e);
+		data.priorities.clear();
+		for (Object response : (Object[]) execute(RPC_PRIORITY_FIND_ALL)) {
+			data.priorities.add(parseResponse2Priority(response));
 		}
+		monitor.worked(1);
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+
+		data.statuses.clear();
+		for (Object response : (Object[]) execute(RPC_STATUS_FIND_ALL)) {
+			data.statuses.add(parseResponse2Status(response));
+		}
+		monitor.worked(1);
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		
+		data.projects.clear();
+		for (Object response : projects) {
+			RedmineProject project = parseResponse2Project(response);
+			RedmineProjectData projData = new RedmineProjectData(project);
+			data.projects.add(projData);
+			updateProjectAttributes(monitor, projData);
+		}
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+
+		data.lastupdate=new Date().getTime();
 	}
 	
-	public synchronized void updateProjectAttributes(IProgressMonitor monitor, RedmineProjectData projData) throws RedmineException {
+	private synchronized void updateProjectAttributes(IProgressMonitor monitor, RedmineProjectData projData) throws RedmineException {
 		Integer projId = new Integer(projData.getProject().getValue());
 
 		monitor.subTask("project " + projData.project.getName());
-		try {
-			projData.trackers.clear();
-			for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_TRACKERS, projId)) {
-				projData.trackers.add(parseResponse2Tracker(projResponse));
-			}
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			
-			projData.categorys.clear();
-			for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_ISSUE_CATEGORYS, projId)) {
-				projData.categorys.add(parseResponse2IssueCategory(projResponse));
-			}
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			
-			projData.versions.clear();
-			for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_VERSIONS, projId)) {
-				projData.versions.add(parseResponse2Version(projResponse));
-			}
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			
-			projData.members.clear();
-			for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_MEMBERS, projId)) {
-				projData.members.add(parseResponse2Member(projResponse));
-			}
-			
-			projData.customTicketFields.clear();
-			for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_CUSTOM_ISSUE_FIELDS, projId)) {
-				projData.customTicketFields.add(parseResponse2CustomFields(projResponse));
-			}
-			
-			monitor.worked(1);
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-		} catch (RedmineException e) {
-			// TODO log exception
-			throw new RedmineException(e);
+		
+		projData.trackers.clear();
+		for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_TRACKERS, projId)) {
+			projData.trackers.add(parseResponse2Tracker(projResponse));
+		}
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		
+		projData.categorys.clear();
+		for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_ISSUE_CATEGORYS, projId)) {
+			projData.categorys.add(parseResponse2IssueCategory(projResponse));
+		}
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		
+		projData.versions.clear();
+		for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_VERSIONS, projId)) {
+			projData.versions.add(parseResponse2Version(projResponse));
+		}
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		
+		projData.members.clear();
+		for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_MEMBERS, projId)) {
+			projData.members.add(parseResponse2Member(projResponse));
+		}
+		
+		projData.customTicketFields.clear();
+		for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_CUSTOM_ISSUE_FIELDS, projId)) {
+			projData.customTicketFields.add(parseResponse2CustomFields(projResponse));
+		}
+		
+		monitor.worked(1);
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
 		}
 	}
 
@@ -318,153 +308,138 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	private RedmineTicket parseResponse2Ticket(Object response)
 			throws RedmineException {
 		RedmineTicket ticket = null;
-		if (response instanceof HashMap) {
-			HashMap<String, Object> map = (HashMap) response;
-			if (map.get("id") instanceof Integer) {
-				Object value;
-				ticket = new RedmineTicket(((Integer) map.get("id")).intValue());
-				ticket.putBuiltinValue(Key.SUBJECT, map.get("subject")
-						.toString());
-				ticket.putBuiltinValue(Key.DESCRIPTION, map.get("description")
-						.toString());
-				ticket
-						.putBuiltinValue(Key.AUTHOR, map.get("author")
-								.toString());
+		HashMap<String, Object> map = parseResponse2HashMap(response);
+		if (map.get("id") instanceof Integer) {
+			ticket = new RedmineTicket(((Integer) map.get("id")).intValue());
+			ticket.putBuiltinValue(Key.SUBJECT, map.get("subject")
+					.toString());
+			ticket.putBuiltinValue(Key.DESCRIPTION, map.get("description")
+					.toString());
+			ticket
+					.putBuiltinValue(Key.AUTHOR, map.get("author")
+							.toString());
 
-				ticket.setCreated((Date) map.get("created_on"));
-				ticket.setLastChanged((Date) map.get("updated_on"));
-				
-				//Handle Project for Ticket
-				Integer intValue = (Integer)map.get("project_id");
-				if (intValue==null) {
-					throw new RedmineRemoteException("Missing project ID for ticket");
-				}
-				RedmineProjectData projectData = data.getProjectFromId(intValue);
-				if (projectData==null) {
-					throw new RedmineRemoteException("Can't find project for ID: " + intValue.toString());
-				}
-				ticket.putBuiltinValue(Key.PROJECT, intValue);
-
-				//Handle RedmineTicketAttributes / ProjectAttributes
-				String xmlRpcKey;
-				for (Key key : this.attributeKeys) {
-					xmlRpcKey = redmineKey2XmlRpcKey(key);
-					intValue = (Integer)map.get(xmlRpcKey);
-					if (intValue!=null) {
-						ticket.putBuiltinValue(key, intValue);
-					}
-				}
-				
-				//customValues
-				Object customValues = map.get("custom_values");
-				if (customValues != null && customValues instanceof Object[]) {
-					for (Object customValue : (Object[])customValues) {
-						if (customValue instanceof Map) {
-							Map customValueMap = (Map)customValue;
-							Integer customFieldId = (Integer)customValueMap.get("custom_field_id");
-							String customFieldValue = customValueMap.get("value").toString();
-							ticket.putCustomFieldValue(customFieldId, customFieldValue);
-						}
-					}
-				}
-				
+			ticket.setCreated((Date) map.get("created_on"));
+			ticket.setLastChanged((Date) map.get("updated_on"));
+			
+			//Handle Project for Ticket
+			Integer intValue = (Integer)map.get("project_id");
+			if (intValue==null) {
+				throw new RedmineRemoteException("Missing project ID for ticket");
 			}
-			return ticket;
-		} else {
-			throw new RedmineRemoteException(
-					"Invalid Response: HashMap expected");
+			RedmineProjectData projectData = data.getProjectFromId(intValue);
+			if (projectData==null) {
+				throw new RedmineRemoteException("Can't find project for ID: " + intValue.toString());
+			}
+			ticket.putBuiltinValue(Key.PROJECT, intValue);
+
+			//Handle RedmineTicketAttributes / ProjectAttributes
+			String xmlRpcKey;
+			for (Key key : this.attributeKeys) {
+				xmlRpcKey = redmineKey2XmlRpcKey(key);
+				intValue = (Integer)map.get(xmlRpcKey);
+				if (intValue!=null) {
+					ticket.putBuiltinValue(key, intValue);
+				}
+			}
+			
+			//customValues
+			Object customValues = map.get("custom_values");
+			if (customValues != null && customValues instanceof Object[]) {
+				for (Object customValue : (Object[])customValues) {
+					if (customValue instanceof Map) {
+						HashMap<String, Object> customValueMap = parseResponse2HashMap(response);
+						Integer customFieldId = (Integer)customValueMap.get("custom_field_id");
+						String customFieldValue = customValueMap.get("value").toString();
+						ticket.putCustomFieldValue(customFieldId, customFieldValue);
+					}
+				}
+			}
+			
 		}
+		return ticket;
 	}
 
 	private RedmineProject parseResponse2Project(Object response)
 			throws RedmineException {
 		RedmineProject project = null;
-		if (response instanceof HashMap) {
-			HashMap<String, Object> map = (HashMap) response;
-			project = new RedmineProject(map.get("name").toString(),
-					((Integer) map.get("id")).intValue());
-			project.setIssueEditAllowed(Boolean.parseBoolean(map.get("issue_edit_allowed").toString()));
-		}
+		HashMap<String, Object> map = parseResponse2HashMap(response);
+		project = new RedmineProject(map.get("name").toString(),
+				((Integer) map.get("id")).intValue());
+		project.setIssueEditAllowed(Boolean.parseBoolean(map.get("issue_edit_allowed").toString()));
 		return project;
 	}
 
 	private RedmineMember parseResponse2Member(Object response)
 			throws RedmineException {
 		RedmineMember member = null;
-		if (response instanceof HashMap) {
-			HashMap<String, Object> map = (HashMap) response;
-			member = new RedmineMember(
-					map.get("name").toString(),
-					((Integer)map.get("id")).intValue(),
-					((Boolean)map.get("assignable")).booleanValue());
-		}
+		HashMap<String, Object> map = parseResponse2HashMap(response);
+		member = new RedmineMember(
+				map.get("name").toString(),
+				((Integer)map.get("id")).intValue(),
+				((Boolean)map.get("assignable")).booleanValue());
 		return member;
 	}
 
 	private RedmineVersion parseResponse2Version(Object response)
 			throws RedmineException {
 		RedmineVersion version = null;
-		if (response instanceof HashMap) {
-			HashMap<String, Object> map = (HashMap) response;
-			version = new RedmineVersion(map.get("name").toString(),
-					((Integer) map.get("id")).intValue());
-		}
+		HashMap<String, Object> map = parseResponse2HashMap(response);
+		version = new RedmineVersion(map.get("name").toString(),
+				((Integer) map.get("id")).intValue());
 		return version;
 	}
 
 	private RedmineTracker parseResponse2Tracker(Object response)
 			throws RedmineException {
 		RedmineTracker tracker = null;
-		if (response instanceof HashMap) {
-			HashMap<String, Object> map = (HashMap) response;
-			tracker = new RedmineTracker(map.get("name").toString(),
-					((Integer) map.get("id")).intValue());
-		}
+		HashMap<String, Object> map = parseResponse2HashMap(response);
+		tracker = new RedmineTracker(map.get("name").toString(),
+				((Integer) map.get("id")).intValue());
 		return tracker;
 	}
 
 	private RedmineCustomTicketField parseResponse2CustomFields(Object response)
 	throws RedmineException {
 		RedmineCustomTicketField customValue = null;
-		if (response instanceof HashMap) {
-			HashMap<String, Object> map = (HashMap) response;
-			int id = ((Integer)map.get("id")).intValue();
-			String type = map.get("type").toString();
+		HashMap<String, Object> map = parseResponse2HashMap(response);
+		int id = ((Integer)map.get("id")).intValue();
+		String type = map.get("type").toString();
 
-			//assigned trackers (id)
-			Object[] rawValues = (Object[])map.get("trackers");
-			int[] trackers = new int[rawValues.length];
-			for(int i=rawValues.length-1; i>=0; i--) {
-				if (rawValues[i] instanceof Integer) {
-					trackers[i] = ((Integer)rawValues[i]).intValue();
-				}
+		//assigned trackers (id)
+		Object[] rawValues = (Object[])map.get("trackers");
+		int[] trackers = new int[rawValues.length];
+		for(int i=rawValues.length-1; i>=0; i--) {
+			if (rawValues[i] instanceof Integer) {
+				trackers[i] = ((Integer)rawValues[i]).intValue();
 			}
-			
-			//list-values
-			rawValues = (Object[])map.get("possible_values");
-			String[] listValues = null;
-			if (rawValues==null) {
-				listValues = new String[0];
-			} else {
-				listValues = new String[rawValues.length];
-				for(int i=rawValues.length-1; i>=0; i--) {
-					if (rawValues[i] instanceof String) {
-						listValues[i] = (String)rawValues[i];
-					}
-				}
-			}
-
-			customValue = new RedmineCustomTicketField(id, type);
-			customValue.setDefaultValue(map.get("default_value").toString());
-			customValue.setMax(((Integer)map.get("max")).intValue());
-			customValue.setMin(((Integer)map.get("min")).intValue());
-			customValue.setName(map.get("name").toString());
-			customValue.setRequired(((Boolean)map.get("is_required")).booleanValue());
-			customValue.setSupportFilter(((Boolean)map.get("is_filter")).booleanValue());
-			customValue.setValidationRegex(map.get("regex").toString());
-			customValue.setListValues(listValues);
-			customValue.setTrackerId(trackers);
 		}
+		
+		//list-values
+		rawValues = (Object[])map.get("possible_values");
+		String[] listValues = null;
+		if (rawValues==null) {
+			listValues = new String[0];
+		} else {
+			listValues = new String[rawValues.length];
+			for(int i=rawValues.length-1; i>=0; i--) {
+				if (rawValues[i] instanceof String) {
+					listValues[i] = (String)rawValues[i];
+				}
+			}
+		}
+
+		customValue = new RedmineCustomTicketField(id, type);
+		customValue.setDefaultValue(map.get("default_value").toString());
+		customValue.setMax(((Integer)map.get("max")).intValue());
+		customValue.setMin(((Integer)map.get("min")).intValue());
+		customValue.setName(map.get("name").toString());
+		customValue.setRequired(((Boolean)map.get("is_required")).booleanValue());
+		customValue.setSupportFilter(((Boolean)map.get("is_filter")).booleanValue());
+		customValue.setValidationRegex(map.get("regex").toString());
+		customValue.setListValues(listValues);
+		customValue.setTrackerId(trackers);
+		
 		return customValue;
 	}
 	
@@ -488,39 +463,35 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	private RedmineTicketStatus parseResponse2Status(Object response)
 	throws RedmineException {
 		RedmineTicketStatus status = null;
-		if (response instanceof HashMap) {
-			HashMap<String, Object> map = (HashMap) response;
-			status = new RedmineTicketStatus(map.get("name").toString(),
-					((Integer) map.get("id")).intValue());
-			status.setClosed(Boolean.parseBoolean(map.get("is_closed").toString()));
-			status.setDefaultStatus(Boolean.parseBoolean(map.get("is_default").toString()));
-		}
+		HashMap<String, Object> map = parseResponse2HashMap(response);
+		status = new RedmineTicketStatus(map.get("name").toString(),
+				((Integer) map.get("id")).intValue());
+		status.setClosed(Boolean.parseBoolean(map.get("is_closed").toString()));
+		status.setDefaultStatus(Boolean.parseBoolean(map.get("is_default").toString()));
+
 		return status;
 	}
 	
 	private RedminePriority parseResponse2Priority(Object response)
 			throws RedmineException {
 		RedminePriority priority = null;
-		if (response instanceof HashMap) {
-			HashMap<String, Object> map = (HashMap) response;
-			priority = new RedminePriority(
-					map.get("name").toString(),
-					((Integer) map.get("id")).intValue(), 
-					((Integer) map.get("position")).intValue());
-			priority.setDefaultPriority(Boolean.parseBoolean(map.get("is_default").toString()));
+		HashMap<String, Object> map = parseResponse2HashMap(response);
+		priority = new RedminePriority(
+				map.get("name").toString(),
+				((Integer) map.get("id")).intValue(), 
+				((Integer) map.get("position")).intValue());
+		priority.setDefaultPriority(Boolean.parseBoolean(map.get("is_default").toString()));
 
-		}
 		return priority;
 	}
 	
 	private RedmineIssueCategory parseResponse2IssueCategory(Object response)
 	throws RedmineException {
 		RedmineIssueCategory category = null;
-		if (response instanceof HashMap) {
-			HashMap<String, Object> map = (HashMap) response;
-			category = new RedmineIssueCategory(map.get("name").toString(),
-					((Integer) map.get("id")).intValue());
-		}
+		HashMap<String, Object> map = parseResponse2HashMap(response);
+		category = new RedmineIssueCategory(map.get("name").toString(),
+				((Integer) map.get("id")).intValue());
+		
 		return category;
 	}
 	
@@ -533,7 +504,7 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			RedmineTicketJournal journal;
 			for (Object object : maps) {
 				if (object instanceof HashMap) {
-					HashMap<String, Object> map = (HashMap) object;
+					HashMap<String, Object> map = parseResponse2HashMap(response);
 					journal = new RedmineTicketJournal();
 					journal.setId(Integer.parseInt(map.get("id").toString()));
 					journal.setNotes(map.get("notes").toString());
@@ -557,7 +528,7 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			RedmineAttachment attachment;
 			for (Object object : maps) {
 				if (object instanceof HashMap) {
-					HashMap<String, Object> map = (HashMap) object;
+					HashMap<String, Object> map = parseResponse2HashMap(response);
 					attachment = new RedmineAttachment(Integer.parseInt(map.get("id").toString()));
 					attachment.setCreated((Date)map.get("created_on"));
 					attachment.setAuthorId(Integer.parseInt(map.get("author_id").toString()));
@@ -597,4 +568,11 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		return redmineKey.name().toLowerCase() + "_id";
 	}
 
+	@SuppressWarnings("unchecked")
+	private HashMap<String, Object> parseResponse2HashMap(Object response) throws RedmineException {
+		if (response instanceof HashMap) {
+			return (HashMap)response;
+		}
+		throw new RedmineException("Invalid Response: HashMap expected");
+	}
 }

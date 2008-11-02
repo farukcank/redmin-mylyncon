@@ -39,8 +39,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.osgi.framework.BundleContext;
 
-import com.sun.org.apache.bcel.internal.generic.ISTORE;
-
 public class RedmineCorePlugin extends Plugin {
 
 	public static final String PLUGIN_ID = "org.svenk.redmine.core";
