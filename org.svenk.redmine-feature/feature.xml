@@ -2,11 +2,12 @@
 <feature
       id="org.svenk.redmine_feature"
       label="Mylyn Connector: Redmine"
-      version="3.0.0.qualifier">
+      version="3.0.0.Nqualifier-e3x-r07x">
 
    <description url="http://redmin-mylyncon.wiki.sourceforge.net/Features">
       Provides Task List integration, offline support and rich editing
 for the open source Redmine project management.
+Note: This version is under development.
    </description>
 
    <copyright>
@@ -33,6 +34,7 @@ along with this program; if not, see &lt;http://www.gnu.org/licenses/&gt;.
    </license>
 
    <url>
+      <update label="org.svenk.redmine-site" url="http://redmin-mylyncon.sourceforge.net/update-site/"/>
       <discovery label="Mylyn Project" url="http://www.eclipse.org/mylyn/"/>
       <discovery label="Redmine Project" url="http://www.redmine.org/"/>
    </url>
