@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <description>
+   <description url="http://redmin-mylyncon.sourceforge.net/update-site/">
       Provides Task List integration, offline support and rich editing
 for the open source Redmine project management.
    </description>
-   <feature url="features/org.svenk.redmine_feature_3.0.0.qualifier.jar" id="org.svenk.redmine_feature" version="3.0.0.qualifier">
-      <category name="org.svenk.redmine.collaboration-tools"/>
+   <feature url="features/org.svenk.redmine_feature_3.0.0.Nqualifier-e3x-r07x.jar" id="org.svenk.redmine_feature" version="3.0.0.Nqualifier-e3x-r07x">
+      <category name="Collaboration Tools"/>
    </feature>
-   <category-def name="org.svenk.redmine.collaboration-tools" label="Collaboration Tools"/>
+   <category-def name="Collaboration Tools" label="Collaboration Tools"/>
 </site>
