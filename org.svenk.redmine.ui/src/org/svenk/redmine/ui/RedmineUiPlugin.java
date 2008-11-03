@@ -48,8 +48,10 @@ public class RedmineUiPlugin extends Plugin {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		RedmineCorePlugin.getDefault().getConnector().setTaskRepositoryLocationFactory(new TaskRepositoryLocationUiFactory());
-		TasksUi.getRepositoryManager().addListener(RedmineCorePlugin.getDefault().getConnector().getClientManager());
+		RedmineCorePlugin corePlugin = RedmineCorePlugin.getDefault();
+		
+		corePlugin.getConnector().setTaskRepositoryLocationFactory(new TaskRepositoryLocationUiFactory());
+		TasksUi.getRepositoryManager().addListener(corePlugin.getConnector().getClientManager());
 	}
-
+	
 }

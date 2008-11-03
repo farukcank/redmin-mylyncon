@@ -35,7 +35,6 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
-import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormEditor;
 import org.svenk.redmine.core.RedmineAttribute;
@@ -57,7 +56,7 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 	public IManagedForm getManagedForm() {
 		IManagedForm form = super.getManagedForm();
 		if (form==null) {
-			FormEditor editor = getEditor();
+			FormEditor editor = getTaskEditor();
 			if (editor!= null && !isActive()) {
 				editor.setActivePage(getId());
 				form = super.getManagedForm();
