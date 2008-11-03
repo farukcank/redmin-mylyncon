@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -347,8 +346,8 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			Object customValues = map.get("custom_values");
 			if (customValues != null && customValues instanceof Object[]) {
 				for (Object customValue : (Object[])customValues) {
-					if (customValue instanceof Map) {
-						HashMap<String, Object> customValueMap = parseResponse2HashMap(response);
+					if (customValue instanceof HashMap) {
+						HashMap<String, Object> customValueMap = parseResponse2HashMap(customValue);
 						Integer customFieldId = (Integer)customValueMap.get("custom_field_id");
 						String customFieldValue = customValueMap.get("value").toString();
 						ticket.putCustomFieldValue(customFieldId, customFieldValue);
@@ -430,7 +429,7 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		}
 
 		customValue = new RedmineCustomTicketField(id, type);
-		customValue.setDefaultValue(map.get("default_value").toString());
+//		customValue.setDefaultValue(map.get("default_value").toString());
 		customValue.setMax(((Integer)map.get("max")).intValue());
 		customValue.setMin(((Integer)map.get("min")).intValue());
 		customValue.setName(map.get("name").toString());
@@ -504,7 +503,7 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			RedmineTicketJournal journal;
 			for (Object object : maps) {
 				if (object instanceof HashMap) {
-					HashMap<String, Object> map = parseResponse2HashMap(response);
+					HashMap<String, Object> map = parseResponse2HashMap(object);
 					journal = new RedmineTicketJournal();
 					journal.setId(Integer.parseInt(map.get("id").toString()));
 					journal.setNotes(map.get("notes").toString());
@@ -528,7 +527,7 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			RedmineAttachment attachment;
 			for (Object object : maps) {
 				if (object instanceof HashMap) {
-					HashMap<String, Object> map = parseResponse2HashMap(response);
+					HashMap<String, Object> map = parseResponse2HashMap(object);
 					attachment = new RedmineAttachment(Integer.parseInt(map.get("id").toString()));
 					attachment.setCreated((Date)map.get("created_on"));
 					attachment.setAuthorId(Integer.parseInt(map.get("author_id").toString()));
