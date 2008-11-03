@@ -31,6 +31,15 @@
 
 package org.svenk.redmine.core;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.util.Date;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
@@ -48,7 +57,9 @@ public class RedmineCorePlugin extends Plugin {
 	private static RedmineCorePlugin plugin;
 	
 	private RedmineRepositoryConnector connector;
-
+	
+	private PrintWriter logWriter = null;
+	
 	public static RedmineCorePlugin getDefault() {
 		return plugin;
 	}
@@ -64,6 +75,10 @@ public class RedmineCorePlugin extends Plugin {
 		if (connector != null) {
 			connector.stop();
 			connector = null;
+		}
+		
+		if (logWriter != null) {
+			logWriter.close();
 		}
 		
 		plugin = null;
@@ -85,6 +100,28 @@ public class RedmineCorePlugin extends Plugin {
 		return new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage());
 	}
 
+	public void logException(IStatus status, Exception exception) {
+		IPath stateLocation = Platform.getStateLocation(getBundle());
+		IPath cacheFile = stateLocation.append("connectorLog.txt");
+		
+		try {
+			if (logWriter == null) {
+				logWriter = new PrintWriter(new FileWriter(cacheFile.toFile()));
+			}
+			logWriter.println(new Date(System.currentTimeMillis()).toString());
+			exception.printStackTrace(logWriter);
+		} catch (NullPointerException e) {
+			//nothing to do
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+		}
+	}
+	
+	public void logUnexpectedException(Exception e) {
+		IStatus status = RedmineCorePlugin.toStatus(e, null);
+		logException(status, e);
+	}
+	
 	protected IPath getRepostioryAttributeCachePath() {
 		IPath stateLocation = Platform.getStateLocation(getBundle());
 		IPath cacheFile = stateLocation.append("repositoryClientDataCache");
