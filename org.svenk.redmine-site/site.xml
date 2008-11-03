@@ -4,7 +4,7 @@
       Provides Task List integration, offline support and rich editing
 for the open source Redmine project management.
    </description>
-   <feature url="features/org.svenk.redmine_feature_3.0.0.Nqualifier-e3x-r07x.jar" id="org.svenk.redmine_feature" version="3.0.0.Nqualifier-e3x-r07x">
+   <feature url="features/org.svenk.redmine_feature_3.0.0.Nqualifier.jar" id="org.svenk.redmine_feature" version="3.0.0.Nqualifier">
       <category name="Collaboration Tools"/>
    </feature>
    <category-def name="Collaboration Tools" label="Collaboration Tools"/>
