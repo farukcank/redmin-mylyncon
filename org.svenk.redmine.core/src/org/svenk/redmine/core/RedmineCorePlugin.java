@@ -31,12 +31,8 @@
 
 package org.svenk.redmine.core;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Date;
 
@@ -110,6 +106,7 @@ public class RedmineCorePlugin extends Plugin {
 			}
 			logWriter.println(new Date(System.currentTimeMillis()).toString());
 			exception.printStackTrace(logWriter);
+			logWriter.flush();
 		} catch (NullPointerException e) {
 			//nothing to do
 		} catch (IOException e) {
