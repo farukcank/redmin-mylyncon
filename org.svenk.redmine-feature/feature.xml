@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.svenk.redmine_feature"
+      id="org.svenk.redmine.feature"
       label="Mylyn Connector: Redmine"
       version="3.0.0.Nqualifier">
 
