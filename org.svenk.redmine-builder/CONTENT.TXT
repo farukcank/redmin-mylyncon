@@ -1,0 +1,3 @@
+dependencies:
+	mylyn-feature/plugin
+	orbit collection
