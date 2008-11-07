@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Redmine-Mylyn Build" default="main">
-    <description>
+	<description>
             description
     </description>
 
-	<target name="build" description="Call the Equinox Laucher">
+	<import file="${buildHome}/build-files/common.xml" />
+
+	<target name="build" description="Call the Equinox Laucher" >
+		<generatequalifier qualifierproperty="forceContextQualifier"/>
+
 		<property name="buildResultsDirectory" value="${buildDirectory}/results" />
-		
+
 		<java classname="org.eclipse.equinox.launcher.Main" fork="true" 
 			failonerror="true" errorproperty="build.stderr">
 			<arg value="-application" />
@@ -30,11 +34,12 @@
 			<jvmarg value="-DfetchTag=${fetchTag}"/>
 			-->
 			<jvmarg value="-DbuildProperties=${buildHome}/build-files/build.properties"/>
+			<jvmarg value="-DforceContextQualifier=${forceContextQualifier}"/>
 
 			<classpath>
 				<pathelement location="${equinoxjar}" />
 			</classpath>
-			
+
 			<!--
 			<syspropertyset>
 				<propertyset>
@@ -44,7 +49,7 @@
 			</syspropertyset>
 			-->
 		</java>
-		
+
 		<!-- save stderr for scrutinizing later -->
 		<!--
 		<echo file="${buildDirectory}/stderr.txt">${build.stderr}</echo>
@@ -64,10 +69,11 @@
 		-->
 
 	</target>
-	
-    <target name="main" description="Run the ...">
-        <antcall target="build"></antcall>
-    </target>
+
+	<target name="main" description="Run the ...">
+		<antcall target="build">
+		</antcall>
+	</target>
 
 
 </project>

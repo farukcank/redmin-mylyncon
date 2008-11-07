@@ -1,0 +1,26 @@
+<project name="Tooling build targets">
+
+	<macrodef name="getbuildnr">
+		<attribute name="buildnrproperty" />
+		<sequential>
+			<exec executable="svn" output="~getbuildnr.xml">
+				<arg value="info" />
+				<arg value="--xml" />
+				<arg value="${fetchDir}" />
+			</exec>
+			<xmlproperty file="~getbuildnr.xml" collapseAttributes="true" />
+			<property name="@{buildnrproperty}" value="${info.entry.commit.revision}" />
+			<delete file="~getbuildnr.xml" />
+		</sequential>
+	</macrodef>
+
+    <macrodef name="generatequalifier">
+        <attribute name="qualifierproperty" />
+        <sequential>
+			<tstamp/>
+			<getbuildnr buildnrproperty="svnrevision"/>
+			<property name="@{qualifierproperty}" value="${DSTAMP}${TSTAMP}-r${svnrevision}" />
+        </sequential>
+    </macrodef>
+
+</project>
