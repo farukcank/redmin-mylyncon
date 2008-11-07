@@ -1,3 +1,6 @@
 dependencies:
 	mylyn-feature/plugin
 	orbit collection
+	
+buildserver.properties:
+	buildserver specific settings
