@@ -1,3 +1,3 @@
-feature@org.svenk.redmine.feature= COPY, /home/sven/Workspaces/rcp/org.svenk.redmine-builder/svnfetch, org.svenk.redmine-feature
-plugin@org.svenk.redmine.core= COPY, /home/sven/Workspaces/rcp/org.svenk.redmine-builder/svnfetch, org.svenk.redmine.core
-plugin@org.svenk.redmine.ui= COPY, /home/sven/Workspaces/rcp/org.svenk.redmine-builder/svnfetch, org.svenk.redmine.ui
+feature@org.svenk.redmine_feature= COPY, ${buildHome}/svnfetch, org.svenk.redmine-feature
+plugin@org.svenk.redmine.core= COPY, ${buildHome}/svnfetch, org.svenk.redmine.core
+plugin@org.svenk.redmine.ui= COPY, ${buildHome}/svnfetch, org.svenk.redmine.ui

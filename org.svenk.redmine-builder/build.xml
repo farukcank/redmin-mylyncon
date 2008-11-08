@@ -5,14 +5,21 @@
     </description>
 
 	<import file="${buildHome}/build-files/common.xml" />
+	<property file="${buildHome}/build-files/build.properties"/>
 
-	<target name="build" description="Call the Equinox Laucher" >
-		<generatequalifier qualifierproperty="forceContextQualifier"/>
+	<target name="-prepare">
+		<tstamp />
 
-		<property name="buildResultsDirectory" value="${buildDirectory}/results" />
+		<record name="${buildDirectory}/build.log"/>
+		<getbuildnr buildnrproperty="svnrevision"/>
+		<property name="forceContextQualifier" value="${buildType}${DSTAMP}${TSTAMP}-r${svnrevision}"/>
+
+	</target>
+	
+	<target name="-build" description="Call the Equinox Laucher" depends="-prepare">
 
 		<java classname="org.eclipse.equinox.launcher.Main" fork="true" 
-			failonerror="true" errorproperty="build.stderr">
+			failonerror="true" >
 			<arg value="-application" />
 			<arg value="org.eclipse.ant.core.antRunner" />
 			<arg value="-buildfile" />
@@ -21,58 +28,23 @@
 			<jvmarg value="-Dbuilder=${buildHome}/build-files" />
 			<jvmarg value="-DjavacFailOnError=true"/>
 			<jvmarg value="-DbuildDirectory=${buildDirectory}"/>
-			<!--
-			<jvmarg value="-DbuildResultsDirectory=${buildResultsDirectory}"/>
-			-->
 			<jvmarg value="-DbaseLocation=${eclipseDir}"/>
 			<jvmarg value="-DbuildHome=${buildHome}"/>
-			<!--
-			<jvmarg value="-Dversion.full=${version.full}"/>
-			<jvmarg value="-Dversion.qualifier=${version.qualifier}${buildTypePresentation}"/>
-			-->
-			<!--
-			<jvmarg value="-DfetchTag=${fetchTag}"/>
-			-->
-			<jvmarg value="-DbuildProperties=${buildHome}/build-files/build.properties"/>
 			<jvmarg value="-DforceContextQualifier=${forceContextQualifier}"/>
+			<jvmarg value="-DbuildProperties=${buildHome}/build-files/build.properties"/>
 
 			<classpath>
 				<pathelement location="${equinoxjar}" />
 			</classpath>
 
-			<!--
-			<syspropertyset>
-				<propertyset>
-					<propertyref prefix="buildSystemProperty"/>
-					<mapper type="glob" from="buildSystemProperty.*" to="*"/>
-				</propertyset>
-			</syspropertyset>
-			-->
 		</java>
-
-		<!-- save stderr for scrutinizing later -->
-		<!--
-		<echo file="${buildDirectory}/stderr.txt">${build.stderr}</echo>
-		
-		<echo taskname="stderr">${build.stderr}</echo>
-		
-		<condition property="is.build.error" value="true">
-			<contains string="${build.stderr}" substring="BUILD FAILED"/>
-		</condition>
-		-->
-		<!-- Note that the fail task throws an exception which will be intercepted
-		     from calling antcalls. During that processing the status will 
-		     be lost and set to 1. Therefor ethe processing of TESTS FAILED which should 
-		     return an exit status of 2 can only take place in main targets. -->
-		<!--
-		<fail message="PDE Build failed" if="is.build.error" status="1"/>
-		-->
-
 	</target>
 
 	<target name="main" description="Run the ...">
-		<antcall target="build">
-		</antcall>
+		<antcall target="-prepare" />
+		
+		
+		<antcall target="-build" />
 	</target>
 
 
