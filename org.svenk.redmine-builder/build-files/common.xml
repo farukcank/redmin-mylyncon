@@ -14,4 +14,13 @@
 		</sequential>
 	</macrodef>
 
+	<target name="-checkforfailure">
+		<condition property="build.failure">
+			<isfileselected file="${logDir}/build.log">
+				<contains text="BUILD FAILED" casesensitive="true"/>
+			</isfileselected>
+		</condition>
+	</target>
+
+
 </project>

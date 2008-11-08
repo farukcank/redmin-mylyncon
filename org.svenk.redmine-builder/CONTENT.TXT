@@ -1,3 +1,7 @@
+Required dependencies
+	-mail.jar
+	-activation.jar
+
 dependencies:
 	mylyn-feature/plugin
 	orbit collection
