@@ -10,21 +10,38 @@
 	<target name="-prepare">
 		<tstamp />
 
+		<!-- init logging -->
 		<property name="logDir" value="${buildDirectory}/logs"/>
 		<mkdir dir="${logDir}"/>
 		<record name="${logDir}/build.log"/>
 		
+		<!-- svn reversion of last build -->
+		<getbuildnr buildnrproperty="lastsvnrevision"/>
+		<property name="lastsvnrevision" value="${lastsvnrevision}"/>
+		<echo>"Software revision of last build: ${lastsvnrevision}"</echo>
+
+		<!-- update sources -->
+		<echo>"Updating sources ..."</echo>
 		<exec executable="svn" output="${buildDirectory}/logs/svnupdate.log" >
 			<arg value="update"/>
 			<arg value="${buildHome}/svnfetch"/>
 		</exec>
 		
-		<getbuildnr buildnrproperty="svnrevision"/>
-		<property name="forceContextQualifier" value="${buildType}${DSTAMP}${TSTAMP}-r${svnrevision}"/>
-
+		<!-- svn reversion of this build -->
+		<getbuildnr buildnrproperty="newsvnrevision"/>
+		<property name="newsvnrevision" value="${newsvnrevision}"/>
+		<echo>"Software revision of this build: ${newsvnrevision}"</echo>
+		
+		<property name="forceContextQualifier" value="${buildType}${DSTAMP}${TSTAMP}-r${newsvnrevision}"/>
 	</target>
 	
-	<target name="-build" description="Call the Equinox Laucher">
+	<target name="-checkforchanges">
+		<condition property="build.skip">
+			<equals arg1="${lastsvnrevision}" arg2="${newsvnrevision}" />
+		</condition>
+	</target>
+	
+	<target name="-build" description="Call the Equinox Laucher" unless="build.skip">
 
 		<java classname="org.eclipse.equinox.launcher.Main" fork="true" 
 			failonerror="true" >
@@ -48,32 +65,10 @@
 		</java>
 	</target>
 
-	<target name="main" description="Run the ..."  depends="-prepare" >
-		<!--
+	<target name="main" description="Run the ..."  depends="-prepare, -checkforchanges" >
 		<antcall target="-build" />
-		-->
-		<antcall target="-mailsuccess" />
+		<antcall target="mailresult" />
 	</target>
 
-	<target name="-mailsuccess" unless="build.failure">
-		<path id="project.classpath">
-			<pathelement location="${buildHome}/lib/mail.jar"/>
-			<pathelement location="${buildHome}/lib/dsn.jar"/>
-			<pathelement location="${buildHome}/lib/imap.jar"/>
-			<pathelement location="${buildHome}/lib/mailapi.jar"/>
-			<pathelement location="${buildHome}/lib/pop3.jar"/>
-			<pathelement location="${buildHome}/lib/smtp.jar"/>
-		</path>
-
-		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build erfolgreich" >
-			<from address="${mail.from}"/>
-			<replyto address="${mail.replyto}"/>
-			<to address="${mail.to}"/>
-			<message>Build von Redmine-Mylyn Connector erfolgreich durchgeführt</message>
-			<fileset dir="${logDir}">
-				<include name="*.*"/>
-			</fileset>
-		</mail>
-	</target>
 
 </project>

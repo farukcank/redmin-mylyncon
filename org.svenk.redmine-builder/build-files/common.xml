@@ -10,9 +10,14 @@
 			</exec>
 			<xmlproperty file="~getbuildnr.xml" collapseAttributes="true" />
 			<property name="@{buildnrproperty}" value="${info.entry.commit.revision}" />
+			<!--
 			<delete file="~getbuildnr.xml" />
+			-->
 		</sequential>
 	</macrodef>
+
+
+	<target name="mailresult" depends="-checkforfailure, -mailfailure, -mailskip, -mailsuccess"/>
 
 	<target name="-checkforfailure">
 		<condition property="build.failure">
@@ -20,6 +25,53 @@
 				<contains text="BUILD FAILED" casesensitive="true"/>
 			</isfileselected>
 		</condition>
+		<condition property="build.success">
+			<and>
+				<not>
+					<isset property="buildskip"/>
+				</not>
+				<not>
+					<isset property="build.failure"/>
+				</not>
+			</and>
+		</condition>
+
+	</target>
+
+	<target name="-mailsuccess" if="build.success" >
+		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build erfolgreich" >
+			<from address="${mail.from}"/>
+			<replyto address="${mail.replyto}"/>
+			<to address="${mail.to}"/>
+			<message>Build von Redmine-Mylyn Connector erfolgreich durchgeführt</message>
+			<fileset dir="${logDir}">
+				<include name="*.*"/>
+			</fileset>
+		</mail>
+	</target>
+
+	<target name="-mailfailure" if="build.failure" unless="build.skip">
+		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build FEHLGESCHLAGEN" >
+			<from address="${mail.from}"/>
+			<replyto address="${mail.replyto}"/>
+			<to address="${mail.to}"/>
+			<message>Build von Redmine-Mylyn Connector FEHLGESCHLAGEN</message>
+			<fileset dir="${logDir}">
+				<include name="*.*"/>
+			</fileset>
+		</mail>
+	</target>
+
+	<target name="-mailskip" if="build.skip" unless="build.failure">
+		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build nicht ausgefuehrt" >
+			<from address="${mail.from}"/>
+			<replyto address="${mail.replyto}"/>
+			<to address="${mail.to}"/>
+			<message>Build von Redmine-Mylyn Connector übersprungen</message>
+			<fileset dir="${logDir}">
+				<include name="*.*"/>
+			</fileset>
+		</mail>
 	</target>
 
 
