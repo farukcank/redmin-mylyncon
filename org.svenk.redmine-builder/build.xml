@@ -5,7 +5,7 @@
     </description>
 
 	<import file="${buildHome}/build-files/common.xml" />
-	<property file="${buildHome}/build-files/build.properties"/>
+	<property file="${buildHome}/build-files/build.properties" />
 
 	<target name="-prepare">
 		<tstamp />
@@ -15,11 +15,6 @@
 		<mkdir dir="${logDir}"/>
 		<record name="${logDir}/build.log"/>
 		
-		<!-- svn reversion of last build -->
-		<getbuildnr buildnrproperty="lastsvnrevision"/>
-		<property name="lastsvnrevision" value="${lastsvnrevision}"/>
-		<echo>"Software revision of last build: ${lastsvnrevision}"</echo>
-
 		<!-- update sources -->
 		<echo>"Updating sources ..."</echo>
 		<exec executable="svn" output="${buildDirectory}/logs/svnupdate.log" >
@@ -28,16 +23,25 @@
 		</exec>
 		
 		<!-- svn reversion of this build -->
-		<getbuildnr buildnrproperty="newsvnrevision"/>
-		<property name="newsvnrevision" value="${newsvnrevision}"/>
+		<getbuildnr buildnrproperty="newsvnrevision" />
 		<echo>"Software revision of this build: ${newsvnrevision}"</echo>
+		
+		<propertyfile file="buildserver.properties">
+			<entry key="lastbuildrevision" value="${newsvnrevision}"/>
+		</propertyfile>
 		
 		<property name="forceContextQualifier" value="${buildType}${DSTAMP}${TSTAMP}-r${newsvnrevision}"/>
 	</target>
 	
 	<target name="-checkforchanges">
+		<property file="${logDir}/lastbuildrevision.log" />
+		<echo>"Software revision of last build: ${lastsvnrevision}"</echo>
+		
 		<condition property="build.skip">
-			<equals arg1="${lastsvnrevision}" arg2="${newsvnrevision}" />
+			<and>
+				<isset property="lastsvnrevision"/>
+				<equals arg1="${lastsvnrevision}" arg2="${newsvnrevision}" />
+			</and>
 		</condition>
 	</target>
 	
@@ -66,7 +70,9 @@
 	</target>
 
 	<target name="main" description="Run the ..."  depends="-prepare, -checkforchanges" >
+		<!--
 		<antcall target="-build" />
+		-->
 		<antcall target="mailresult" />
 	</target>
 

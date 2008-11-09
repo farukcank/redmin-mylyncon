@@ -3,16 +3,14 @@
 	<macrodef name="getbuildnr">
 		<attribute name="buildnrproperty" />
 		<sequential>
-			<exec executable="svn" output="~getbuildnr.xml">
+			<exec executable="svn" output="~getbuildnr.xml" >
 				<arg value="info" />
 				<arg value="--xml" />
 				<arg value="${buildHome}/svnfetch" />
 			</exec>
-			<xmlproperty file="~getbuildnr.xml" collapseAttributes="true" />
-			<property name="@{buildnrproperty}" value="${info.entry.commit.revision}" />
-			<!--
+			<xmlproperty file="~getbuildnr.xml" collapseAttributes="true" prefix="@{buildnrproperty}" />
+			<property name="@{buildnrproperty}" value="${@{buildnrproperty}.info.entry.commit.revision}" />
 			<delete file="~getbuildnr.xml" />
-			-->
 		</sequential>
 	</macrodef>
 
