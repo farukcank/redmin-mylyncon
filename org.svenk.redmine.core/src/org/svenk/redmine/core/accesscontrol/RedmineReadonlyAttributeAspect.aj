@@ -72,6 +72,12 @@ public aspect RedmineReadonlyAttributeAspect {
 			return;
 		}
 		
+		//closed Ticket - set all attributes to readonly
+		if (ticket.isClosed()) {
+			taskAttribute.getMetaData().setReadOnly(true);
+			return;
+		}
+		
 		//edit global allow - no change
 		if (editAllowed.get(ticket).booleanValue()) {
 			return;

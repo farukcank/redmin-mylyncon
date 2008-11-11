@@ -43,6 +43,7 @@ import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.RedmineClientData;
 import org.svenk.redmine.core.RedmineProjectData;
+import org.svenk.redmine.core.util.RedmineUtil;
 
 public class RedmineTicket {
 
@@ -193,6 +194,18 @@ public class RedmineTicket {
 	
 	public int getIntValue(Key key) {
 		return Integer.parseInt(getValue(key));
+	}
+	
+	public boolean isClosed() {
+		String statusId = valueByKey.get(Key.STATUS);
+		if (statusId != null) {
+			for (RedmineTicketStatus status : statuses) {
+				if (statusId.equals(""+status.getValue())) {
+					return status.isClosed();
+				}
+			}
+		}
+		return false;
 	}
 	
 	public void addJournal(RedmineTicketJournal journal) {
