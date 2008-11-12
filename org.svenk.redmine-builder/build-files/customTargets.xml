@@ -7,6 +7,7 @@
 	<available property="allElementsFile" file="${builder}/allElements.xml" value="${builder}/allElements.xml"/>
 	<property name="allElementsFile" location="${eclipse.pdebuild.templates}/headless-build/allElements.xml"/>
 
+	<import file="${buildHome}/build-files/common.xml" />
 	<import file="${allElementsFile}" />
 	<target name="allElements">
 		<antcall target="allElementsDelegator" />
@@ -46,6 +47,7 @@
 		<antcall target="allElements">
 			<param name="target" value="cleanElement" />
 		</antcall>
+		<antcall target="custom.clean" />
 	</target>
 
 	<target name="gatherLogs">
@@ -64,6 +66,7 @@
 	<!-- Steps to do before setup -->
 	<!-- ===================================================================== -->
 	<target name="preSetup">
+		<antcall target="custom.presetup" />
 	</target>
 
 	<!-- ===================================================================== -->
@@ -151,6 +154,7 @@
 	<!-- Steps to do to publish the build results -->
 	<!-- ===================================================================== -->
 	<target name="publish">
+		<antcall target="custom.deploy"></antcall>
 	</target>
 
 	<!-- ===================================================================== -->

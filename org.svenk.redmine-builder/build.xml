@@ -4,11 +4,26 @@
             description
     </description>
 
+	<taskdef resource="org/pluginbuilder/anttasks/pluginbuildertasks.properties" classpath="${buildHome}/build-files/lib/pluginbuilder-anttasks.jar" />
+
 	<import file="${buildHome}/build-files/common.xml" />
 	<property file="${buildHome}/build-files/build.properties" />
 
+	<property name="updatesite" value="${buildDirectory}/updatesite" />
+	<mkdir dir="${updatesite}"/>
+	
 	<target name="-prepare">
 		<tstamp />
+
+		<!-- determine buildfiles -->
+		<BundleFileLocator eclipseInstallationRoot="${eclipseDir}" bundleId="org.eclipse.pde.build" filePath="scripts/build.xml" property="buildfile" />
+		<!--
+		<dirname file="${regularbuildfile}" property="scriptdir"/>
+		<property name="productbuildfile" value="${scriptdir}/productBuild/productBuild.xml"/>
+		-->
+		
+		<!-- determine launcher -->
+		<BundleFileLocator eclipseInstallationRoot="${eclipseDir}" bundleId="org.eclipse.equinox.launcher" property="equinoxjar" />		
 
 		<!-- init logging -->
 		<property name="logDir" value="${buildDirectory}/logs"/>
@@ -26,9 +41,11 @@
 		<getbuildnr buildnrproperty="newsvnrevision" />
 		<echo>"Software revision of this build: ${newsvnrevision}"</echo>
 		
+		<!--
 		<propertyfile file="buildserver.properties">
 			<entry key="lastbuildrevision" value="${newsvnrevision}"/>
 		</propertyfile>
+		-->
 		
 		<property name="forceContextQualifier" value="${buildType}${DSTAMP}${TSTAMP}-r${newsvnrevision}"/>
 	</target>
@@ -61,6 +78,10 @@
 			<jvmarg value="-DbuildHome=${buildHome}"/>
 			<jvmarg value="-DforceContextQualifier=${forceContextQualifier}"/>
 			<jvmarg value="-DbuildProperties=${buildHome}/build-files/build.properties"/>
+			<jvmarg value="-Dupdatesite=${updatesite}"/>
+			<jvmarg value="-Dupdatesite=${updatesite}"/>
+			<jvmarg value="-Dbuild.compiler=org.aspectj.tools.ant.taskdefs.Ajc11CompilerAdapter"/>
+			<jvmarg value="-Dbuild.compiler.clean=anything"/>
 
 			<classpath>
 				<pathelement location="${equinoxjar}" />
@@ -70,10 +91,11 @@
 	</target>
 
 	<target name="main" description="Run the ..."  depends="-prepare, -checkforchanges" >
-		<!--
 		<antcall target="-build" />
-		-->
+		<!--
 		<antcall target="mailresult" />
+		-->
+
 	</target>
 
 

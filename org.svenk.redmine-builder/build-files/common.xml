@@ -3,7 +3,7 @@
 	<macrodef name="getbuildnr">
 		<attribute name="buildnrproperty" />
 		<sequential>
-			<exec executable="svn" output="~getbuildnr.xml" >
+			<exec executable="svn" output="~getbuildnr.xml">
 				<arg value="info" />
 				<arg value="--xml" />
 				<arg value="${buildHome}/svnfetch" />
@@ -15,62 +15,111 @@
 	</macrodef>
 
 
-	<target name="mailresult" depends="-checkforfailure, -mailfailure, -mailskip, -mailsuccess"/>
+	<target name="mailresult" depends="-checkforfailure, -mailfailure, -mailskip, -mailsuccess" />
+
+	<!-- ##################### -->
+	<target name="custom.presetup">
+		<condition property="isNightly">
+			<equals arg1="${buildType}" arg2="N" />
+		</condition>
+		<condition property="isDeployable">
+			<and>
+				<isset property="sf.user" />
+				<isset property="sf.password" />
+			</and>
+		</condition>
+	</target>
+
+	<target name="custom.clean" depends="-custom.clean.updatesite" />
+
+	<target name="-custom.clean.updatesite">
+		<delete dir="${updatesite}" />
+	</target>
+
+	<target name="custom.deploy" if="isDeployable">
+	</target>
+	<!-- ##################### -->
 
 	<target name="-checkforfailure">
 		<condition property="build.failure">
 			<isfileselected file="${logDir}/build.log">
-				<contains text="BUILD FAILED" casesensitive="true"/>
+				<contains text="BUILD FAILED" casesensitive="true" />
 			</isfileselected>
 		</condition>
 		<condition property="build.success">
 			<and>
 				<not>
-					<isset property="buildskip"/>
+					<isset property="buildskip" />
 				</not>
 				<not>
-					<isset property="build.failure"/>
+					<isset property="build.failure" />
 				</not>
 			</and>
 		</condition>
 
 	</target>
 
-	<target name="-mailsuccess" if="build.success" >
-		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build erfolgreich" >
-			<from address="${mail.from}"/>
-			<replyto address="${mail.replyto}"/>
-			<to address="${mail.to}"/>
+	<target name="-mailsuccess" if="build.success">
+		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build erfolgreich">
+			<from address="${mail.from}" />
+			<replyto address="${mail.replyto}" />
+			<to address="${mail.to}" />
 			<message>Build von Redmine-Mylyn Connector erfolgreich durchgeführt</message>
 			<fileset dir="${logDir}">
-				<include name="*.*"/>
+				<include name="*.*" />
 			</fileset>
 		</mail>
 	</target>
 
 	<target name="-mailfailure" if="build.failure" unless="build.skip">
-		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build FEHLGESCHLAGEN" >
-			<from address="${mail.from}"/>
-			<replyto address="${mail.replyto}"/>
-			<to address="${mail.to}"/>
+		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build FEHLGESCHLAGEN">
+			<from address="${mail.from}" />
+			<replyto address="${mail.replyto}" />
+			<to address="${mail.to}" />
 			<message>Build von Redmine-Mylyn Connector FEHLGESCHLAGEN</message>
 			<fileset dir="${logDir}">
-				<include name="*.*"/>
+				<include name="*.*" />
 			</fileset>
 		</mail>
 	</target>
 
 	<target name="-mailskip" if="build.skip" unless="build.failure">
-		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build nicht ausgefuehrt" >
-			<from address="${mail.from}"/>
-			<replyto address="${mail.replyto}"/>
-			<to address="${mail.to}"/>
+		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build nicht ausgefuehrt">
+			<from address="${mail.from}" />
+			<replyto address="${mail.replyto}" />
+			<to address="${mail.to}" />
 			<message>Build von Redmine-Mylyn Connector übersprungen</message>
 			<fileset dir="${logDir}">
-				<include name="*.*"/>
+				<include name="*.*" />
 			</fileset>
 		</mail>
 	</target>
 
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="${buildHome}/build-files/lib/ant-contrib-0.6.jar" />
+		</classpath>
+	</taskdef>
+
+
+	<taskdef name="sfpublish" classname="org.apache.tools.ant.taskdefs.optional.sourceforge.SourceForgePublish">
+		<classpath>
+			<pathelement location="${buildHome}/build-files/lib/sfutils-1.01RC1.jar" />
+			<pathelement location="${buildHome}/build-files/lib/httpunit-1.5.3.jar" />
+			<pathelement location="${buildHome}/build-files/lib/j2ssh-core-0.2.9.jar" />
+			<pathelement location="${buildHome}/build-files/lib/nekohtml-0.7.6.jar" />
+			<pathelement location="${buildHome}/build-files/lib/js-1.5R4-RC3.jar" />
+			<pathelement location="${buildHome}/build-files/lib/commons-logging.jar" />
+			<pathelement location="${buildHome}/build-files/lib/xercesImpl.jar" />
+		</classpath>
+	</taskdef>
+
+	<target name="publish">
+		<sfpublish releasename="nightly" packagename="update-site content" packagehidden="yes" hidden="yes" projectshortname="redmin-mylyncon" projectname="Redmine-Mylyn Connector" username="${sf.user}" password="${sf.password}" releasedate="6/28/2003">
+			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/features/org.svenk.redmine_feature_3.0.0.${forceContextQualifier}.jar" />
+			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/plugins/org.svenk.redmine.core_3.0.0.${forceContextQualifier}.jar" />
+			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/plugins/org.svenk.redmine.ui_3.0.0.${forceContextQualifier}.jar" />
+		</sfpublish>
+	</target>
 
 </project>
