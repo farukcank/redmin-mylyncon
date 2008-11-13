@@ -1,20 +1,5 @@
 <project name="Tooling build targets">
 
-	<macrodef name="getbuildnr">
-		<attribute name="buildnrproperty" />
-		<sequential>
-			<exec executable="svn" output="~getbuildnr.xml">
-				<arg value="info" />
-				<arg value="--xml" />
-				<arg value="${buildHome}/svnfetch" />
-			</exec>
-			<xmlproperty file="~getbuildnr.xml" collapseAttributes="true" prefix="@{buildnrproperty}" />
-			<property name="@{buildnrproperty}" value="${@{buildnrproperty}.info.entry.commit.revision}" />
-			<delete file="~getbuildnr.xml" />
-		</sequential>
-	</macrodef>
-
-
 	<target name="mailresult" depends="-checkforfailure, -mailfailure, -mailskip, -mailsuccess" />
 
 	<!-- ##################### -->
@@ -32,11 +17,13 @@
 
 	<target name="custom.clean" depends="-custom.clean.updatesite" />
 
-	<target name="-custom.clean.updatesite">
+	<target name="-custom.clean.updatesite" if="isNightly">
 		<delete dir="${updatesite}" />
 	</target>
 
-	<target name="custom.deploy" if="isDeployable">
+
+	<target name="custom.deploy" depends="custom.presetup" if="isDeployable">
+		<antcall target="publish.sf.frs" />
 	</target>
 	<!-- ##################### -->
 
@@ -102,7 +89,7 @@
 	</taskdef>
 
 
-	<taskdef name="sfpublish" classname="org.apache.tools.ant.taskdefs.optional.sourceforge.SourceForgePublish">
+	<taskdef name="publish.sf.frs" classname="org.apache.tools.ant.taskdefs.optional.sourceforge.SourceForgePublish">
 		<classpath>
 			<pathelement location="${buildHome}/build-files/lib/sfutils-1.01RC1.jar" />
 			<pathelement location="${buildHome}/build-files/lib/httpunit-1.5.3.jar" />
@@ -114,7 +101,7 @@
 		</classpath>
 	</taskdef>
 
-	<target name="publish">
+	<target name="publish.sf.frs">
 		<sfpublish releasename="nightly" packagename="update-site content" packagehidden="yes" hidden="yes" projectshortname="redmin-mylyncon" projectname="Redmine-Mylyn Connector" username="${sf.user}" password="${sf.password}" releasedate="6/28/2003">
 			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/features/org.svenk.redmine_feature_3.0.0.${forceContextQualifier}.jar" />
 			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/plugins/org.svenk.redmine.core_3.0.0.${forceContextQualifier}.jar" />

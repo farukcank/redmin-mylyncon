@@ -4,23 +4,16 @@
             description
     </description>
 
+	<!-- need for BundleFileLocator -->
 	<taskdef resource="org/pluginbuilder/anttasks/pluginbuildertasks.properties" classpath="${buildHome}/build-files/lib/pluginbuilder-anttasks.jar" />
 
-	<import file="${buildHome}/build-files/common.xml" />
-	<property file="${buildHome}/build-files/build.properties" />
-
 	<property name="updatesite" value="${buildDirectory}/updatesite" />
-	<mkdir dir="${updatesite}"/>
 	
-	<target name="-prepare">
+	<target name="-prepare" depends="-checkforchanges">
 		<tstamp />
 
 		<!-- determine buildfiles -->
 		<BundleFileLocator eclipseInstallationRoot="${eclipseDir}" bundleId="org.eclipse.pde.build" filePath="scripts/build.xml" property="buildfile" />
-		<!--
-		<dirname file="${regularbuildfile}" property="scriptdir"/>
-		<property name="productbuildfile" value="${scriptdir}/productBuild/productBuild.xml"/>
-		-->
 		
 		<!-- determine launcher -->
 		<BundleFileLocator eclipseInstallationRoot="${eclipseDir}" bundleId="org.eclipse.equinox.launcher" property="equinoxjar" />		
@@ -31,15 +24,13 @@
 		<record name="${logDir}/build.log"/>
 		
 		<!-- update sources -->
+		<!--
 		<echo>"Updating sources ..."</echo>
 		<exec executable="svn" output="${buildDirectory}/logs/svnupdate.log" >
 			<arg value="update"/>
 			<arg value="${buildHome}/svnfetch"/>
 		</exec>
-		
-		<!-- svn reversion of this build -->
-		<getbuildnr buildnrproperty="newsvnrevision" />
-		<echo>"Software revision of this build: ${newsvnrevision}"</echo>
+		-->
 		
 		<!--
 		<propertyfile file="buildserver.properties">
@@ -48,12 +39,24 @@
 		-->
 		
 		<property name="forceContextQualifier" value="${buildType}${DSTAMP}${TSTAMP}-r${newsvnrevision}"/>
+		<mkdir dir="${updatesite}"/>
 	</target>
 	
 	<target name="-checkforchanges">
 		<property file="${logDir}/lastbuildrevision.log" />
 		<echo>"Software revision of last build: ${lastsvnrevision}"</echo>
-		
+
+		<!-- svn reversion of this build -->
+		<exec executable="svn" output="~getbuildnr.xml">
+			<arg value="info" />
+			<arg value="--xml" />
+			<arg value="${buildHome}/svnfetch" />
+		</exec>
+		<xmlproperty file="~getbuildnr.xml" collapseAttributes="true" />
+		<property name="newsvnrevision" value="${info.entry.commit.revision}" />
+		<delete file="~getbuildnr.xml" />
+		<echo>"Software revision of this build: ${newsvnrevision}"</echo>
+
 		<condition property="build.skip">
 			<and>
 				<isset property="lastsvnrevision"/>
@@ -74,15 +77,14 @@
 			<jvmarg value="-Dbuilder=${buildHome}/build-files" />
 			<jvmarg value="-DjavacFailOnError=true"/>
 			<jvmarg value="-DbuildDirectory=${buildDirectory}"/>
-			<jvmarg value="-DbaseLocation=${eclipseDir}"/>
+			<jvmarg value="-DeclipseDir=${eclipseDir}"/>
 			<jvmarg value="-DbuildHome=${buildHome}"/>
 			<jvmarg value="-DforceContextQualifier=${forceContextQualifier}"/>
 			<jvmarg value="-DbuildProperties=${buildHome}/build-files/build.properties"/>
 			<jvmarg value="-Dupdatesite=${updatesite}"/>
-			<jvmarg value="-Dupdatesite=${updatesite}"/>
 			<jvmarg value="-Dbuild.compiler=org.aspectj.tools.ant.taskdefs.Ajc11CompilerAdapter"/>
 			<jvmarg value="-Dbuild.compiler.clean=anything"/>
-
+			
 			<classpath>
 				<pathelement location="${equinoxjar}" />
 			</classpath>
@@ -90,7 +92,7 @@
 		</java>
 	</target>
 
-	<target name="main" description="Run the ..."  depends="-prepare, -checkforchanges" >
+	<target name="main" description="Run the ..."  depends="-prepare" >
 		<antcall target="-build" />
 		<!--
 		<antcall target="mailresult" />
