@@ -17,4 +17,4 @@ Export-Package: org.svenk.redmine.core,
  org.svenk.redmine.core.model,
  org.svenk.redmine.core.util
 Bundle-ClassPath: .,
- lib/aspectjrt-1.5.3.jar
+ lib/aspectjrt.jar
