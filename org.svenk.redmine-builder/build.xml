@@ -24,13 +24,11 @@
 		<record name="${logDir}/build.log"/>
 		
 		<!-- update sources -->
-		<!--
 		<echo>"Updating sources ..."</echo>
 		<exec executable="svn" output="${buildDirectory}/logs/svnupdate.log" >
 			<arg value="update"/>
 			<arg value="${buildHome}/svnfetch"/>
 		</exec>
-		-->
 		
 		<!--
 		<propertyfile file="buildserver.properties">
