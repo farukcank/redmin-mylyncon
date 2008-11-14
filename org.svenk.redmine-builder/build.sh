@@ -10,5 +10,5 @@ if [ ! -d ./svnfetch ];then
 	svn co https://redmin-mylyncon.svn.sourceforge.net/svnroot/redmin-mylyncon/trunk ${DIR}svnfetch
 fi
 
-ant -propertyfile buildserver.properties
+ant -propertyfile buildserver.properties -Dsf.password=$1
 

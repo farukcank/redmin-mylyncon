@@ -1,122 +1,19 @@
 <project name="Tooling build targets" >
+	<import file="${buildHome}/build-files/publish/publish.xml"/>
 
-	<target name="mailresult" depends="-checkforfailure, -mailfailure, -mailskip, -mailsuccess" />
-
-	<!-- ##################### -->
-	<target name="-nightlycheck">
-		<condition property="isNightly">
-			<equals arg1="${buildType}" arg2="N" />
-		</condition>
-	</target>
 
 	<target name="custom.clean" depends="-custom.clean.updatesite" />
 
-	<target name="-custom.clean.updatesite" depends="-nightlycheck" if="isNightly">
+	<!-- remove last nightly update-site -->
+	<target name="-custom.clean.updatesite" depends="nightlycheck" if="isNightly">
 		<delete dir="${updatesite}" />
 	</target>
 
-
-	<target name="custom.publish" depends="-create.site.xml, -publish.sf" />
-
-	<!-- ##################### -->
-
-	<target name="-checkforfailure">
-		<condition property="build.failure">
-			<isfileselected file="${logDir}/build.log">
-				<contains text="BUILD FAILED" casesensitive="true" />
-			</isfileselected>
+	<!-- check for nightly build -->
+	<target name="nightlycheck">
+		<condition property="isNightly">
+			<equals arg1="${buildType}" arg2="N" />
 		</condition>
-		<condition property="build.success">
-			<and>
-				<not>
-					<isset property="buildskip" />
-				</not>
-				<not>
-					<isset property="build.failure" />
-				</not>
-			</and>
-		</condition>
-
-	</target>
-
-	<target name="-mailsuccess" if="build.success">
-		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build erfolgreich">
-			<from address="${mail.from}" />
-			<replyto address="${mail.replyto}" />
-			<to address="${mail.to}" />
-			<message>Build von Redmine-Mylyn Connector erfolgreich durchgeführt</message>
-			<fileset dir="${logDir}">
-				<include name="*.*" />
-			</fileset>
-		</mail>
-	</target>
-
-	<target name="-mailfailure" if="build.failure" unless="build.skip">
-		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build FEHLGESCHLAGEN">
-			<from address="${mail.from}" />
-			<replyto address="${mail.replyto}" />
-			<to address="${mail.to}" />
-			<message>Build von Redmine-Mylyn Connector FEHLGESCHLAGEN</message>
-			<fileset dir="${logDir}">
-				<include name="*.*" />
-			</fileset>
-		</mail>
-	</target>
-
-	<target name="-mailskip" if="build.skip" unless="build.failure">
-		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build nicht ausgefuehrt">
-			<from address="${mail.from}" />
-			<replyto address="${mail.replyto}" />
-			<to address="${mail.to}" />
-			<message>Build von Redmine-Mylyn Connector übersprungen</message>
-			<fileset dir="${logDir}">
-				<include name="*.*" />
-			</fileset>
-		</mail>
-	</target>
-
-	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
-		<classpath>
-			<pathelement location="${buildHome}/build-files/lib/ant-contrib-0.6.jar" />
-		</classpath>
-	</taskdef>
-
-	<target name="-create.site.xml" depends="-nightlycheck" if="isNightly">
-	</target>
-
-	<taskdef name="publish.sf.frs" classname="org.apache.tools.ant.taskdefs.optional.sourceforge.SourceForgePublish">
-		<classpath>
-			<pathelement location="${buildHome}/build-files/lib/sfutils-1.01RC1.jar" />
-			<pathelement location="${buildHome}/build-files/lib/httpunit-1.5.3.jar" />
-			<pathelement location="${buildHome}/build-files/lib/j2ssh-core-0.2.9.jar" />
-			<pathelement location="${buildHome}/build-files/lib/nekohtml-0.7.6.jar" />
-			<pathelement location="${buildHome}/build-files/lib/js-1.5R4-RC3.jar" />
-			<pathelement location="${buildHome}/build-files/lib/commons-logging.jar" />
-			<pathelement location="${buildHome}/build-files/lib/xercesImpl.jar" />
-		</classpath>
-	</taskdef>
-
-	<target name="-publish.sf" depends="-nightlycheck" if="isNightly" >
-		<property file="${buildHome}/build-files/account.properties" />
-		<antcall target="-publish.sf.site" />
-	</target>
-
-	<target name="-publish.sf.site" >
-		<scp todir="${sf.username},${sf.project.unixname}@web.sf.net:/home/groups/r/re/redmin-mylyncon/htdocs/update-site/nightly/" password="${sf.password}" verbose="true" trust="true" >
-			<fileset dir="${updatesite}" >
-				<include name="**/*.xml"/>
-				<exclude name="**/*.jar"/>
-			</fileset>
-		</scp>
-	</target>
-
-	<target name="-publish.sf.frs">
-		<property name="sf.user" value="${sf.username}" />
-		<sfpublish releasename="nightly" packagename="update-site content" packagehidden="yes" hidden="yes" projectshortname="${sf.project.unixname}" projectname="${sf.project.longname}" username="${sf.user}" password="${sf.password}" releasedate="6/28/2003">
-			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/features/org.svenk.redmine_feature_3.0.0.${forceContextQualifier}.jar" />
-			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/plugins/org.svenk.redmine.core_3.0.0.${forceContextQualifier}.jar" />
-			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/plugins/org.svenk.redmine.ui_3.0.0.${forceContextQualifier}.jar" />
-		</sfpublish>
 	</target>
 
 </project>

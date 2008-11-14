@@ -3,13 +3,17 @@
 	<description>
             description
     </description>
+	
+
+	<import file="${buildHome}/build-files/mail/mail.xml"/>
 
 	<!-- need for BundleFileLocator -->
 	<taskdef resource="org/pluginbuilder/anttasks/pluginbuildertasks.properties" classpath="${buildHome}/build-files/lib/pluginbuilder-anttasks.jar" />
 
 	<property name="updatesite" value="${buildDirectory}/updatesite" />
+	<property name="logDir" value="${buildDirectory}/logs"/>
 	
-	<target name="-prepare" depends="-checkforchanges">
+	<target name="-prepare" >
 		<tstamp />
 
 		<!-- determine buildfiles -->
@@ -19,28 +23,22 @@
 		<BundleFileLocator eclipseInstallationRoot="${eclipseDir}" bundleId="org.eclipse.equinox.launcher" property="equinoxjar" />		
 
 		<!-- init logging -->
-		<property name="logDir" value="${buildDirectory}/logs"/>
 		<mkdir dir="${logDir}"/>
 		<record name="${logDir}/build.log"/>
 		
 		<!-- update sources -->
 		<echo>"Updating sources ..."</echo>
-		<exec executable="svn" output="${buildDirectory}/logs/svnupdate.log" >
+		<exec executable="svn" output="${logDir}/svnupdate.log" >
 			<arg value="update"/>
 			<arg value="${buildHome}/svnfetch"/>
 		</exec>
-		
-		<!--
-		<propertyfile file="buildserver.properties">
-			<entry key="lastbuildrevision" value="${newsvnrevision}"/>
-		</propertyfile>
-		-->
 		
 		<property name="forceContextQualifier" value="${buildType}${DSTAMP}${TSTAMP}-r${newsvnrevision}"/>
 		<mkdir dir="${updatesite}"/>
 	</target>
 	
 	<target name="-checkforchanges">
+		<echo>"Software revision of last build: ${lastsvnrevision}${logDir}/lastbuildrevision.log"</echo>
 		<property file="${logDir}/lastbuildrevision.log" />
 		<echo>"Software revision of last build: ${lastsvnrevision}"</echo>
 
@@ -63,10 +61,10 @@
 		</condition>
 	</target>
 	
-	<target name="-build" description="Call the Equinox Laucher" unless="build.skip">
+	<target name="-build" description="Call the Equinox Laucher" unless="build.skip" >
 
 		<java classname="org.eclipse.equinox.launcher.Main" fork="true" 
-			failonerror="true" >
+			failonerror="false" >
 			<arg value="-application" />
 			<arg value="org.eclipse.ant.core.antRunner" />
 			<arg value="-buildfile" />
@@ -83,6 +81,7 @@
 			<jvmarg value="-Dbuild.compiler=org.aspectj.tools.ant.taskdefs.Ajc11CompilerAdapter"/>
 			<jvmarg value="-Dbuild.compiler.clean=anything"/>
 			<jvmarg value="-DbuildType=${buildType}"/>
+			<jvmarg value="-Dsf.password=${sf.password}"/>
 			
 			<classpath>
 				<pathelement location="${equinoxjar}" />
@@ -91,12 +90,36 @@
 		</java>
 	</target>
 
-	<target name="main" description="Run the ..."  depends="-prepare" >
-		<antcall target="-build" />
-		<!--
-		<antcall target="mailresult" />
-		-->
+	<!-- check for build error -->
+	<target name="checkforfailure">
+		<condition property="build.failure">
+			<isfileselected file="${logDir}/build.log">
+				<contains text="BUILD FAILED" casesensitive="true" />
+			</isfileselected>
+		</condition>
+		<condition property="build.success">
+			<and>
+				<not>
+					<isset property="build.skip" />
+				</not>
+				<not>
+					<isset property="build.failure" />
+				</not>
+			</and>
+		</condition>
 
+	</target>
+
+	<target name="-savebuildrevision" depends="checkforfailure" if="build.success" >
+		<propertyfile file="${logDir}/lastbuildrevision.log">
+			<entry key="lastsvnrevision" value="${newsvnrevision}"/>
+		</propertyfile>
+	</target>
+	
+	<target name="main" description="Run the ..."  depends="-checkforchanges, -prepare" >
+		<antcall target="-build" />
+		<antcall target="-savebuildrevision" />
+		<antcall target="mailresult" />
 	</target>
 
 
