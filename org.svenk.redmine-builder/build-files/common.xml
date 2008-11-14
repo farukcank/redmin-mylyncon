@@ -1,30 +1,23 @@
-<project name="Tooling build targets">
+<project name="Tooling build targets" >
 
 	<target name="mailresult" depends="-checkforfailure, -mailfailure, -mailskip, -mailsuccess" />
 
 	<!-- ##################### -->
-	<target name="custom.presetup">
+	<target name="-nightlycheck">
 		<condition property="isNightly">
 			<equals arg1="${buildType}" arg2="N" />
-		</condition>
-		<condition property="isDeployable">
-			<and>
-				<isset property="sf.user" />
-				<isset property="sf.password" />
-			</and>
 		</condition>
 	</target>
 
 	<target name="custom.clean" depends="-custom.clean.updatesite" />
 
-	<target name="-custom.clean.updatesite" if="isNightly">
+	<target name="-custom.clean.updatesite" depends="-nightlycheck" if="isNightly">
 		<delete dir="${updatesite}" />
 	</target>
 
 
-	<target name="custom.deploy" depends="custom.presetup" if="isDeployable">
-		<antcall target="publish.sf.frs" />
-	</target>
+	<target name="custom.publish" depends="-create.site.xml, -publish.sf" />
+
 	<!-- ##################### -->
 
 	<target name="-checkforfailure">
@@ -88,6 +81,8 @@
 		</classpath>
 	</taskdef>
 
+	<target name="-create.site.xml" depends="-nightlycheck" if="isNightly">
+	</target>
 
 	<taskdef name="publish.sf.frs" classname="org.apache.tools.ant.taskdefs.optional.sourceforge.SourceForgePublish">
 		<classpath>
@@ -101,8 +96,23 @@
 		</classpath>
 	</taskdef>
 
-	<target name="publish.sf.frs">
-		<sfpublish releasename="nightly" packagename="update-site content" packagehidden="yes" hidden="yes" projectshortname="redmin-mylyncon" projectname="Redmine-Mylyn Connector" username="${sf.user}" password="${sf.password}" releasedate="6/28/2003">
+	<target name="-publish.sf" depends="-nightlycheck" if="isNightly" >
+		<property file="${buildHome}/build-files/account.properties" />
+		<antcall target="-publish.sf.site" />
+	</target>
+
+	<target name="-publish.sf.site" >
+		<scp todir="${sf.username},${sf.project.unixname}@web.sf.net:/home/groups/r/re/redmin-mylyncon/htdocs/update-site/nightly/" password="${sf.password}" verbose="true" trust="true" >
+			<fileset dir="${updatesite}" >
+				<include name="**/*.xml"/>
+				<exclude name="**/*.jar"/>
+			</fileset>
+		</scp>
+	</target>
+
+	<target name="-publish.sf.frs">
+		<property name="sf.user" value="${sf.username}" />
+		<sfpublish releasename="nightly" packagename="update-site content" packagehidden="yes" hidden="yes" projectshortname="${sf.project.unixname}" projectname="${sf.project.longname}" username="${sf.user}" password="${sf.password}" releasedate="6/28/2003">
 			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/features/org.svenk.redmine_feature_3.0.0.${forceContextQualifier}.jar" />
 			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/plugins/org.svenk.redmine.core_3.0.0.${forceContextQualifier}.jar" />
 			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/plugins/org.svenk.redmine.ui_3.0.0.${forceContextQualifier}.jar" />

@@ -82,6 +82,7 @@
 			<jvmarg value="-Dupdatesite=${updatesite}"/>
 			<jvmarg value="-Dbuild.compiler=org.aspectj.tools.ant.taskdefs.Ajc11CompilerAdapter"/>
 			<jvmarg value="-Dbuild.compiler.clean=anything"/>
+			<jvmarg value="-DbuildType=${buildType}"/>
 			
 			<classpath>
 				<pathelement location="${equinoxjar}" />
