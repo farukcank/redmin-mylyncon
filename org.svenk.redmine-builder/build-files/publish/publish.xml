@@ -1,14 +1,8 @@
 <project name="publish">
 	<dirname property="ant.file.publish.dir" file="${ant.file.publish}" />
 
-	<!-- 
-	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
-		<classpath>
-			<pathelement location="${buildHome}/build-files/lib/ant-contrib-0.6.jar" />
-		</classpath>
-	</taskdef>
- 	-->
-
+	<import file="${buildHome}/build-files/common.xml"/>
+	
 	<taskdef name="sfpublish" classname="org.apache.tools.ant.taskdefs.optional.sourceforge.SourceForgePublish">
 		<classpath>
 			<fileset dir="${ant.file.publish.dir}/lib" >
@@ -18,7 +12,7 @@
 
 	</taskdef>
 
-	<target name="custom.publish" depends="-create.site.xml, -publish.sf" >
+	<target name="publish.sf" depends="-create.site.xml, -publish.sf" if="sf.password" >
 	</target>
  	
  	<!-- create the (nightly) site.xml -->
@@ -27,8 +21,8 @@
 
 	<target name="-publish.sf" depends="nightlycheck" if="isNightly" >
 		<property file="${buildHome}/build-files/account.properties" />
-		<antcall target="-publish.sf.site" />
 		<antcall target="-publish.sf.frs" />
+		<antcall target="-publish.sf.site" />
 	</target>
 
 	<target name="-publish.sf.site" >

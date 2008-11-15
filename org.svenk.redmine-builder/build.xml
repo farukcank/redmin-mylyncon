@@ -5,15 +5,17 @@
     </description>
 	
 
-	<import file="${buildHome}/build-files/mail/mail.xml"/>
+	<import file="${buildHome}/build-files/publish/publish.xml"/>
 
 	<!-- need for BundleFileLocator -->
 	<taskdef resource="org/pluginbuilder/anttasks/pluginbuildertasks.properties" classpath="${buildHome}/build-files/lib/pluginbuilder-anttasks.jar" />
 
-	<property name="updatesite" value="${buildDirectory}/updatesite" />
-	<property name="logDir" value="${buildDirectory}/logs"/>
 	
+	<property name="logDir" value="${buildDirectory}/logs"/>
+
 	<target name="-prepare" >
+		<property name="updatesite" value="${buildDirectory}/updatesite" />
+		
 		<tstamp />
 
 		<!-- determine buildfiles -->
@@ -33,12 +35,10 @@
 			<arg value="${buildHome}/svnfetch"/>
 		</exec>
 		
-		<property name="forceContextQualifier" value="${buildType}${DSTAMP}${TSTAMP}-r${newsvnrevision}"/>
 		<mkdir dir="${updatesite}"/>
 	</target>
 	
 	<target name="-checkforchanges">
-		<echo>"Software revision of last build: ${lastsvnrevision}${logDir}/lastbuildrevision.log"</echo>
 		<property file="${logDir}/lastbuildrevision.log" />
 		<echo>"Software revision of last build: ${lastsvnrevision}"</echo>
 
@@ -52,6 +52,8 @@
 		<property name="newsvnrevision" value="${info.entry.commit.revision}" />
 		<delete file="~getbuildnr.xml" />
 		<echo>"Software revision of this build: ${newsvnrevision}"</echo>
+
+		<property name="forceContextQualifier" value="${buildType}${DSTAMP}${TSTAMP}-r${newsvnrevision}"/>
 
 		<condition property="build.skip">
 			<and>
@@ -91,7 +93,7 @@
 	</target>
 
 	<!-- check for build error -->
-	<target name="checkforfailure">
+	<target name="-checkforfailure">
 		<condition property="build.failure">
 			<isfileselected file="${logDir}/build.log">
 				<contains text="BUILD FAILED" casesensitive="true" />
@@ -110,17 +112,47 @@
 
 	</target>
 
-	<target name="-savebuildrevision" depends="checkforfailure" if="build.success" >
+	<target name="-savebuildrevision" depends="-checkforfailure" if="build.success" >
 		<propertyfile file="${logDir}/lastbuildrevision.log">
 			<entry key="lastsvnrevision" value="${newsvnrevision}"/>
 		</propertyfile>
 	</target>
 	
-	<target name="main" description="Run the ..."  depends="-checkforchanges, -prepare" >
+	<target name="-publish" depends="-checkforfailure" if="build.success" >
+		<antcall target="publish.sf" />
+	</target>
+	
+	<target name="main" description="Run the ..."  depends="-prepare, -checkforchanges" >
 		<antcall target="-build" />
+		<antcall target="-publish" />
 		<antcall target="-savebuildrevision" />
 		<antcall target="mailresult" />
 	</target>
 
+	<target name="mailresult" depends="-checkforfailure, -mailfailure, -mailsuccess" />
+
+	<target name="-mailsuccess" unless="build.failure">
+		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build erfolgreich">
+			<from address="${mail.from}" />
+			<replyto address="${mail.replyto}" />
+			<to address="${mail.to}" />
+			<message>Build von Redmine-Mylyn Connector erfolgreich durchgeführt</message>
+			<fileset dir="${logDir}">
+				<include name="*.*" />
+			</fileset>
+		</mail>
+	</target>
+
+	<target name="-mailfailure" if="build.failure" unless="build.skip">
+		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build FEHLGESCHLAGEN">
+			<from address="${mail.from}" />
+			<replyto address="${mail.replyto}" />
+			<to address="${mail.to}" />
+			<message>Build von Redmine-Mylyn Connector FEHLGESCHLAGEN</message>
+			<fileset dir="${logDir}">
+				<include name="*.*" />
+			</fileset>
+		</mail>
+	</target>
 
 </project>

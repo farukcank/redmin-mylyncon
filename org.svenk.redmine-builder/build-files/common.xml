@@ -1,6 +1,4 @@
 <project name="Tooling build targets" >
-	<import file="${buildHome}/build-files/publish/publish.xml"/>
-
 
 	<target name="custom.clean" depends="-custom.clean.updatesite" />
 

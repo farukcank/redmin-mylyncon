@@ -2,6 +2,8 @@
 
 DIR=`echo $0 | sed -e 's/^\(.\+\/\).*$/\1/'`
 
+cd $DIR
+
 # Update of build script
 svn update ${DIR}
 
@@ -11,4 +13,5 @@ if [ ! -d ./svnfetch ];then
 fi
 
 ant -propertyfile buildserver.properties -Dsf.password=$1
+ant -propertyfile buildserver.properties mailresult
 
