@@ -134,7 +134,6 @@
 	<target name="-mailsuccess" unless="build.failure">
 		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build erfolgreich">
 			<from address="${mail.from}" />
-			<replyto address="${mail.replyto}" />
 			<to address="${mail.to}" />
 			<message>Build von Redmine-Mylyn Connector erfolgreich durchgeführt</message>
 			<fileset dir="${logDir}">
@@ -146,7 +145,6 @@
 	<target name="-mailfailure" if="build.failure" unless="build.skip">
 		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build FEHLGESCHLAGEN">
 			<from address="${mail.from}" />
-			<replyto address="${mail.replyto}" />
 			<to address="${mail.to}" />
 			<message>Build von Redmine-Mylyn Connector FEHLGESCHLAGEN</message>
 			<fileset dir="${logDir}">
