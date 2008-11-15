@@ -36,7 +36,7 @@
 
 	<target name="-publish.sf.frs">
 		<property name="sf.user" value="${sf.username}" />
-		<sfpublish releasename="nightly" packagename="update-site content" packagehidden="yes" hidden="yes" projectshortname="${sf.project.unixname}" username="${sf.user}" password="${sf.password}" releasedate="6/28/2003">
+		<sfpublish releasename="nightly" packagename="update-site content" packagehidden="yes" hidden="yes" projectshortname="${sf.project.unixname}" projectname="${sf.project.longname}" username="${sf.user}" password="${sf.password}" releasedate="6/28/2003">
 			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/features/org.svenk.redmine_feature_3.0.0.${forceContextQualifier}.jar" />
 			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/plugins/org.svenk.redmine.core_3.0.0.${forceContextQualifier}.jar" />
 			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/plugins/org.svenk.redmine.ui_3.0.0.${forceContextQualifier}.jar" />
