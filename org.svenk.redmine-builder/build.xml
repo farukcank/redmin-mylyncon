@@ -45,8 +45,6 @@
 				<include name="*.map"/>
 			</fileset>
 		</copy>
-		
-		<fail/>
 	</target>
 	
 	<target name="-checkforchanges">
