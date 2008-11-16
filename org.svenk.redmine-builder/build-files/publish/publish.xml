@@ -12,19 +12,55 @@
 
 	</taskdef>
 
-	<target name="publish.sf" depends="-create.site.xml, -publish.sf" if="sf.password" >
+	<target name="publish.sf" depends="-publish.sf.checkAccount, -create.site.xml, -publish.sf" >
 	</target>
  	
+	<target name="-publish.sf.checkAccount">
+		<property file="${buildHome}/build-files/account.properties" />
+		<condition property="missingAccount">
+			<not>
+				<and>
+					<isset property="${sf.username}"/>
+					<not>
+						<equals arg1="${sf.username}" arg2="" trim="true"/>
+					</not>
+				</and>
+			</not>
+		</condition>
+	</target>
+	
  	<!-- create the (nightly) site.xml -->
 	<target name="-create.site.xml" depends="nightlycheck" if="isNightly">
 	</target>
 
-	<target name="-publish.sf" depends="nightlycheck" if="isNightly" >
-		<property file="${buildHome}/build-files/account.properties" />
+	<target name="-publish.sf" depends="nightlycheck" if="isNightly" unless="missingAccount" >
+		<property name="sf.user" value="${sf.username}" />
+		<tstamp>
+			<format property="sf.releasedate" pattern="MM/dd/yyyy" />
+		</tstamp>
+		
 		<antcall target="-publish.sf.frs" />
 		<antcall target="-publish.sf.site" />
+		<antcall target="-publish.sf.archive" />
 	</target>
 
+	<target name="-publish.sf.archive" >
+		<delete dir="${buildDirectory}/archive" />
+		<mkdir dir="${buildDirectory}/archive/updatesite"/>
+		<copy todir="${buildDirectory}/archive/updatesite" >
+			<fileset dir="${updatesite}" />
+		</copy>
+		
+		<echo file="${buildDirectory}/archive/updatesite/README.TXT" append="false">Project Website: http://sourceforge.net/projects/redmin-mylyncon/${line.separator}</echo>
+		<echo file="${buildDirectory}/archive/updatesite/README.TXT" append="true">Eclipse Updatesite: http://redmin-mylyncon.sourceforge.net/update-site/nightly/${line.separator}</echo>
+		
+		<zip destfile="${buildDirectory}/archive/redmine-mylyn_${forceContextQualifier}.zip" basedir="${buildDirectory}/archive" compress="true" update="false" />
+
+		<sfpublish releasename="nightly" packagename="Archived Update-Site" packagehidden="no" hidden="no" projectshortname="${sf.project.unixname}" projectname="${sf.project.longname}" username="${sf.user}" password="${sf.password}" releasedate="${sf.releasedate}" >
+			<filespec filetype="zip" processortype="platform_independent" file="${buildDirectory}/archive/redmine-mylyn_${forceContextQualifier}.zip" />
+		</sfpublish>
+	</target>
+	
 	<target name="-publish.sf.site" >
 		<scp todir="${sf.username},${sf.project.unixname}@web.sf.net:/home/groups/r/re/redmin-mylyncon/htdocs/update-site/nightly/" password="${sf.password}" verbose="true" trust="true" >
 			<fileset dir="${updatesite}" >
@@ -35,8 +71,7 @@
 	</target>
 
 	<target name="-publish.sf.frs">
-		<property name="sf.user" value="${sf.username}" />
-		<sfpublish releasename="nightly" packagename="update-site content" packagehidden="yes" hidden="yes" projectshortname="${sf.project.unixname}" projectname="${sf.project.longname}" username="${sf.user}" password="${sf.password}" releasedate="6/28/2003">
+		<sfpublish releasename="nightly" packagename="update-site content" packagehidden="yes" hidden="yes" projectshortname="${sf.project.unixname}" projectname="${sf.project.longname}" username="${sf.user}" password="${sf.password}" releasedate="${sf.releasedate}">
 			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/features/org.svenk.redmine_feature_3.0.0.${forceContextQualifier}.jar" />
 			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/plugins/org.svenk.redmine.core_3.0.0.${forceContextQualifier}.jar" />
 			<filespec filetype="jar" processortype="platform_independent" file="${updatesite}/plugins/org.svenk.redmine.ui_3.0.0.${forceContextQualifier}.jar" />

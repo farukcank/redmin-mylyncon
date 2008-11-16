@@ -36,6 +36,17 @@
 		</exec>
 		
 		<mkdir dir="${updatesite}"/>
+		
+		<!-- Copy Map-Files into Builddirectory -->
+		<delete dir="${buildDirectory}/maps" />
+		<mkdir dir="${buildDirectory}/maps" />
+		<copy todir="${buildDirectory}/maps" >
+			<fileset dir="${buildHome}/build-files/maps">
+				<include name="*.map"/>
+			</fileset>
+		</copy>
+		
+		<fail/>
 	</target>
 	
 	<target name="-checkforchanges">
@@ -126,7 +137,6 @@
 		<antcall target="-build" />
 		<antcall target="-publish" />
 		<antcall target="-savebuildrevision" />
-		<antcall target="mailresult" />
 	</target>
 
 	<target name="mailresult" depends="-checkforfailure, -mailfailure, -mailsuccess" />
