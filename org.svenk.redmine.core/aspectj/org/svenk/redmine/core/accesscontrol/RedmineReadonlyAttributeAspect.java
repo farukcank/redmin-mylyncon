@@ -41,6 +41,7 @@ import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.RedmineProjectData;
 import org.svenk.redmine.core.RedmineTaskDataHandler;
+import org.svenk.redmine.core.model.RedmineCustomTicketField;
 import org.svenk.redmine.core.model.RedmineTicket;
 
 public aspect RedmineReadonlyAttributeAspect {
@@ -97,27 +98,40 @@ public aspect RedmineReadonlyAttributeAspect {
 		taskAttribute.getMetaData().setReadOnly(true);
 	}
 	
-	pointcut createAttributes(RedmineTicket ticket, RedmineProjectData projectData) : 
+	/* Default Attributes */
+	pointcut createDefaultAttributes(RedmineTicket ticket, RedmineProjectData projectData) : 
 		execution(private static void RedmineTaskDataHandler.createDefaultAttributes(TaskData, IRedmineClient, RedmineTicket, RedmineProjectData))
 		&& args(TaskData, IRedmineClient, ticket, projectData);
 	
-	pointcut createAttribute(RedmineAttribute redmineAttribute, RedmineTicket ticket) :
+	pointcut createDefaultAttribute(RedmineAttribute redmineAttribute, RedmineTicket ticket) :
 		call(private static TaskAttribute RedmineTaskDataHandler.createAttribute(..))
 		&& withincode(private static void RedmineTaskDataHandler.createDefaultAttributes(..))
 		&& args(TaskData, redmineAttribute, ..)
-		&& cflow(createAttributes(ticket, RedmineProjectData));
+		&& cflow(createDefaultAttributes(ticket, RedmineProjectData));
 	
-	before(RedmineTicket ticket, RedmineProjectData projectData) : createAttributes(ticket, projectData) {
+	
+	before(RedmineTicket ticket, RedmineProjectData projectData) : createDefaultAttributes(ticket, projectData) {
 		synchronized (ticket) {
 			editAllowed.put(ticket, Boolean.valueOf(projectData.getProject().isIssueEditAllowed()));
 			multipleStatus.put(ticket, (ticket.getStatuses()!=null && ticket.getStatuses().size()>1));
 		}
 	};
 	
-	after(RedmineAttribute redmineAttribute, RedmineTicket ticket) returning(TaskAttribute attr) : createAttribute(redmineAttribute, ticket) {
+	after(RedmineAttribute redmineAttribute, RedmineTicket ticket) returning(TaskAttribute attr) : createDefaultAttribute(redmineAttribute, ticket) {
 		checkForReadonly(attr, redmineAttribute, ticket);
 	}
 	
+
+	/* Custom Attributes */
+	pointcut createCustomAttribute(TaskData taskData) :
+		call(private static TaskAttribute RedmineTaskDataHandler.createAttribute(TaskData, RedmineCustomTicketField))
+		&& withincode(private static void RedmineTaskDataHandler.createCustomAttributes(..))
+		&& args(taskData, RedmineCustomTicketField);
+	
+	after(TaskData taskData) returning(TaskAttribute attr) : createCustomAttribute(taskData) {
+		TaskAttribute referenceAttribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.CATEGORY.getRedmineKey());
+		attr.getMetaData().setReadOnly(referenceAttribute.getMetaData().isReadOnly());
+	}
 	
 }
 
