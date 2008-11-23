@@ -59,7 +59,7 @@ public aspect RedmineReadonlyAttributeAspect {
 		updatableNoTransition.add(RedmineAttribute.ASSIGNED_TO);
 		updatableNoTransition.add(RedmineAttribute.VERSION);
 		updatableNoTransition.add(RedmineAttribute.STATUS);
-		//TODO add done_ration
+		updatableNoTransition.add(RedmineAttribute.PROGRESS);
 	}
 	
 	private void checkForReadonly(TaskAttribute taskAttribute, RedmineAttribute redmineAttribute, RedmineTicket ticket) {

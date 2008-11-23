@@ -63,7 +63,7 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 
 	private final static String RAILS_VERSION = "2.0.2";
 	
-	private final static String PLUGIN_VERSION = "v1";
+	private final static String PLUGIN_VERSION = "v2";
 	
 	private final static String URL_ENDPOINT = "/eclipse_mylyn_connector/api";
 
@@ -318,6 +318,8 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 					.putBuiltinValue(Key.AUTHOR, map.get("author")
 							.toString());
 
+			ticket.putBuiltinValue(Key.DONE_RATIO,  ((Integer)map.get("done_ratio")).intValue());
+			
 			ticket.setCreated((Date) map.get("created_on"));
 			ticket.setLastChanged((Date) map.get("updated_on"));
 			

@@ -263,6 +263,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 
 		nameValuePair.add(new NameValuePair("issue[subject]", values.get(Key.SUBJECT.getKey())));
 		nameValuePair.add(new NameValuePair("issue[description]", values.get(Key.DESCRIPTION.getKey())));
+		nameValuePair.add(new NameValuePair("issue[done_ratio]", values.get(Key.DONE_RATIO.getKey())));
 		
 		//Handle RedmineTicketAttributes / ProjectAttributes
 		String xmlRpcKey;

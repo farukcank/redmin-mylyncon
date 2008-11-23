@@ -61,6 +61,7 @@ import org.svenk.redmine.core.model.RedminePriority;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicketAttribute;
 import org.svenk.redmine.core.model.RedmineTicketJournal;
+import org.svenk.redmine.core.model.RedmineTicketProgress;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
 import org.svenk.redmine.core.model.RedmineCustomTicketField.FieldType;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
@@ -272,7 +273,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 						
 			createCustomAttributes(data, client, ticket, projectData);
 			
-			//set default value for attributes Status and Priority
+			//set default value for attributes Status,Priority and Progress(DoneRatio)
 			attr = data.getRoot().getMappedAttribute(RedmineAttribute.STATUS.getRedmineKey());
 			for (RedmineTicketStatus status : client.getClientData().getStatuses()) {
 				if (status.isDefaultStatus()) {
@@ -285,6 +286,8 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 					attr.setValue("" + priority.getValue());
 				}
 			}
+			attr = data.getRoot().getMappedAttribute(RedmineAttribute.PROGRESS.getRedmineKey());
+			attr.setValue(RedmineTicketProgress.getDefaultValue());
 
 			return true;
 		} catch (OperationCanceledException e) {
@@ -325,6 +328,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		createAttribute(data, RedmineAttribute.VERSION, projectData.getVersions(), true);
 		createAttribute(data, RedmineAttribute.ASSIGNED_TO, projectData.getMembers(), !existingTask);
 		createAttribute(data, RedmineAttribute.TRACKER, projectData.getTrackers(), false);
+		createAttribute(data, RedmineAttribute.PROGRESS, RedmineTicketProgress.availableValues(), false);
 		
 	}
 	

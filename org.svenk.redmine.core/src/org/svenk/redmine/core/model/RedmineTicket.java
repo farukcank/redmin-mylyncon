@@ -65,6 +65,7 @@ public class RedmineTicket {
 //		RESOLUTION("resolution"), 
 		TRACKER("tracker", true), 
 		STATUS("status"), 
+		DONE_RATIO("done_ratio"), 
 //		STEPS_TO_REPRODUCE("steps_to_reproduce"),
 		SUBJECT("subject"),
 		VERSION("version"), 
