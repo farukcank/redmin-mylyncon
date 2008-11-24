@@ -69,6 +69,7 @@ import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.RedmineProjectData;
 import org.svenk.redmine.core.RedmineRepositoryConnector;
 import org.svenk.redmine.core.exception.RedmineException;
+import org.svenk.redmine.core.model.RedmineIssueCategory;
 import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.model.RedminePriority;
 import org.svenk.redmine.core.model.RedmineProject;
@@ -125,6 +126,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		lstSearchFields.add(SearchField.FIXED_VERSION);
 		lstSearchFields.add(SearchField.ASSIGNED_TO);
 		lstSearchFields.add(SearchField.AUTHOR);
+		lstSearchFields.add(SearchField.CATEGORY);
 
 		lstSearchOperators = new HashMap<Combo, SearchField>(lstSearchFields
 				.size());
@@ -256,7 +258,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	}
 
 	private void createListGroup(final Composite parent) {
-		int columns = 3;
+		int columns = 4;
 
 		Composite control = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(columns * 2, true);
@@ -285,11 +287,11 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 
 			if (i % columns == 0 || i == lstSearchFields.size()) {
 				int sv = (i % columns == 0) ? i - columns : i - i % columns;
-				if (sv != 0) {
+				if (i % columns != 0) {
 					listGridData = new GridData();
 					listGridData.verticalSpan = 2;
 					listGridData.heightHint = 100;
-					listGridData.horizontalSpan = i % columns + 1;
+					listGridData.horizontalSpan = (columns-(i % columns)) * 2 +1;
 					listGridData.widthHint = 85;
 					list.setLayoutData(listGridData);
 				}
@@ -466,6 +468,12 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		for (RedmineTracker tracker : projectData.getTrackers()) {
 			list.add(tracker.getName());
 		}
+		/* Category */
+		list = lstSearchValues.get(SearchField.CATEGORY);
+		list.removeAll();
+		for (RedmineIssueCategory category : projectData.getCategorys()) {
+			list.add(category.getName());
+		}
 
 	}
 
@@ -561,6 +569,8 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			return new String("" + projData.getMember(name).getValue());
 		case ASSIGNED_TO:
 			return new String("" + projData.getMember(name).getValue());
+		case CATEGORY:
+			return new String("" + projData.getCategory(name).getValue());
 		}
 		throw new IllegalArgumentException();
 	}
@@ -582,6 +592,8 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			return new String("" + projData.getMember(value).getName());
 		case ASSIGNED_TO:
 			return new String("" + projData.getMember(value).getName());
+		case CATEGORY:
+			return new String("" + projData.getCategory(value).getName());
 		}
 		throw new IllegalArgumentException();
 	}
