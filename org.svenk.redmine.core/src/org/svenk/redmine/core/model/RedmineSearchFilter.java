@@ -166,7 +166,9 @@ public class RedmineSearchFilter {
 				CompareOperator.NONE, CompareOperator.ALL), AUTHOR("author_id",
 				CompareOperator.IS, CompareOperator.IS_NOT), FIXED_VERSION(
 				"fixed_version_id", CompareOperator.IS, CompareOperator.IS_NOT,
-				CompareOperator.NONE, CompareOperator.ALL), SUBJECT("subject",
+				CompareOperator.NONE, CompareOperator.ALL),CATEGORY("category_id",
+				CompareOperator.IS,	CompareOperator.IS_NOT, CompareOperator.ALL, 
+				CompareOperator.NONE),SUBJECT("subject",
 				CompareOperator.CONTAINS, CompareOperator.CONTAINS_NOT), DATE_CREATED(
 				"created_on", CompareOperator.DAY_AGO_MORE_THEN,
 				CompareOperator.DAY_AGO_LESS_THEN, CompareOperator.DAY_AGO,
@@ -292,6 +294,7 @@ public class RedmineSearchFilter {
 				case TRACKER:
 				case AUTHOR:
 				case PRIORITY:
+				case CATEGORY:
 				case FIXED_VERSION:
 				case ASSIGNED_TO: {
 					if (searchField.containsOperator(operator)) {
