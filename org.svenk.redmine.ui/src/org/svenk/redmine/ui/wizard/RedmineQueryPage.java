@@ -51,6 +51,7 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -213,10 +214,13 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	private void createTextGroup(final Composite parent) {
 
 		Composite control = new Composite(parent, SWT.NONE);
+		control.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		GridLayout layout = new GridLayout(3, false);
 		control.setLayout(layout);
 
 		GridData commonGridData = new GridData();
+		GridData textGridData = new GridData(SWT.FILL, SWT.CENTER, false, true);
+		textGridData.widthHint=300;
 
 		for (int i = 1; i <= txtSearchFields.size(); i++) {
 			SearchField searchField = txtSearchFields.get(i - 1);
@@ -252,7 +256,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 
 			Text text = new Text(control, SWT.BORDER);
 			txtSearchValues.put(searchField, text);
-			text.setLayoutData(commonGridData);
+			text.setLayoutData(textGridData);
 			text.setEnabled(false);
 		}
 	}
