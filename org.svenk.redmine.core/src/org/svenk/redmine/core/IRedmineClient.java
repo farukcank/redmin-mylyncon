@@ -60,6 +60,8 @@ public interface IRedmineClient {
 //	public static final String CHANGESET_URL = "/changeset/";
 //
 //	public static final String REVISION_LOG_URL = "/log/";
+
+	public static final String REVISION_URL = "/repositories/revision/";
 //
 //	public static final String MILESTONE_URL = "/milestone/";
 //

@@ -206,8 +206,9 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 //			Date date = task.getModificationDate();
 //			task.setAttribute(TASK_KEY_UPDATE_DATE, (date != null) ? TracUtil.toTracTime(date) + "" : null);
 			
-			String projectId = taskData.getRoot().getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey()).getValue();
-			task.setAttribute(TaskAttribute.PRODUCT, projectId);
+			String projectName = taskData.getRoot().getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey()).getValue();
+			int projectId = clientData.getProjectFromName(projectName).getProject().getValue();
+			task.setAttribute(TaskAttribute.PRODUCT, ""+projectId);
 
 //			RedmineProjectData projectData = getClientManager().getRedmineClient(repository).getClientData().getProjectFromId(Integer.parseInt(projectId));
 //			boolean issueEditAllowed = projectData.getProject().isIssueEditAllowed();
@@ -252,12 +253,15 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 				ITask task = iterator.next();
 				
 				//Project ID des Tickets ermitteln
-				String projectName = task.getAttribute(TaskAttribute.PRODUCT);
-				RedmineProjectData projectData = client.getClientData().getProjectFromName(projectName);
+				int projectId = 0;
+				try {
+					projectId = Integer.parseInt(task.getAttribute(TaskAttribute.PRODUCT));
+				} catch (NumberFormatException e) {
+					//nothing to do
+				}
+				RedmineProjectData projectData = client.getClientData().getProjectFromId(projectId);
 				//projectData kann Null sein, wenn zuvor noch keine Aktion ausgeführt wurde
 				if (projectData!= null) {
-					Integer projectId = Integer.valueOf(projectData.getProject().getValue());
-					
 					//Bei Bedarf geaenderte Tickets fuer ProjectId abrufen
 					if (!changedByProject.containsKey(projectId)) {
 						changedByProject.put(projectId, client.getChangedTicketId(projectId, changedSince));
