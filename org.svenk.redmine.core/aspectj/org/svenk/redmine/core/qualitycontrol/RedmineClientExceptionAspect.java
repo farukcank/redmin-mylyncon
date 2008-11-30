@@ -21,18 +21,22 @@
 package org.svenk.redmine.core.qualitycontrol;
 
 import org.svenk.redmine.core.RedmineCorePlugin;
-import org.svenk.redmine.core.RedmineXmlRpcClient;
-import org.svenk.redmine.core.AbstractRedmineClient;
+import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.exception.RedmineException;
+import org.svenk.redmine.core.exception.RedmineRemoteException;
 
 public aspect RedmineClientExceptionAspect {
 
 	pointcut catchRuntime() : 
-		execution(public * RedmineXmlRpcClient.*(..) throws RedmineException) 
-		|| execution(public * AbstractRedmineClient.*(..) throws RedmineException);
+		execution(public * IRedmineClient+.*(..) throws RedmineException); 
 
-	after() throwing(Exception e) throws RedmineException : catchRuntime() {
-		if (e instanceof RuntimeException) {
+	Object around() throws RedmineException : catchRuntime() {
+		try {
+			return proceed();
+		} catch (RedmineRemoteException e) {
+			RedmineCorePlugin.getDefault().logUnexpectedException(e);
+			throw e;
+		} catch (RuntimeException e) {
 			RedmineCorePlugin.getDefault().logUnexpectedException(e);
 			throw new RedmineException(e.getMessage(), e);
 		}
