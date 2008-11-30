@@ -3,7 +3,7 @@ class TrackerDto < ActionWebService::Struct
   member :name, :string
 
   def self.create tracker
-    PriorityDto.new(
+    TrackerDto.new(
       :id => tracker.id,
       :name => tracker.name
     )
