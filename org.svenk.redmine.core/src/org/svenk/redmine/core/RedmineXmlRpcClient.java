@@ -238,8 +238,13 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		monitor.subTask("project " + projData.project.getName());
 		
 		projData.trackers.clear();
-		for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_TRACKERS, projId)) {
-			projData.trackers.add(parseResponse2Tracker(projResponse));
+		Object rawResponse = execute(RPC_GET_PROJECT_TRACKERS, projId);
+		if (rawResponse instanceof Object[]) {
+			for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_TRACKERS, projId)) {
+				projData.trackers.add(parseResponse2Tracker(projResponse));
+			}
+		} else if (rawResponse instanceof Boolean ){
+			throw new RedmineException("Issue Tracking for Project " +projData.getProject().getName() + " is disabled");
 		}
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
