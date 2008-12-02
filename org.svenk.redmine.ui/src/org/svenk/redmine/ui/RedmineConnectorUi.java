@@ -31,6 +31,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.mylyn.tasks.core.IRepositoryQuery;
 import org.eclipse.mylyn.tasks.core.ITask;
+import org.eclipse.mylyn.tasks.core.ITaskComment;
 import org.eclipse.mylyn.tasks.core.ITaskMapping;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.ui.AbstractRepositoryConnectorUi;
@@ -125,6 +126,12 @@ public class RedmineConnectorUi extends AbstractRepositoryConnectorUi {
 		
 		return links.toArray(new IHyperlink[links.size()]);
 	};
+	
+	@Override
+	public String getReplyText(TaskRepository taskRepository, ITask task,
+			ITaskComment taskComment, boolean includeTask) {
+		return "#note-" + taskComment.getNumber();
+	}
 	
 	protected IRegion buildRegion(int lineOffset, int matcherStart, int matcherEnd) {
 		return new Region(lineOffset + matcherStart, matcherEnd-matcherStart);
