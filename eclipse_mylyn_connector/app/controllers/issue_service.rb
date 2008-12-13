@@ -41,7 +41,7 @@ class IssueService < BaseService
   end
   
   def find_journals_for_issue(id)
-    journals = @issue.journals
+    journals = @issue.journals.find(:all, :conditions => ["notes IS NOT NULL"])
     journals.collect! {|x|JournalDto.create(x)}
     return journals.compact
   end

@@ -42,6 +42,8 @@ public class RedmineRepositorySettingsPage extends
 	private static final String DESCRIPTION = "Example: www.your-domain.de/redmine";
 	
 	private String checkedUrl = null;
+	
+	private String version = null;
 
 	public RedmineRepositorySettingsPage(TaskRepository taskRepository) {
 		super(TITLE, DESCRIPTION, taskRepository);
@@ -74,11 +76,11 @@ public class RedmineRepositorySettingsPage extends
 		return new Validator() {
 			@Override
 			public void run(IProgressMonitor monitor) throws CoreException {
-				// TODO Auto-generated method stub
 				RedmineRepositoryConnector connector = (RedmineRepositoryConnector)TasksUi.getRepositoryManager().getRepositoryConnector(RedmineCorePlugin.REPOSITORY_KIND);
 				IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
 				try {
-					client.checkClientConnection();
+					RedmineRepositorySettingsPage.this.version = client.checkClientConnection();
+					repository.setVersion(version);
 				} catch (RedmineException e) {
 					throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
 				}
@@ -99,6 +101,11 @@ public class RedmineRepositorySettingsPage extends
 		return false;
 	}
 
+	@Override
+	public String getVersion() {
+		return version;
+	}
+	
 	@Override
 	public String getConnectorKind() {
 		return RedmineCorePlugin.REPOSITORY_KIND;

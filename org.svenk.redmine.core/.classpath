@@ -4,6 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="aspectj"/>
-	<classpathentry exported="true" kind="lib" path="lib/aspectjrt.jar" sourcepath="org.svenk.redmine.coresrc.zip"/>
+	<classpathentry kind="lib" path="/home/sven/bin/eclipseSDK/plugins/org.aspectj.runtime_1.6.3.20081127160000/aspectjrt.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

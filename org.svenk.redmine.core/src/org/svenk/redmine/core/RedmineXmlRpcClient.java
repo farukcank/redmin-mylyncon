@@ -50,9 +50,7 @@ import org.svenk.redmine.core.util.RedmineTransportFactory;
 
 public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmineClient {
 
-	private final static String RAILS_VERSION = "2.0.2";
-	
-	private final static String PLUGIN_VERSION = "v2";
+	private final static double PLUGIN_VERSION_2 = 2.0;
 	
 	private final static String URL_ENDPOINT = "/eclipse_mylyn_connector/api";
 
@@ -90,8 +88,18 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 
 	private XmlRpcClient client;
 	
+	private double wsVersion = 0D;
+	
 	public RedmineXmlRpcClient(AbstractWebLocation location, RedmineClientData clientData, TaskRepository repository) {
 		super(location, clientData, repository);
+		refreshRepositorySettings(repository);
+	}
+
+	public void refreshRepositorySettings(TaskRepository repository) {
+		super.refreshRepositorySettings(repository);
+		if (!repository.getVersion().equals(TaskRepository.NO_VERSION_SPECIFIED)) {
+			wsVersion = getWsVersion(repository.getVersion());
+		}
 	}
 
 	private XmlRpcClient getClient() throws RedmineException {
@@ -117,17 +125,25 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		if (response instanceof Object[]) {
 			Object[] object = (Object[])response;
 			if (object.length==3) {
-				if (!object[1].equals(RAILS_VERSION)) {
-					throw new RedmineException("This connector requires Rails version " + RAILS_VERSION + " (" + object[1] + ")");
+				String v = object[0].toString() + object[2].toString();
+				double wsV = getWsVersion(v);
+				if (wsV<PLUGIN_VERSION_2) {
+					throw new RedmineException("This connector requires Plugin version v" + PLUGIN_VERSION_2 + " (" + wsV + ")");
 				}
-				if (!object[2].toString().endsWith(PLUGIN_VERSION)) {
-					throw new RedmineException("This connector requires Plugin version " + PLUGIN_VERSION + " (" + object[2] + ")");
-				}
-				return object[0].toString();
+				return v;
 			}
 		}
 		throw new RedmineException("Not possible to determine version information");
 	}
+	
+	private double getWsVersion(String version) {
+		double v = 0D;
+		int pos = version.lastIndexOf('v');
+		if (pos>0 && version.length()>pos) {
+			v = Double.parseDouble(version.substring(pos+1));
+		}
+		return v;
+	} 
 
 	public RedmineTicket getTicket(int id, IProgressMonitor monitor) throws RedmineException {
 		RedmineTicket ticket =  parseResponse2Ticket(execute(RPC_TICKET_BY_ID, new Integer(id)));
@@ -271,9 +287,11 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			projData.members.add(parseResponse2Member(projResponse));
 		}
 		
-		projData.customTicketFields.clear();
-		for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_CUSTOM_ISSUE_FIELDS, projId)) {
-			projData.customTicketFields.add(parseResponse2CustomFields(projResponse));
+		if (redmineVersion==REDMINE_VERSION_7) {
+			projData.customTicketFields.clear();
+			for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_CUSTOM_ISSUE_FIELDS, projId)) {
+				projData.customTicketFields.add(parseResponse2CustomFields(projResponse));
+			}
 		}
 		
 		monitor.worked(1);
@@ -339,14 +357,16 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			}
 			
 			//customValues
-			Object customValues = map.get("custom_values");
-			if (customValues != null && customValues instanceof Object[]) {
-				for (Object customValue : (Object[])customValues) {
-					if (customValue instanceof HashMap) {
-						HashMap<String, Object> customValueMap = parseResponse2HashMap(customValue);
-						Integer customFieldId = (Integer)customValueMap.get("custom_field_id");
-						String customFieldValue = customValueMap.get("value").toString();
-						ticket.putCustomFieldValue(customFieldId, customFieldValue);
+			if (redmineVersion==REDMINE_VERSION_7) {
+				Object customValues = map.get("custom_values");
+				if (customValues != null && customValues instanceof Object[]) {
+					for (Object customValue : (Object[])customValues) {
+						if (customValue instanceof HashMap) {
+							HashMap<String, Object> customValueMap = parseResponse2HashMap(customValue);
+							Integer customFieldId = (Integer)customValueMap.get("custom_field_id");
+							String customFieldValue = customValueMap.get("value").toString();
+							ticket.putCustomFieldValue(customFieldId, customFieldValue);
+						}
 					}
 				}
 			}

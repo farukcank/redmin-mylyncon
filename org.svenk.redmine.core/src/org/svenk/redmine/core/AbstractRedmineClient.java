@@ -55,8 +55,10 @@ import org.svenk.redmine.core.util.internal.RedminePartSource;
 
 abstract public class AbstractRedmineClient implements IRedmineClient {
 
-	private final static String REDMINE_VERSION = "0.7";
-	
+	protected final static double REDMINE_VERSION_7 = 0.7D;
+
+	protected final static double REDMINE_VERSION_8 = 0.8D;
+
 	private final HttpClient httpClient;
 	
 	protected AbstractWebLocation location;
@@ -66,6 +68,8 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	protected String characterEncoding;
 	
 	protected boolean authenticated;
+	
+	protected double redmineVersion = 0D;
 
 	protected RedmineTicket.Key attributeKeys[] = new RedmineTicket.Key[]{Key.ASSIGNED_TO, Key.PRIORITY, Key.VERSION, Key.CATEGORY, Key.STATUS, Key.TRACKER};
 
@@ -76,15 +80,30 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		this.characterEncoding = repository.getCharacterEncoding();
 		
 		this.httpClient.getParams().setContentCharset(characterEncoding);
+		
+		refreshRepositorySettings(repository);
 	}
 
-	public void checkClientConnection() throws RedmineException {
-		if (!checkClientVersion().startsWith(REDMINE_VERSION)) {
-			throw new RedmineException("This connector requires Redmine version 0.7.X");
+	public void refreshRepositorySettings(TaskRepository repository) {
+		if (!repository.getVersion().equals(TaskRepository.NO_VERSION_SPECIFIED)) {
+			redmineVersion = getRedmineVersion(repository.getVersion());
 		}
 	}
 	
+	public String checkClientConnection() throws RedmineException {
+		String version = checkClientVersion();
+		if (!(version.startsWith(""+REDMINE_VERSION_7) || version.startsWith(""+REDMINE_VERSION_8))) {
+			throw new RedmineException("This connector requires Redmine version 0.7.X or 0.8.X");
+		}
+		return version;
+	}
+	
 	abstract protected String checkClientVersion() throws RedmineException;
+	
+	private double getRedmineVersion(String version) {
+		int pos = version.indexOf('.', version.indexOf('.')+1);
+		return Double.parseDouble(version.substring(0, pos));
+	}
 	
 	public InputStream getAttachmentContent(int attachmentId, IProgressMonitor monitor) throws RedmineException {
 		GetMethod method = new GetMethod(IRedmineClient.ATTACHMENT_URL + attachmentId);
@@ -269,11 +288,12 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		}
 		
 		//CustomTicketFields
-		for (Map.Entry<Integer, String> customValue : ticket.getCustomValues().entrySet()) {
-			String name = "custom_fields[" + customValue.getKey() + "]";
-			nameValuePair.add(new NameValuePair(name, customValue.getValue()));
+		if (redmineVersion==REDMINE_VERSION_7) {
+			for (Map.Entry<Integer, String> customValue : ticket.getCustomValues().entrySet()) {
+				String name = "custom_fields[" + customValue.getKey() + "]";
+				nameValuePair.add(new NameValuePair(name, customValue.getValue()));
+			}
 		}
-		
 		
 		return nameValuePair;
 	}
