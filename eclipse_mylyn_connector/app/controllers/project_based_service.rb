@@ -25,9 +25,9 @@ class ProjectBasedService < BaseService
   end
   
   def get_issue_custom_fields_for_project id
-   custom_fields =  @project.all_custom_fields
-   custom_fields.collect! { |x| IssueCustomFieldDto.create(x) }
-   return custom_fields.compact
+    custom_fields = @project.methods.include?('all_issue_custom_fields') ? @project.all_issue_custom_fields : @project.all_custom_fields;
+    custom_fields.collect! { |x| IssueCustomFieldDto.create(x) }
+    return custom_fields.compact
   end
   
   def get_issue_categorys_for_project id
@@ -49,5 +49,17 @@ class ProjectBasedService < BaseService
     versions.collect!{|x|VersionDto.create(x)}
     return versions
   end
+
+  def get_queries_for_project id
+    # Code form Issue_helper
+    visible = ARCondition.new(["is_public = ? OR user_id = ?", true, (User.current.logged? ? User.current.id : 0)])
+    visible << (@project.nil? ? ["project_id IS NULL"] : ["project_id IS NULL OR project_id = ?", @project.id])
+    queries = Query.find(:all,
+                         :order => "name ASC",
+                         :conditions => visible.conditions)
+    queries.collect!{|x|QueryDto.create(x)}
+    return queries.compact
+  end
+
 
 end

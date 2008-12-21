@@ -16,12 +16,18 @@ class IssueDto < ActionWebService::Struct
   member :tracker_id, :int
   member :status_id, :int
   member :done_ratio, :int
+  member :estimated_hours, :string  #float
+  member :sub_tickets, [:int]
   member :custom_values, [CustomValueDto]
   
   def self.create issue
     custom_values = issue.custom_values
     custom_values.collect! { |x| CustomValueDto.create(x)}
     custom_values.compact!
+
+    sub_tickets = issue.relations_to
+    sub_tickets.collect! { |x| x.issue_from_id}
+    sub_tickets.compact!
     
     return IssueDto.new(
       :id => issue.id,
@@ -38,6 +44,8 @@ class IssueDto < ActionWebService::Struct
       :tracker_id => issue.tracker_id,
       :status_id => issue.status_id,
       :done_ratio => issue.done_ratio,
+      :estimated_hours => issue.estimated_hours,
+      :sub_tickets => sub_tickets,
       :custom_values => custom_values
     )
 #    rescue

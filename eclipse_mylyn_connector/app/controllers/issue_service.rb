@@ -12,15 +12,15 @@ class IssueService < BaseService
   web_service_api IssueApi
 
   def find_project rpcname, args
-    if rpcname==:search_tickets
-      @querydecoder = QueryStringDecoder.new(args[0])
-      @project = @querydecoder.project
-    elsif rpcname==:find_tickets_by_last_update
-      @project = Project.find(args[0])
-    else 
-      @issue = Issue.find(args[0])
-      @project = @issue.project
-    end
+   if rpcname==:search_tickets
+     @query = retrieve_query(args[0], args[1], args[2])
+     @project = @query.project
+   elsif rpcname==:find_tickets_by_last_update
+     @project = Project.find(args[0])
+   else 
+     @issue = Issue.find(args[0])
+     @project = @issue.project
+   end
 #rescue
 #      false
   end
@@ -55,12 +55,11 @@ class IssueService < BaseService
   #project_id=2&set_filter=1&fields[]=start_date&operators[start_date]=t&values[start_date][]
   #project_id=2&set_filter=1&fields[]=status_id&operators[status_id]=o&values[status_id][]
   #project_id=2&set_filter=1&fields[]=updated_on&operators[updated_on]=>t-&values[updated_on][]=8
-  def search_tickets(query_string)
-    query = @querydecoder.query
-    if query.valid?
+  def search_tickets(query_string, project_id, query_id)
+    if @query.valid?
       issues = Issue.find :all,
                           :include => [ :assigned_to, :status, :tracker, :project, :priority, :category, :fixed_version ],
-                          :conditions => query.statement
+                          :conditions => @query.statement
 
       issues.collect! {|x|IssueDto.create(x)}
       return issues.compact
@@ -75,5 +74,24 @@ class IssueService < BaseService
     issues.collect! {|x|x.id}
     return issues.compact
  end
+
+  private
+  def retrieve_query query_string, project_id, query_id
+    query = nil
+    if project_id>0 && query_id>0 then
+      project = Project.find(project_id)
+      begin
+        query = Query.find(query_id, :conditions => "project_id = #{project_id}")
+      rescue
+        query = Query.new
+      end
+      query.project = project
+   else
+      querydecoder = QueryStringDecoder.new(query_string)
+      query = @querydecoder.query
+      query.project = querydecoder.project
+    end
+    return query
+  end
   
 end

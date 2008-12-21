@@ -25,7 +25,7 @@ class IssueApi < ActionWebService::API::Base
     :returns => [[AttachmentDto]]
 
   api_method :search_tickets,
-    :expects => [:string],
+    :expects => [:string, :int, :int],
     :returns => [[IssueDto]]
   
   api_method :find_tickets_by_last_update,
