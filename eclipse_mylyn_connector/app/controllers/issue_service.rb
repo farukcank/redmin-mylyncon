@@ -58,9 +58,8 @@ class IssueService < BaseService
   def search_tickets(query_string, project_id, query_id)
     if @query.valid?
       issues = Issue.find :all,
-                          :include => [ :assigned_to, :status, :tracker, :project, :priority, :category, :fixed_version ],
-                          :conditions => @query.statement
-
+                         :include => [ :assigned_to, :status, :tracker, :project, :priority, :category, :fixed_version ],
+                         :conditions => @query.statement
       issues.collect! {|x|IssueDto.create(x)}
       return issues.compact
     else
@@ -69,12 +68,17 @@ class IssueService < BaseService
   end
   
   def find_tickets_by_last_update(projectid, timestamp)
-    issues = Issue.find :all,
-                        :conditions => ["project_id = ? AND updated_on >= ?", projectid, timestamp]
+    issues = Issue.find(:all, :conditions => ["project_id = ? AND updated_on >= ?", projectid, timestamp])
     issues.collect! {|x|x.id}
     return issues.compact
- end
+  end
 
+  def find_relations_for_issue id
+    relations = @issue.relations
+    relations.collect! {|x|IssueRelationDto.create(x)}
+    return relations.compact
+  end
+  
   private
   def retrieve_query query_string, project_id, query_id
     query = nil

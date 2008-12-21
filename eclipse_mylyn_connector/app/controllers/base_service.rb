@@ -20,6 +20,7 @@ class BaseService < ActionWebService::Base
     @@authorizemap[IssueService][:find_attachments_for_issue] = {:ctrl => :issues, :action => :show}
     @@authorizemap[IssueService][:search_tickets] = {:ctrl => :issues, :action => :index}
     @@authorizemap[IssueService][:find_tickets_by_last_update] = {:ctrl => :issues, :action => :show}
+    @@authorizemap[IssueService][:find_relations_for_issue] = {:ctrl => :issues, :action => :show}
     
     @@authorizemap[ProjectBasedService] = Hash.new(nil)
     @@authorizemap[ProjectBasedService][:get_trackers_for_project] = {:ctrl => :issues, :action => :index}

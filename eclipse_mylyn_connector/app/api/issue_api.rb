@@ -6,6 +6,7 @@ require File.dirname(__FILE__) + '/../struct/issue_dto'
 require File.dirname(__FILE__) + '/../struct/issue_status_dto'
 require File.dirname(__FILE__) + '/../struct/journal_dto'
 require File.dirname(__FILE__) + '/../struct/attachment_dto'
+require File.dirname(__FILE__) + '/../struct/issue_relation_dto'
 
 class IssueApi < ActionWebService::API::Base
   api_method :find_ticket_by_id,
@@ -31,5 +32,9 @@ class IssueApi < ActionWebService::API::Base
   api_method :find_tickets_by_last_update,
     :expects => [:int, :datetime],
     :returns => [[:int]]
+
+  api_method :find_relations_for_issue,
+    :expects => [:int],
+    :returns => [[IssueRelationDto]]
   
 end
