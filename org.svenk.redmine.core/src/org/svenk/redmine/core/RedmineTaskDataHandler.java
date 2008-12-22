@@ -299,6 +299,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		createAttribute(data, RedmineAttribute.SUMMARY);
 		createAttribute(data, RedmineAttribute.DESCRIPTION);
 		createAttribute(data, RedmineAttribute.PROJECT);
+		createAttribute(data, RedmineAttribute.ESTIMATED);
 
 		if (existingTask) {
 			createAttribute(data, RedmineAttribute.REPORTER);

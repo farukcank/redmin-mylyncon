@@ -33,8 +33,8 @@ public class RedmineCustomTicketField implements Serializable {
 	public enum FieldType implements Serializable {
 		STRING(TaskAttribute.TYPE_SHORT_TEXT),
 		TEXT(TaskAttribute.TYPE_LONG_TEXT),
-		INT(TaskAttribute.TYPE_INTEGER),
-		FLOAT(TaskAttribute.TYPE_INTEGER),
+		INT(TaskAttribute.TYPE_SHORT_TEXT),
+		FLOAT(TaskAttribute.TYPE_SHORT_TEXT),
 		LIST(TaskAttribute.TYPE_SINGLE_SELECT),
 		DATE(TaskAttribute.TYPE_DATE),
 		BOOL(TaskAttribute.TYPE_BOOLEAN);

@@ -42,13 +42,15 @@ public enum RedmineAttribute {
 	TRACKER(Key.TRACKER, "Tracker:", RedmineAttribute.TASK_KEY_TRACKER, TaskAttribute.TYPE_SINGLE_SELECT),
 	STATUS(Key.STATUS, "Status:", TaskAttribute.STATUS, TaskAttribute.TYPE_SINGLE_SELECT),
 	COMMENT(Key.COMMENT, "Comment: ", TaskAttribute.COMMENT_NEW, TaskAttribute.TYPE_LONG_RICH_TEXT, Flag.HIDDEN),
-	PROGRESS(Key.DONE_RATIO, "Done ratio: ", RedmineAttribute.TASK_KEY_PROGRESS, TaskAttribute.TYPE_SINGLE_SELECT)
+	PROGRESS(Key.DONE_RATIO, "Done ratio: ", RedmineAttribute.TASK_KEY_PROGRESS, TaskAttribute.TYPE_SINGLE_SELECT),
+	ESTIMATED(Key.ESTIMATED_HOURS, "Estimated hours: ", RedmineAttribute.TASK_KEY_ESTIMATE, TaskAttribute.TYPE_SHORT_TEXT)
 	; 
 
 	public final static String TASK_KEY_CATEGORY = "task.redmine.category";
 	public final static String TASK_KEY_VERSION = "task.redmine.version";
 	public final static String TASK_KEY_TRACKER = "task.redmine.tracker";
 	public final static String TASK_KEY_PROGRESS = "task.redmine.progress";
+	public final static String TASK_KEY_ESTIMATE = "task.redmine.estimate";
 	
 	private final Key key;
 	

@@ -26,6 +26,7 @@ import java.util.Date;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskAttributeMapper;
+import org.svenk.redmine.core.util.RedmineUtil;
 
 public class RedmineAttributeMapper extends TaskAttributeMapper {
 
@@ -39,7 +40,7 @@ public class RedmineAttributeMapper extends TaskAttributeMapper {
 
 	@Override
 	public Date getDateValue(TaskAttribute attribute) {
-		return new Date(Long.parseLong(attribute.getValue()));
+		return RedmineUtil.parseDate(attribute.getValue());
 	}
 
 	@Override

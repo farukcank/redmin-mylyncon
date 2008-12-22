@@ -50,7 +50,7 @@ import org.svenk.redmine.core.util.RedmineTransportFactory;
 
 public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmineClient {
 
-	private final static double PLUGIN_VERSION_2 = 2.0;
+	private final static double PLUGIN_VERSION_2_2 = 2.2;
 	
 	private final static String URL_ENDPOINT = "/eclipse_mylyn_connector/api";
 
@@ -127,8 +127,8 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			if (object.length==3) {
 				String v = object[0].toString() + object[2].toString();
 				double wsV = getWsVersion(v);
-				if (wsV<PLUGIN_VERSION_2) {
-					throw new RedmineException("This connector requires Plugin version v" + PLUGIN_VERSION_2 + " (" + wsV + ")");
+				if (wsV<PLUGIN_VERSION_2_2) {
+					throw new RedmineException("This connector requires Plugin version v" + PLUGIN_VERSION_2_2 + " (" + wsV + ")");
 				}
 				return v;
 			}
@@ -165,7 +165,7 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	
 	public void search(String searchParam, List<RedmineTicket> tickets)
 			throws RedmineException {
-		Object response = execute(RPC_TICKET_SEARCH, searchParam);
+		Object response = execute(RPC_TICKET_SEARCH, searchParam, 0, 0);
 		if (response instanceof Object[]) {
 			Object[] maps = (Object[]) response;
 			for (Object object : maps) {
@@ -287,11 +287,9 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			projData.members.add(parseResponse2Member(projResponse));
 		}
 		
-		if (redmineVersion==REDMINE_VERSION_7) {
-			projData.customTicketFields.clear();
-			for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_CUSTOM_ISSUE_FIELDS, projId)) {
-				projData.customTicketFields.add(parseResponse2CustomFields(projResponse));
-			}
+		projData.customTicketFields.clear();
+		for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_CUSTOM_ISSUE_FIELDS, projId)) {
+			projData.customTicketFields.add(parseResponse2CustomFields(projResponse));
 		}
 		
 		monitor.worked(1);
@@ -332,6 +330,11 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 
 			ticket.putBuiltinValue(Key.DONE_RATIO,  ((Integer)map.get("done_ratio")).intValue());
 			
+			if (map.get("estimated_hours")!=null) {
+				ticket.putBuiltinValue(Key.ESTIMATED_HOURS,  map.get("estimated_hours").toString());
+			}
+			
+			
 			ticket.setCreated((Date) map.get("created_on"));
 			ticket.setLastChanged((Date) map.get("updated_on"));
 			
@@ -357,16 +360,14 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			}
 			
 			//customValues
-			if (redmineVersion==REDMINE_VERSION_7) {
-				Object customValues = map.get("custom_values");
-				if (customValues != null && customValues instanceof Object[]) {
-					for (Object customValue : (Object[])customValues) {
-						if (customValue instanceof HashMap) {
-							HashMap<String, Object> customValueMap = parseResponse2HashMap(customValue);
-							Integer customFieldId = (Integer)customValueMap.get("custom_field_id");
-							String customFieldValue = customValueMap.get("value").toString();
-							ticket.putCustomFieldValue(customFieldId, customFieldValue);
-						}
+			Object customValues = map.get("custom_values");
+			if (customValues != null && customValues instanceof Object[]) {
+				for (Object customValue : (Object[])customValues) {
+					if (customValue instanceof HashMap) {
+						HashMap<String, Object> customValueMap = parseResponse2HashMap(customValue);
+						Integer customFieldId = (Integer)customValueMap.get("custom_field_id");
+						String customFieldValue = customValueMap.get("value").toString();
+						ticket.putCustomFieldValue(customFieldId, customFieldValue);
 					}
 				}
 			}

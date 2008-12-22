@@ -32,7 +32,6 @@ import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.RedmineClientData;
 import org.svenk.redmine.core.RedmineProjectData;
-import org.svenk.redmine.core.util.RedmineUtil;
 
 public class RedmineTicket {
 
@@ -43,7 +42,7 @@ public class RedmineTicket {
 		CATEGORY("category"), 
 		CREATED_ON("created_on", true), 
 		DESCRIPTION("description"), 
-//		ETA("eta"), 
+		ESTIMATED_HOURS("estimated_hours"), 
 		UPDATED_ON("updated_on", true), 
 		PRIORITY("priority"),
 		PROJECT("project", true), 

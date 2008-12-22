@@ -20,17 +20,27 @@
  *******************************************************************************/
 package org.svenk.redmine.core.util;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class RedmineUtil {
 	public static Date parseDate(String time) {
+		Date date = null;
 		if (time != null) {
 			try {
-				return RedmineUtil.parseDate(Long.valueOf(time).longValue());
+				date = RedmineUtil.parseDate(Long.valueOf(time).longValue());
 			} catch (NumberFormatException e) {
+				DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+				try {
+					date = dateFormat.parse(time);
+				} catch (ParseException e1) {
+					//nothing to do
+				}
 			}
 		}
-		return null;
+		return date;
 	}
 
 	public static String parseDate(Date date) {

@@ -272,6 +272,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		nameValuePair.add(new NameValuePair("issue[subject]", values.get(Key.SUBJECT.getKey())));
 		nameValuePair.add(new NameValuePair("issue[description]", values.get(Key.DESCRIPTION.getKey())));
 		nameValuePair.add(new NameValuePair("issue[done_ratio]", values.get(Key.DONE_RATIO.getKey())));
+		nameValuePair.add(new NameValuePair("issue[estimated_hours]", values.get(Key.ESTIMATED_HOURS.getKey())));
 		
 		//Handle RedmineTicketAttributes / ProjectAttributes
 		String xmlRpcKey;
@@ -288,11 +289,11 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		}
 		
 		//CustomTicketFields
-		if (redmineVersion==REDMINE_VERSION_7) {
-			for (Map.Entry<Integer, String> customValue : ticket.getCustomValues().entrySet()) {
-				String name = "custom_fields[" + customValue.getKey() + "]";
-				nameValuePair.add(new NameValuePair(name, customValue.getValue()));
-			}
+		for (Map.Entry<Integer, String> customValue : ticket.getCustomValues().entrySet()) {
+			String name = redmineVersion<REDMINE_VERSION_8
+				? "custom_fields[" + customValue.getKey() + "]"
+				: "issue[custom_field_values][" + customValue.getKey() + "]";
+			nameValuePair.add(new NameValuePair(name, customValue.getValue()));
 		}
 		
 		return nameValuePair;
