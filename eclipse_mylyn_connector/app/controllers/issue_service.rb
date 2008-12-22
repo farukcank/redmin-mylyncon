@@ -92,7 +92,7 @@ class IssueService < BaseService
       query.project = project
    else
       querydecoder = QueryStringDecoder.new(query_string)
-      query = @querydecoder.query
+      query = querydecoder.query
       query.project = querydecoder.project
     end
     return query
