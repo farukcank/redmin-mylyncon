@@ -82,7 +82,7 @@ class IssueService < BaseService
   private
   def retrieve_query query_string, project_id, query_id
     query = nil
-    if project_id>0 && query_id>0 then
+    if project_id>0 && query_id!=nil && query_id>0 then
       project = Project.find(project_id)
       begin
         query = Query.find(query_id, :conditions => "project_id = #{project_id}")
