@@ -20,7 +20,6 @@
  *******************************************************************************/
 package org.svenk.redmine.core;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -54,12 +53,13 @@ import org.svenk.redmine.core.model.RedmineTicketProgress;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
 import org.svenk.redmine.core.model.RedmineCustomTicketField.FieldType;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
+import org.svenk.redmine.core.util.RedmineUtil;
 
 
 public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 
 	private RedmineRepositoryConnector connector;
-
+	
 	public RedmineTaskDataHandler(RedmineRepositoryConnector connector) {
 		this.connector = connector;
 	}
@@ -114,13 +114,13 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 
 		if (ticket.getCreated() != null) {
 			TaskAttribute taskAttribute = data.getRoot().getAttribute(RedmineAttribute.DATE_SUBMITTED.getRedmineKey());
-			taskAttribute.setValue(ticket.getCreated().getTime() + "");
+			taskAttribute.setValue(RedmineUtil.parseDate(ticket.getCreated()));
 			changedAttributes.add(taskAttribute);
 		}
 		
 		if (ticket.getLastChanged() != null) {
 			TaskAttribute taskAttribute = data.getRoot().getAttribute(RedmineAttribute.DATE_UPDATED.getRedmineKey());
-			taskAttribute.setValue(ticket.getLastChanged().getTime() + "");
+			taskAttribute.setValue(RedmineUtil.parseDate(ticket.getLastChanged()));
 			changedAttributes.add(taskAttribute);
 		}
 		
@@ -191,7 +191,11 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		for (Map.Entry<Integer, String> customValue : ticket.getCustomValues().entrySet()) {
 			TaskAttribute taskAttribute = data.getRoot().getAttribute(RedmineCustomTicketField.TASK_KEY_PREFIX + customValue.getKey().intValue());
 			if (taskAttribute != null) {
-				taskAttribute.setValue(customValue.getValue());
+				if (taskAttribute.getMetaData().getType()==TaskAttribute.TYPE_BOOLEAN) {
+					taskAttribute.setValue(RedmineUtil.parseBoolean(customValue.getValue()).toString());
+				} else {
+					taskAttribute.setValue(customValue.getValue());
+				}
 			}
 		}
 		
@@ -206,9 +210,10 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		// TODO Auto-generated method stub
 		
 		IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
-		RedmineTicket ticket = RedmineTicket.fromTaskData(taskData, client.getClientData());
 		
 		try {
+			RedmineTicket ticket = RedmineTicket.fromTaskData(taskData, client.getClientData());
+			
 			if (taskData.isNew() || taskData.getTaskId().equals("")) {
 				//set read-only attribute Project
 				TaskAttribute projAttr = taskData.getRoot().getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey());
@@ -378,37 +383,5 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		attr.getMetaData().setReadOnly(false);
 		return attr;
 	}
-
-	public static RedmineTicket populateTicket(TaskRepository repository, TaskData data) throws CoreException {
-		RedmineTicket redmineTicket = null;
-
-		if  (data.isNew()) {
-			redmineTicket = new RedmineTicket();
-		} else {
-			try {
-				int id;
-				id = Integer.parseInt(data.getTaskId());
-				if (id==0) {
-					throw new CoreException(new Status(IStatus.ERROR, RedmineCorePlugin.PLUGIN_ID, IStatus.OK,
-							"Invalid ticket id: 0", null));
-				}
-				redmineTicket = new RedmineTicket(id);
-			} catch (NumberFormatException e) {
-				throw new CoreException(new Status(IStatus.ERROR, RedmineCorePlugin.PLUGIN_ID, IStatus.OK,
-						"Invalid ticket id: " + data.getTaskId(), e));
-			}
-		}
-		
-		Collection<TaskAttribute> taskAttributes = data.getRoot().getAttributes().values();
-		for (TaskAttribute taskAttribute : taskAttributes) {
-			if (taskAttribute.getMetaData().isReadOnly()) {
-				continue;
-			}
-			redmineTicket.putBuiltinValue(taskAttribute.getId(), taskAttribute.getValue());
-		}
-
-		return redmineTicket;
-	}
-
-
+	
 }

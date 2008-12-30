@@ -1,0 +1,198 @@
+package org.svenk.redmine.core.util;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
+import org.eclipse.mylyn.tasks.core.data.TaskData;
+import org.svenk.redmine.core.RedmineAttribute;
+import org.svenk.redmine.core.RedmineClientData;
+import org.svenk.redmine.core.RedmineProjectData;
+import org.svenk.redmine.core.model.RedmineCustomTicketField;
+
+public class RedmineTaskDataValidator {
+
+	RedmineClientData clientData;
+	
+	public RedmineTaskDataValidator(RedmineClientData clientData) {
+		this.clientData = clientData;
+	}
+	
+	public RedmineTaskDataValidatorResult validateTaskData(TaskData taskData) {
+		RedmineTaskDataValidatorResult result = new RedmineTaskDataValidatorResult();
+		validateDefaultAttributes(taskData, result);
+		validateCustomAttributes(taskData, result);
+		return result;
+	}
+	
+	public RedmineTaskDataValidatorResult validateTaskAttribute(TaskData taskData, TaskAttribute attribute) {
+		RedmineTaskDataValidatorResult result = new RedmineTaskDataValidatorResult();
+
+		if (attribute.getId().startsWith(RedmineCustomTicketField.TASK_KEY_PREFIX)) {
+			TaskAttribute rootAttr = taskData.getRoot();
+			TaskAttribute projAttr = rootAttr.getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey());
+			RedmineProjectData projectData = clientData.getProjectFromName(projAttr.getValue());
+
+			int trackerId = Integer.parseInt(rootAttr.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue());
+			List<RedmineCustomTicketField> ticketFields = projectData.getCustomTicketFields(trackerId);
+			
+			int fieldId = Integer.parseInt(attribute.getId().substring(RedmineCustomTicketField.TASK_KEY_PREFIX.length()));
+			for (RedmineCustomTicketField customField : ticketFields) {
+				if (customField.getId()==fieldId) {
+					validateCustomAttribute(attribute.getValue(), customField, result);
+					break;
+				}
+			}
+			
+		} else {
+			if (attribute.getId().equals(RedmineAttribute.ESTIMATED.getRedmineKey())) {
+				validateDefaultAttributeEsimatedHours(attribute.getValue(), result);
+			}
+		}
+		return result;
+	}
+	
+	protected void validateDefaultAttributes(TaskData taskData, RedmineTaskDataValidatorResult result) {
+		validateRequiredDefaultAttributes(taskData, result);
+		
+		TaskAttribute estimatedAttr = taskData.getRoot().getMappedAttribute(RedmineAttribute.ESTIMATED.getRedmineKey());
+		if (estimatedAttr != null) {
+			validateDefaultAttributeEsimatedHours(estimatedAttr.getValue(), result);
+		}
+	}
+
+	protected void validateRequiredDefaultAttributes(TaskData taskData, RedmineTaskDataValidatorResult result) {
+		TaskAttribute rootAttr = taskData.getRoot();
+		TaskAttribute taskAttr = null;
+		String attributeValue = null;
+		
+		for (RedmineAttribute redmineAttribute : RedmineAttribute.values()) {
+			if (redmineAttribute.isRequired()) {
+				taskAttr = rootAttr.getMappedAttribute(redmineAttribute.getRedmineKey());
+				attributeValue = (taskAttr!=null) ? taskAttr.getValue().trim() : null;
+				if (attributeValue==null || attributeValue.length()<1) {
+					result.addErrorMessage(redmineAttribute.toString() + " is required");
+				}
+			}
+		}
+	}
+	
+	protected void validateDefaultAttributeEsimatedHours(String value, RedmineTaskDataValidatorResult result) {
+		if (value.trim().length()>0) {
+			try {
+				Double.valueOf(value).toString();
+			} catch (NumberFormatException e) {
+				StringBuilder sb = new StringBuilder(RedmineAttribute.ESTIMATED.toString());
+				sb.append(": must be a Float");
+				result.addErrorMessage(sb.toString());
+			}
+		}
+	}
+
+	protected void validateCustomAttributes(TaskData taskData, RedmineTaskDataValidatorResult result) {
+		TaskAttribute rootAttr = taskData.getRoot();
+		TaskAttribute projAttr = rootAttr.getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey());
+		RedmineProjectData projectData = clientData.getProjectFromName(projAttr.getValue());
+
+		int trackerId = Integer.parseInt(rootAttr.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue());
+		List<RedmineCustomTicketField> ticketFields = projectData.getCustomTicketFields(trackerId);
+		
+		String attributeValue = null;
+		TaskAttribute taskAttribute = null;
+		for (RedmineCustomTicketField customField : ticketFields) {
+			taskAttribute = rootAttr.getMappedAttribute(RedmineCustomTicketField.TASK_KEY_PREFIX + customField.getId());
+			attributeValue = (taskAttribute==null) ? "" : taskAttribute.getValue().trim();
+			validateCustomAttribute(attributeValue, customField, result);
+		}
+
+	}
+	
+	protected void validateCustomAttribute(String attributeValue, RedmineCustomTicketField customField, RedmineTaskDataValidatorResult result) {
+		validateRequiredCustomAttribute(attributeValue, customField, result);
+		validateCustomAttributeType(attributeValue, customField, result);
+		validateCustomAttributeMinLength(attributeValue, customField, result);
+		validateCustomAttributeMaxLength(attributeValue, customField, result);
+		validateCustomAttributePattern(attributeValue, customField, result);
+	}
+	
+	protected void validateRequiredCustomAttribute(String value, RedmineCustomTicketField customField, RedmineTaskDataValidatorResult result) {
+		if (customField.isRequired() && (value==null || value.length()<1)) {
+			result.addErrorMessage(customField.getName() + " is required");
+		}
+	}
+	
+	protected void validateCustomAttributeMinLength(String value, RedmineCustomTicketField customField, RedmineTaskDataValidatorResult result) {
+		int min = customField.getMin();
+		if (min>0 && value.length()<min) {
+			StringBuilder sb = new StringBuilder(customField.getName());
+			sb.append(": minimum length of ").append(min).append(" below");
+			result.addErrorMessage(sb.toString());
+		}
+	}
+	
+	protected void validateCustomAttributeMaxLength(String value, RedmineCustomTicketField customField, RedmineTaskDataValidatorResult result) {
+		int max = customField.getMax();
+		if (max>0 && value.length()>max) {
+			StringBuilder sb = new StringBuilder(customField.getName());
+			sb.append(": maximum length of ").append(max).append(" exceeded");
+			result.addErrorMessage(sb.toString());
+		}
+	}
+	
+	protected void validateCustomAttributePattern(String value, RedmineCustomTicketField customField, RedmineTaskDataValidatorResult result) {
+		String pattern = customField.getValidationRegex();
+		if (pattern!=null && pattern.length()>0 && !Pattern.matches(pattern, value)) {
+			StringBuilder sb = new StringBuilder(customField.getName());
+			sb.append(": ").append(value).append(" dosn't match ").append(pattern);
+			result.addErrorMessage(sb.toString());
+		}
+	}
+	
+	protected void validateCustomAttributeType(String value, RedmineCustomTicketField customField, RedmineTaskDataValidatorResult result) {
+		if (value!=null && value.length()>0)  {
+			try {
+				switch (customField.getType()) {
+				case FLOAT:
+					Double.valueOf(value).toString();
+					break;
+				case INT:
+					Integer.valueOf(value).toString();
+					break;
+				}
+			} catch (NumberFormatException e) {
+				StringBuilder sb = new StringBuilder(customField.getName());
+				sb.append(": must be a ").append(customField.getType().toString());
+				result.addErrorMessage(sb.toString());
+			}
+		}
+		
+	}
+	
+	public class RedmineTaskDataValidatorResult {
+		
+		public RedmineTaskDataValidatorResult() {
+			
+		}
+		
+		private List<String> errorMessages = new ArrayList<String>(1);
+		
+		protected void addErrorMessage(String errorMessage) {
+			errorMessages.add(errorMessage);
+		}
+
+		public boolean hasErrors() {
+			return errorMessages.size()>0;
+		}
+		
+		public String getFirstErrorMessage() {
+			return errorMessages.size()>0 ? errorMessages.get(0) : null;
+		}
+		
+		public List<String> getErrorMessages() {
+			return Collections.unmodifiableList(errorMessages);
+		}
+	}
+	
+}

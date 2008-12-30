@@ -52,6 +52,7 @@ import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.RedmineSearch;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
+import org.svenk.redmine.core.util.RedmineTaskDataValidator;
 import org.svenk.redmine.core.util.RedmineUtil;
 
 
@@ -60,7 +61,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 	private RedmineClientManager clientManager;
 	
 	private RedmineTaskDataHandler taskDataHandler;
-	
+
 	private final static String CLIENT_LABEL = "Redmine (supports redmine 0.7 with rails 2.0.2 and mylyn plugin)";
 	
 	private final static Pattern TASK_ID_FROM_TASK_URL = Pattern.compile(IRedmineClient.TICKET_URL + "(\\d+)");
@@ -119,6 +120,11 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 	@Override
 	public AbstractTaskDataHandler getTaskDataHandler() {
 		return taskDataHandler;
+	}
+	
+	public RedmineTaskDataValidator createNewTaskDataValidator(TaskRepository repository) {
+		IRedmineClient client = clientManager.getRedmineClient(repository);
+		return new RedmineTaskDataValidator(client.getClientData());
 	}
 
 	@Override

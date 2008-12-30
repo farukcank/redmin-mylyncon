@@ -54,4 +54,8 @@ public class RedmineUtil {
 	public static long toRedmineTime(Date date) {
 		return date.getTime();
 	}
+	
+	public static Boolean parseBoolean(String value) {
+		return value.trim().equals("1") ? Boolean.TRUE : Boolean.parseBoolean(value);
+	}
 }

@@ -257,13 +257,14 @@ public class RedmineTicket {
 		TaskAttribute projAttr = rootAttribute.getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey());
 		RedmineProjectData projectData = clientData.getProjectFromName(projAttr.getValue());
 
+		String attributeValue = null;
 		int trackerId = Integer.parseInt(rootAttribute.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue());
 		List<RedmineCustomTicketField> ticketFields = projectData.getCustomTicketFields(trackerId); 
 		for (RedmineCustomTicketField customField :ticketFields) {
+			//AttributeValue
 			TaskAttribute taskAttribute = rootAttribute.getMappedAttribute(RedmineCustomTicketField.TASK_KEY_PREFIX + customField.getId());
-			if (taskAttribute != null) {
-				this.putCustomFieldValue(Integer.valueOf(customField.getId()), taskAttribute.getValue());
-			}
+			attributeValue = (taskAttribute==null) ? "" : taskAttribute.getValue().trim();
+			this.putCustomFieldValue(Integer.valueOf(customField.getId()), attributeValue);
 		}
 	}
 }

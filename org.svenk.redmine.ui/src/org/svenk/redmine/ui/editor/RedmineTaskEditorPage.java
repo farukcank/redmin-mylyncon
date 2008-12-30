@@ -20,14 +20,24 @@
  *******************************************************************************/
 package org.svenk.redmine.ui.editor;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.mylyn.tasks.core.AbstractRepositoryConnector;
+import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
+import org.eclipse.mylyn.tasks.core.data.TaskDataModelEvent;
+import org.eclipse.mylyn.tasks.core.data.TaskDataModelListener;
+import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormEditor;
 import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.RedmineCorePlugin;
+import org.svenk.redmine.core.RedmineRepositoryConnector;
+import org.svenk.redmine.core.util.RedmineTaskDataValidator;
+import org.svenk.redmine.core.util.RedmineTaskDataValidator.RedmineTaskDataValidatorResult;
 
 
 public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
@@ -35,10 +45,35 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 	private final static String REQUIRED_MESSAGE_SUMMARY = "Please enter a subject before  submitting";
 	private final static String REQUIRED_MESSAGE_DESCRIPTION = "Please enter a description before submitting";
 	
+	private RedmineTaskDataValidator validator;
+	
 	public RedmineTaskEditorPage(TaskEditor editor) {
 		super(editor, RedmineCorePlugin.REPOSITORY_KIND);
 	}
 
+	@Override
+	public void init(IEditorSite site, IEditorInput input) {
+		super.init(site, input);
+		
+		TaskRepository repository = getTaskRepository();
+		AbstractRepositoryConnector connector = TasksUi.getRepositoryManager().getRepositoryConnector(repository.getConnectorKind());
+		if (connector instanceof RedmineRepositoryConnector) {
+			validator = ((RedmineRepositoryConnector)connector).createNewTaskDataValidator(repository);
+
+			getModel().addModelListener(new TaskDataModelListener() {
+				@Override
+				public void attributeChanged(TaskDataModelEvent event) {
+					RedmineTaskDataValidatorResult result = validator.validateTaskAttribute(getModel().getTaskData(), event.getTaskAttribute());
+					if(result.hasErrors()) {
+						getTaskEditor().setMessage(result.getFirstErrorMessage(), IMessageProvider.WARNING);
+					} else {
+						getTaskEditor().setMessage("", IMessageProvider.NONE);
+					}
+				}
+			});
+		}
+	}
+	
 	//WORKARAOUND Zugriff auf nicht initialisierte Page
 	//TODO Ticket erstellen
 	@Override
@@ -75,7 +110,14 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 			}
 			return;
 		}
-		
+
+		RedmineTaskDataValidatorResult result = validator.validateTaskData(getModel().getTaskData());
+		if (result.hasErrors()) {
+			getTaskEditor().setMessage(result.getFirstErrorMessage(), IMessageProvider.ERROR);
+			return;
+		}
+
+		getTaskEditor().setMessage("", IMessageProvider.NONE);
 		super.doSubmit();
 	}
 }

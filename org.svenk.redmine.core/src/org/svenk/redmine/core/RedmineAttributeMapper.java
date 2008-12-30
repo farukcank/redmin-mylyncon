@@ -31,7 +31,7 @@ import org.svenk.redmine.core.util.RedmineUtil;
 public class RedmineAttributeMapper extends TaskAttributeMapper {
 
 	enum Flag {
-		READ_ONLY, HIDDEN, CUSTOM_FIELD
+		READ_ONLY, HIDDEN, CUSTOM_FIELD, REQUIRED
 	}
 	
 	public RedmineAttributeMapper(TaskRepository taskRepository) {
