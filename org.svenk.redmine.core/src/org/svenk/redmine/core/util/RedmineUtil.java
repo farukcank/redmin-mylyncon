@@ -55,6 +55,11 @@ public class RedmineUtil {
 		return date.getTime();
 	}
 	
+	public static String toFormatedRedmineDate(Date date) {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		return dateFormat.format(date);
+	}
+	
 	public static Boolean parseBoolean(String value) {
 		return value.trim().equals("1") ? Boolean.TRUE : Boolean.parseBoolean(value);
 	}

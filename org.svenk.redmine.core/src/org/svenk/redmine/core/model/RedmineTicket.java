@@ -32,6 +32,8 @@ import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.RedmineClientData;
 import org.svenk.redmine.core.RedmineProjectData;
+import org.svenk.redmine.core.model.RedmineCustomTicketField.FieldType;
+import org.svenk.redmine.core.util.RedmineUtil;
 
 public class RedmineTicket {
 
@@ -264,6 +266,10 @@ public class RedmineTicket {
 			//AttributeValue
 			TaskAttribute taskAttribute = rootAttribute.getMappedAttribute(RedmineCustomTicketField.TASK_KEY_PREFIX + customField.getId());
 			attributeValue = (taskAttribute==null) ? "" : taskAttribute.getValue().trim();
+			
+			if (customField.getType()==FieldType.DATE && attributeValue.length()>0) {
+				attributeValue = RedmineUtil.toFormatedRedmineDate(RedmineUtil.parseDate(attributeValue));
+			}
 			this.putCustomFieldValue(Integer.valueOf(customField.getId()), attributeValue);
 		}
 	}
