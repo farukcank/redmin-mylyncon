@@ -2,6 +2,17 @@
 
 	<target name="custom.clean" depends="-custom.clean.updatesite" />
 
+	<target name="custom.postGenerate" >
+		<xslt style="${buildHome}/build-files/aspectj.xsl" basedir="${buildDirectory}/plugins" destdir="${buildDirectory}/plugins" extension=".aspect.out.xml" includes="*/build.xml"></xslt>
+		
+		<move todir="${buildDirectory}/plugins">
+			<mapper type="glob" from="*/build.aspect.out.xml" to="*/build.xml" />
+			<fileset dir="${buildDirectory}/plugins">
+				<include name="*/build.aspect.out.xml"/>
+			</fileset>
+		</move>
+	</target>
+
 	<!-- remove last nightly update-site -->
 	<target name="-custom.clean.updatesite" depends="nightlycheck" if="isNightly">
 		<delete dir="${updatesite}" />
