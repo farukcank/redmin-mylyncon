@@ -37,6 +37,8 @@ import org.apache.xmlrpc.client.XmlRpcCommonsTransportFactory;
 import org.apache.xmlrpc.client.XmlRpcHttpClientConfig;
 import org.apache.xmlrpc.client.XmlRpcTransport;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.commons.net.AuthenticationCredentials;
 import org.eclipse.mylyn.commons.net.AuthenticationType;
@@ -67,12 +69,14 @@ public class RedmineTransportFactory extends XmlRpcCommonsTransportFactory {
 		
 		protected final AbstractWebLocation location;
 		
-		protected final IProgressMonitor monitor = null;
+		protected final IProgressMonitor monitor;
 
 		public RedmineTransport(XmlRpcClient pClient,
 				AbstractWebLocation location) {
 			super(pClient);
 			this.location = location;
+			
+			this.monitor = new NullProgressMonitor();
 			
 			WebUtil.configureHttpClient(client, getUserAgent());
 		}
@@ -131,9 +135,11 @@ public class RedmineTransportFactory extends XmlRpcCommonsTransportFactory {
 								setCredentials(null);
 								return sendRequest(request);
 							}
-						} catch (UnsupportedRequestException e1) {;}
+						} catch (UnsupportedRequestException e1) {;
+						} catch (OperationCanceledException e1) {;
+						}
 						
-						throw new XmlRpcException(method.getStatusText(), new RedmineAuthenticationException(method.getStatusCode()));
+						throw new XmlRpcException(method.getStatusText(), new RedmineAuthenticationException(method.getStatusCode(),method.getStatusText()));
 					}
 					
 				}

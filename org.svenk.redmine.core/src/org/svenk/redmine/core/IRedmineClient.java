@@ -76,11 +76,11 @@ public interface IRedmineClient {
 	
 	public RedmineTicket getTicket(int id, IProgressMonitor monitor) throws RedmineException;
 	
-	public List<Integer> getChangedTicketId(Integer projectId, Date changedSince) throws RedmineException;
+	public List<Integer> getChangedTicketId(Integer projectId, Date changedSince, IProgressMonitor monitor) throws RedmineException;
 	
-	public void search(String searchParam, List<RedmineTicket> tickets) throws RedmineException;
+	public void search(String searchParam, List<RedmineTicket> tickets, IProgressMonitor monitor) throws RedmineException;
 	
-	public void updateAttributes(IProgressMonitor monitor, boolean force) throws RedmineException;
+	public void updateAttributes(boolean force, IProgressMonitor monitor) throws RedmineException;
 	
 	public int createTicket(RedmineTicket ticket, IProgressMonitor monitor) throws RedmineException;
 	

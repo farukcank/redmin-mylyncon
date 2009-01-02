@@ -144,7 +144,7 @@ public class RedmineProjectPage extends WizardPage {
 					public void run(IProgressMonitor monitor)
 							throws InvocationTargetException, InterruptedException {
 						try {
-							client.updateAttributes(monitor, force);
+							client.updateAttributes(force, monitor);
 						} catch (RedmineException e) {
 							throw new InvocationTargetException(e);
 						}

@@ -87,7 +87,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
 		RedmineTicket ticket;
 		try {
-			client.updateAttributes(monitor, false);
+			client.updateAttributes(false, monitor);
 			ticket = client.getTicket(id, monitor);
 		} catch (OperationCanceledException e) {
 			throw e;
@@ -246,7 +246,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		
 		try {
 			IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
-			client.updateAttributes(monitor, false);
+			client.updateAttributes(false, monitor);
 			
 			//Input from wizard
 			RedmineProjectData projectData = client.getClientData().getProjectFromName(initializationData.getProduct());

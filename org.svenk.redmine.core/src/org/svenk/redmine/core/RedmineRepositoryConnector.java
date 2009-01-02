@@ -250,7 +250,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 
 			Date changedSince = RedmineUtil.parseDate(repository.getSynchronizationTimeStamp());
 			IRedmineClient client = this.getClientManager().getRedmineClient(repository);
-			client.updateAttributes(monitor, false);
+			client.updateAttributes(false, monitor);
 
 			//Enthaelt die ID's der geaenderten Tickets nach Project ID's zusammengefasst
 			Map<Integer, List<Integer>> changedByProject = new HashMap<Integer, List<Integer>>();
@@ -270,7 +270,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 				if (projectData!= null) {
 					//Bei Bedarf geaenderte Tickets fuer ProjectId abrufen
 					if (!changedByProject.containsKey(projectId)) {
-						changedByProject.put(projectId, client.getChangedTicketId(projectId, changedSince));
+						changedByProject.put(projectId, client.getChangedTicketId(projectId, changedSince, monitor));
 					}
 					
 					//Geaenderte Tickets markieren
@@ -314,8 +314,8 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 				IRedmineClient client;
 				try {
 					client = getClientManager().getRedmineClient(repository);
-					client.updateAttributes(monitor, false);
-					client.search(query.getAttribute(RedmineSearch.SEARCH_PARAMS), tickets);
+					client.updateAttributes(false, monitor);
+					client.search(query.getAttribute(RedmineSearch.SEARCH_PARAMS), tickets, monitor);
 
 					for (RedmineTicket ticket : tickets) {
 						TaskData data = taskDataHandler.createTaskDataFromTicket(client, repository, ticket, monitor);

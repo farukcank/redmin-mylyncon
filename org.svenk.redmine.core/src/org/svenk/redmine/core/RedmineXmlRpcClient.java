@@ -163,7 +163,7 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		return parseResponse2Attachment(execute(RPC_GET_TICKET_ATTACHMENTS, new Integer(id)));
 	}
 	
-	public void search(String searchParam, List<RedmineTicket> tickets)
+	public void search(String searchParam, List<RedmineTicket> tickets, IProgressMonitor monitor)
 			throws RedmineException {
 		Object response = execute(RPC_TICKET_SEARCH, searchParam, 0, 0);
 		if (response instanceof Object[]) {
@@ -196,7 +196,7 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		
 	}
 
-	public List<Integer> getChangedTicketId(Integer projectId, Date changedSince) throws RedmineException {
+	public List<Integer> getChangedTicketId(Integer projectId, Date changedSince, IProgressMonitor monitor) throws RedmineException {
 		Object[] params = new Object[]{projectId, changedSince};
 		Object response = execute(RPC_GET_TICKET_UPDATED_ID, params);
 		return parseResponse2IntegerList(response);
@@ -206,7 +206,7 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		return data.lastupdate!=0;
 	}
 
-	public synchronized void updateAttributes(IProgressMonitor monitor, boolean force)
+	public synchronized void updateAttributes(boolean force, IProgressMonitor monitor)
 			throws RedmineException {
 		
 		if (!force && hasAttributes()) {
@@ -299,7 +299,7 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	}
 
 	private Object execute(String rpc, Object... params)
-			throws RedmineException {
+	throws RedmineException {
 		XmlRpcClient client = getClient();
 		Object result = null;
 		try {
@@ -313,7 +313,7 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		}
 		return result;
 	}
-
+	
 	private RedmineTicket parseResponse2Ticket(Object response)
 			throws RedmineException {
 		RedmineTicket ticket = null;

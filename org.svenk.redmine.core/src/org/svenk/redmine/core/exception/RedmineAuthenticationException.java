@@ -31,8 +31,8 @@ public class RedmineAuthenticationException extends RedmineRemoteException {
 	
 	private Type type;
 	
-	public RedmineAuthenticationException(int statusCode) {
-		super();
+	public RedmineAuthenticationException(int statusCode, String statusText) {
+		super(statusText);
 		
 		if (statusCode==SC_FORBIDDEN) {
 			type = Type.FORBIDDEN;
