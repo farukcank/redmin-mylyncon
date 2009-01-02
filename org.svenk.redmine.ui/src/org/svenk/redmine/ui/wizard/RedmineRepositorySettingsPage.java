@@ -52,6 +52,7 @@ public class RedmineRepositorySettingsPage extends
 		setNeedsEncoding(false);
 		setNeedsTimeZone(false);
 		setNeedsAdvanced(false);
+		setNeedsValidation(true);
 		
 	}
 	
@@ -80,7 +81,7 @@ public class RedmineRepositorySettingsPage extends
 				IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
 				try {
 					RedmineRepositorySettingsPage.this.version = client.checkClientConnection();
-					repository.setVersion(version);
+					repository.setVersion(RedmineRepositorySettingsPage.this.version);
 				} catch (RedmineException e) {
 					throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
 				}
@@ -110,5 +111,7 @@ public class RedmineRepositorySettingsPage extends
 	public String getConnectorKind() {
 		return RedmineCorePlugin.REPOSITORY_KIND;
 	}
+	
+	
 
 }

@@ -62,7 +62,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 	
 	private RedmineTaskDataHandler taskDataHandler;
 
-	private final static String CLIENT_LABEL = "Redmine (supports redmine 0.7 with rails 2.0.2 and mylyn plugin)";
+	private final static String CLIENT_LABEL = "Redmine (supports redmine 0.7 and 0.8 with mylyn plugin)";
 	
 	private final static Pattern TASK_ID_FROM_TASK_URL = Pattern.compile(IRedmineClient.TICKET_URL + "(\\d+)");
 

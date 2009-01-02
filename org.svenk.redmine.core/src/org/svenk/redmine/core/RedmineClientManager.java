@@ -81,8 +81,10 @@ public class RedmineClientManager implements IRepositoryListener {
 	}
 
 	public void repositoryAdded(TaskRepository repository) {
-		// TODO Auto-generated method stub
-		
+		IRedmineClient client = clientByUrl.get(repository.getRepositoryUrl());
+		if (client!=null) {
+			client.refreshRepositorySettings(repository);
+		}
 	}
 
 	public void repositoryRemoved(TaskRepository repository) {
