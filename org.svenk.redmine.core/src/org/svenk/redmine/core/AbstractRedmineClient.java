@@ -119,7 +119,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		PostMethod method = new PostMethod(TICKET_EDIT_URL + ticketId);
 		
 		Part[] parts = new Part[]{
-				new FilePart("attachments[1][file]", new RedminePartSource(source, fileName)),
+				new FilePart("attachments[1][file]", new RedminePartSource(source, fileName), source.getContentType(), this.httpClient.getParams().getContentCharset()),
 				new StringPart("attachments[1][description]", description, characterEncoding),
 				new StringPart("notes", comment, characterEncoding)
 		};

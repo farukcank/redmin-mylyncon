@@ -10,7 +10,6 @@
 	<!-- need for BundleFileLocator -->
 	<taskdef resource="org/pluginbuilder/anttasks/pluginbuildertasks.properties" classpath="${buildHome}/build-files/lib/pluginbuilder-anttasks.jar" />
 
-	
 	<property name="logDir" value="${buildDirectory}/logs"/>
 
 	<target name="-prepare" >
@@ -34,7 +33,6 @@
 			<arg value="update"/>
 			<arg value="${buildHome}/svnfetch"/>
 		</exec>
-		
 		<mkdir dir="${updatesite}"/>
 		
 		<!-- Copy Map-Files into Builddirectory -->
@@ -89,8 +87,6 @@
 			<jvmarg value="-DforceContextQualifier=${forceContextQualifier}"/>
 			<jvmarg value="-DbuildProperties=${buildHome}/build-files/build.properties"/>
 			<jvmarg value="-Dupdatesite=${updatesite}"/>
-			<jvmarg value="-Dbuild.compiler=org.aspectj.tools.ant.taskdefs.Ajc11CompilerAdapter"/>
-			<jvmarg value="-Dbuild.compiler.clean=anything"/>
 			<jvmarg value="-DbuildType=${buildType}"/>
 			<jvmarg value="-Dsf.password=${sf.password}"/>
 			
