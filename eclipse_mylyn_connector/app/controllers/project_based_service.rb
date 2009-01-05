@@ -52,7 +52,7 @@ class ProjectBasedService < BaseService
 
   def get_queries_for_project id
     # Code form Issue_helper
-    visible = ARCondition.new(["is_public = ? OR user_id = ?", true, (User.current.logged? ? User.current.id : 0)])
+    visible = ARCondition.new(["is_public = ? OR user_id = ?", true, User.current.id])
     visible << (@project.nil? ? ["project_id IS NULL"] : ["project_id IS NULL OR project_id = ?", @project.id])
     queries = Query.find(:all,
                          :order => "name ASC",

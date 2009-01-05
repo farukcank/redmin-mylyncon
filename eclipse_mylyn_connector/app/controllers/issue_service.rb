@@ -85,7 +85,11 @@ class IssueService < BaseService
     if project_id>0 && query_id!=nil && query_id>0 then
       project = Project.find(project_id)
       begin
-        query = Query.find(query_id, :conditions => "project_id = #{project_id}")
+        # Code form Issue_helper
+        visible = ARCondition.new(["is_public = ? OR user_id = ?", true, User.current.id])
+        visible << (["project_id IS NULL OR project_id = ?", project.id])
+
+        query = Query.find(query_id, :conditions => visible.conditions)
       rescue
         query = Query.new
       end
