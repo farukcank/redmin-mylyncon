@@ -29,12 +29,13 @@ import org.svenk.redmine.core.model.RedmineCustomTicketField;
 import org.svenk.redmine.core.model.RedmineIssueCategory;
 import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.model.RedmineProject;
+import org.svenk.redmine.core.model.RedmineStoredQuery;
 import org.svenk.redmine.core.model.RedmineTracker;
 import org.svenk.redmine.core.model.RedmineVersion;
 
 public class RedmineProjectData implements Serializable {
 	
-	private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 4L;
 
 	RedmineProject project;
 	
@@ -47,6 +48,8 @@ public class RedmineProjectData implements Serializable {
 	List<RedmineMember> members = new ArrayList<RedmineMember>();
 	
 	List<RedmineCustomTicketField> customTicketFields = new ArrayList<RedmineCustomTicketField>();
+
+	List<RedmineStoredQuery> storedQueries = new ArrayList<RedmineStoredQuery>();
 	
 	RedmineProjectData(RedmineProject project) {
 		this.project = project;
@@ -80,6 +83,10 @@ public class RedmineProjectData implements Serializable {
 			}
 		}
 		return Collections.unmodifiableList(customTicketValues);
+	}
+	
+	public List<RedmineStoredQuery> getStoredQueries() {
+		return Collections.unmodifiableList(storedQueries);
 	}
 	
 	public RedmineTracker getTracker(String name) {
@@ -153,6 +160,19 @@ public class RedmineProjectData implements Serializable {
 		}
 		return null;
 	}
-	
+
+	public RedmineStoredQuery getStoredQuery(int value) {
+		for (RedmineStoredQuery query : storedQueries) {
+			if (query.getValue()==value) {
+				return query;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof RedmineProjectData && ((RedmineProjectData)obj).getProject().equals(getProject());
+	}
 
 }

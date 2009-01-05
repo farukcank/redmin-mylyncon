@@ -78,7 +78,7 @@ public interface IRedmineClient {
 	
 	public List<Integer> getChangedTicketId(Integer projectId, Date changedSince, IProgressMonitor monitor) throws RedmineException;
 	
-	public void search(String searchParam, List<RedmineTicket> tickets, IProgressMonitor monitor) throws RedmineException;
+	public void search(String searchParam, String projectId, String storedQueryId, List<RedmineTicket> tickets, IProgressMonitor monitor) throws RedmineException;
 	
 	public void updateAttributes(boolean force, IProgressMonitor monitor) throws RedmineException;
 	
@@ -93,4 +93,6 @@ public interface IRedmineClient {
 	public String checkClientConnection() throws RedmineException;
 	
 	public void refreshRepositorySettings(TaskRepository repository);
+	
+	public boolean supportServersideStoredQueries();
 }

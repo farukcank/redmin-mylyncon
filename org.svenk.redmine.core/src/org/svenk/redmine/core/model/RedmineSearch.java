@@ -35,10 +35,14 @@ public class RedmineSearch {
 
 	public final static String SEARCH_PARAMS = "SEARCH_PARAMS";
 	public final static String PROJECT_NAME = "PROJECT_NAME";
+	public final static String PROJECT_ID = "PROJECT_ID";
+	public final static String STORED_QUERY_ID = "QUERY_ID";
 	
 	private Map<SearchField, RedmineSearchFilter> filterByFieldField = new HashMap<SearchField, RedmineSearchFilter>();
 
 	private RedmineProject project;
+	
+	private int storedQueryId;
 	
 	private String repositoryUrl;
 	
@@ -117,6 +121,14 @@ public class RedmineSearch {
 
 	public void setProject(RedmineProject project) {
 		this.project = project;
+	}
+	
+	public void setStoredQueryId(int id) {
+		storedQueryId = id;
+	}
+	
+	public int getStoredQueryId() {
+		return storedQueryId;
 	}
 	
 }

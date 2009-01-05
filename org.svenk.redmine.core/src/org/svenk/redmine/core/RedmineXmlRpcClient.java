@@ -40,6 +40,7 @@ import org.svenk.redmine.core.model.RedmineIssueCategory;
 import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.model.RedminePriority;
 import org.svenk.redmine.core.model.RedmineProject;
+import org.svenk.redmine.core.model.RedmineStoredQuery;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicketJournal;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
@@ -51,6 +52,7 @@ import org.svenk.redmine.core.util.RedmineTransportFactory;
 public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmineClient {
 
 	private final static double PLUGIN_VERSION_2_2 = 2.2;
+	private final static double PLUGIN_VERSION_2_3 = 2.3;
 	
 	private final static String URL_ENDPOINT = "/eclipse_mylyn_connector/api";
 
@@ -81,6 +83,8 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	private final static String RPC_GET_PROJECT_VERSIONS = "ProjectBased.GetVersionsForProject";
 
 	private final static String RPC_GET_PROJECT_ISSUE_CATEGORYS = "ProjectBased.GetIssueCategorysForProject";
+
+	private final static String RPC_GET_PROJECT_QUERIES = "ProjectBased.GetQueriesForProject";
 
 	private final static String RPC_GET_VERSION_INFORMATION = "Information.GetVersion";
 
@@ -163,9 +167,13 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		return parseResponse2Attachment(execute(RPC_GET_TICKET_ATTACHMENTS, new Integer(id)));
 	}
 	
-	public void search(String searchParam, List<RedmineTicket> tickets, IProgressMonitor monitor)
+	public void search(String searchParam, String projectId, String storedQueryId, List<RedmineTicket> tickets, IProgressMonitor monitor)
 			throws RedmineException {
-		Object response = execute(RPC_TICKET_SEARCH, searchParam, 0, 0);
+		
+		Object response = supportServersideStoredQueries()
+			? execute(RPC_TICKET_SEARCH, searchParam, (projectId==null?0:projectId), (storedQueryId==null?0:storedQueryId))
+			: execute(RPC_TICKET_SEARCH, searchParam, 0);
+			
 		if (response instanceof Object[]) {
 			Object[] maps = (Object[]) response;
 			for (Object object : maps) {
@@ -286,10 +294,26 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_MEMBERS, projId)) {
 			projData.members.add(parseResponse2Member(projResponse));
 		}
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
 		
 		projData.customTicketFields.clear();
 		for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_CUSTOM_ISSUE_FIELDS, projId)) {
 			projData.customTicketFields.add(parseResponse2CustomFields(projResponse));
+		}
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		
+		if (supportServersideStoredQueries()) {
+			projData.storedQueries.clear();
+			for (Object projResponse : (Object[]) execute(RPC_GET_PROJECT_QUERIES, projId)) {
+				projData.storedQueries.add((RedmineStoredQuery)parseResponse2StoredQuery(projResponse));
+			}
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
 		}
 		
 		monitor.worked(1);
@@ -511,6 +535,14 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		return category;
 	}
 	
+	private RedmineStoredQuery parseResponse2StoredQuery(Object response) throws RedmineException {
+		RedmineStoredQuery query = null;
+		HashMap<String, Object> map = parseResponse2HashMap(response);
+		query = new RedmineStoredQuery(map.get("name").toString(),
+					((Integer) map.get("id")).intValue());
+		return query;
+	}
+	
 	private List<RedmineTicketJournal> parseResponse2Journals(Object response) throws RedmineException {
 		List<RedmineTicketJournal> journals = null;
 		if (response instanceof Object[]) {
@@ -590,5 +622,9 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			return (HashMap)response;
 		}
 		throw new RedmineException("Invalid Response: HashMap expected");
+	}
+
+	public boolean supportServersideStoredQueries() {
+		return wsVersion >= PLUGIN_VERSION_2_3;
 	}
 }

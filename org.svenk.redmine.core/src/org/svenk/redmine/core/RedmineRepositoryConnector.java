@@ -315,7 +315,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 				try {
 					client = getClientManager().getRedmineClient(repository);
 					client.updateAttributes(false, monitor);
-					client.search(query.getAttribute(RedmineSearch.SEARCH_PARAMS), tickets, monitor);
+					client.search(query.getAttribute(RedmineSearch.SEARCH_PARAMS), query.getAttribute(RedmineSearch.PROJECT_ID), query.getAttribute(RedmineSearch.STORED_QUERY_ID), tickets, monitor);
 
 					for (RedmineTicket ticket : tickets) {
 						TaskData data = taskDataHandler.createTaskDataFromTicket(client, repository, ticket, monitor);

@@ -51,5 +51,10 @@ public class RedmineTicketAttribute implements Comparable<RedmineTicketAttribute
 	public String toString() {
 		return name;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return obj.getClass().equals(getClass()) && ((RedmineTicketAttribute)obj).getValue()==getValue();
+	}
 
 }
