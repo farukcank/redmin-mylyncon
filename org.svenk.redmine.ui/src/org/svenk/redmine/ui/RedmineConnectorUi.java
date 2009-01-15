@@ -46,8 +46,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.ui.wizard.NewRedmineTaskWizard;
-import org.svenk.redmine.ui.wizard.RedmineQueryPage;
 import org.svenk.redmine.ui.wizard.RedmineRepositorySettingsPage;
+import org.svenk.redmine.ui.wizard.querypage.RedmineQueryPage;
 
 
 public class RedmineConnectorUi extends AbstractRepositoryConnectorUi {

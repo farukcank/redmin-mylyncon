@@ -18,7 +18,7 @@
  * Contributors:
  *     Sven Krzyzak - adapted Trac implementation for Redmine
  *******************************************************************************/
-package org.svenk.redmine.ui.wizard;
+package org.svenk.redmine.ui.wizard.querypage;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -76,8 +76,6 @@ import org.svenk.redmine.core.model.RedmineTracker;
 import org.svenk.redmine.core.model.RedmineVersion;
 import org.svenk.redmine.core.model.RedmineSearchFilter.CompareOperator;
 import org.svenk.redmine.core.model.RedmineSearchFilter.SearchField;
-import org.svenk.redmine.ui.wizard.querypage.RedmineContentProvider;
-import org.svenk.redmine.ui.wizard.querypage.RedmineLabelProvider;
 
 public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 
