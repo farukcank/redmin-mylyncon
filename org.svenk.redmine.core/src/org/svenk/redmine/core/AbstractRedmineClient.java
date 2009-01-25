@@ -22,6 +22,7 @@ package org.svenk.redmine.core;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -234,6 +235,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	
 	protected int performExecuteMethod(HttpMethod method, HostConfiguration hostConfiguration, IProgressMonitor monitor) throws RedmineException {
 		try {
+			String baseUrl = new URL(location.getUrl()).getPath();
+			if (!method.getPath().startsWith(baseUrl)) {
+				method.setPath(baseUrl + method.getPath());
+			}
 			return WebUtil.execute(httpClient, hostConfiguration, method, monitor);
 		} catch (Exception e) {
 			if (e instanceof OperationCanceledException) {
