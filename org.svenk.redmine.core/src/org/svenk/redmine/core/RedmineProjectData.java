@@ -84,6 +84,10 @@ public class RedmineProjectData implements Serializable {
 		}
 		return Collections.unmodifiableList(customTicketValues);
 	}
+
+	public List<RedmineCustomTicketField> getCustomTicketFields() {
+		return Collections.unmodifiableList(this.customTicketFields);
+	}
 	
 	public List<RedmineStoredQuery> getStoredQueries() {
 		return Collections.unmodifiableList(storedQueries);

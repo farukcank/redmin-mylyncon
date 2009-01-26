@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -55,6 +56,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
@@ -64,6 +67,7 @@ import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.RedmineProjectData;
 import org.svenk.redmine.core.RedmineRepositoryConnector;
 import org.svenk.redmine.core.exception.RedmineException;
+import org.svenk.redmine.core.model.RedmineCustomTicketField;
 import org.svenk.redmine.core.model.RedmineIssueCategory;
 import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.model.RedminePriority;
@@ -74,6 +78,7 @@ import org.svenk.redmine.core.model.RedmineTicketAttribute;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
 import org.svenk.redmine.core.model.RedmineTracker;
 import org.svenk.redmine.core.model.RedmineVersion;
+import org.svenk.redmine.core.model.RedmineCustomTicketField.FieldType;
 import org.svenk.redmine.core.model.RedmineSearchFilter.CompareOperator;
 import org.svenk.redmine.core.model.RedmineSearchFilter.SearchField;
 
@@ -102,6 +107,8 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	protected GridData pageLayoutData;
 	protected Composite settingsComposite;
 	
+	protected Composite customFilterComposite;
+	
 	protected ComboViewer projectViewer;
 	protected RedmineProjectData projectData;
 
@@ -114,6 +121,8 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	protected ArrayList<SearchField> txtSearchFields;
 	protected Map<Combo, SearchField> txtSearchOperators;
 	protected Map<SearchField, Text> txtSearchValues;
+
+	protected Map<RedmineCustomTicketField, List> lstCustomSearchValues;
 
 	protected Button updateButton;
 	protected RedmineClientData data;
@@ -153,6 +162,8 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		txtSearchOperators = new HashMap<Combo, SearchField>(txtSearchFields
 				.size());
 		txtSearchValues = new HashMap<SearchField, Text>(txtSearchFields.size());
+		
+		lstCustomSearchValues = new HashMap<RedmineCustomTicketField, List>();
 	}
 
 	public RedmineQueryPage(TaskRepository repository) {
@@ -184,9 +195,21 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			storedQueryViewer.addSelectionChangedListener(new StoredQuerySelectionListener());
 		}
 
+//		TabFolder tabFolder = new TabFolder(pageComposite, SWT.NONE);
+//		TabItem mainItem = new TabItem(tabFolder, SWT.NONE);
+//		TabItem customItem = new TabItem(tabFolder, SWT.NONE);
+//		mainItem.setText("MAIN FILTER - RENAME");
+//		customItem.setText("CUSTOM FILTER - RENAME");
+		
+//		settingsComposite = new Composite(tabFolder, SWT.NONE);
+//		mainItem.setControl(settingsComposite);
 		settingsComposite = new Composite(pageComposite, SWT.NONE);
 		settingsComposite.setLayout(layout);
 		
+//		customFilterComposite = new Composite(tabFolder, SWT.NONE);
+//		customFilterComposite.setLayout(layout);
+//		customItem.setControl(customFilterComposite);
+
 		createListGroup(settingsComposite);
 		createTextGroup(settingsComposite);
 		
@@ -272,74 +295,76 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	private void createListGroup(final Composite parent) {
 		int columns = 4;
 
-		Composite control = new Composite(parent, SWT.NONE);
-		GridLayout layout = new GridLayout(columns * 2, true);
-		control.setLayout(layout);
+		RedmineGuiHelper.createListGroup(parent, columns, lstSearchFields, lstSearchValues, lstSearchOperators);
 
-		GridData commonGridData = new GridData(GridData.BEGINNING,
-				GridData.BEGINNING, false, false);
-		commonGridData.horizontalAlignment = SWT.FILL;
-
-		GridData listGridData = new GridData();
-		listGridData.verticalSpan = 2;
-		listGridData.heightHint = 100;
-		listGridData.widthHint = 85;
-
-		for (int i = 1; i <= lstSearchFields.size(); i++) {
-			SearchField searchField = lstSearchFields.get(i - 1);
-
-			Label label = new Label(control, SWT.NONE);
-			label.setText(searchField.name());
-			label.setLayoutData(commonGridData);
-
-			List list = new List(control, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
-			lstSearchValues.put(searchField, list);
-			list.setLayoutData(listGridData);
-			list.setEnabled(false);
-
-			if (i % columns == 0 || i == lstSearchFields.size()) {
-				int sv = (i % columns == 0) ? i - columns : i - i % columns;
-				if (i % columns != 0) {
-					listGridData = new GridData();
-					listGridData.verticalSpan = 2;
-					listGridData.heightHint = 100;
-					listGridData.horizontalSpan = (columns-(i % columns)) * 2 +1;
-					listGridData.widthHint = 85;
-					list.setLayoutData(listGridData);
-				}
-				for (int j = sv; j < i; j++) {
-					SearchField tmpSearchField = lstSearchFields.get(j);
-					Combo combo = new Combo(control, SWT.READ_ONLY
-							| SWT.DROP_DOWN);
-					lstSearchOperators.put(combo, tmpSearchField);
-					combo.setLayoutData(commonGridData);
-					if (!tmpSearchField.isRequired()) {
-						combo.add(OPERATOR_TITLE);
-					}
-					for (RedmineSearchFilter.CompareOperator operator : tmpSearchField
-							.getCompareOperators()) {
-						combo.add(operator.toString());
-					}
-					combo.select(0);
-					combo.addSelectionListener(new SelectionAdapter() {
-						public void widgetSelected(SelectionEvent e) {
-							Combo combo = (Combo) e.widget;
-							SearchField searchField = lstSearchOperators
-									.get(combo);
-							List list = lstSearchValues.get(searchField);
-							if (combo.getSelectionIndex() == 0) {
-								list.setEnabled(false);
-							} else {
-								String selected = combo.getItem(combo
-										.getSelectionIndex());
-								list.setEnabled(CompareOperator.fromString(
-										selected).useValue());
-							}
-						}
-					});
-				}
-			}
-		}
+//		Composite control = new Composite(parent, SWT.NONE);
+//		GridLayout layout = new GridLayout(columns * 2, true);
+//		control.setLayout(layout);
+//
+//		GridData commonGridData = new GridData(GridData.BEGINNING,
+//				GridData.BEGINNING, false, false);
+//		commonGridData.horizontalAlignment = SWT.FILL;
+//
+//		GridData listGridData = new GridData();
+//		listGridData.verticalSpan = 2;
+//		listGridData.heightHint = 100;
+//		listGridData.widthHint = 85;
+//
+//		for (int i = 1; i <= lstSearchFields.size(); i++) {
+//			SearchField searchField = lstSearchFields.get(i - 1);
+//
+//			Label label = new Label(control, SWT.NONE);
+//			label.setText(searchField.name());
+//			label.setLayoutData(commonGridData);
+//
+//			List list = new List(control, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
+//			lstSearchValues.put(searchField, list);
+//			list.setLayoutData(listGridData);
+//			list.setEnabled(false);
+//
+//			if (i % columns == 0 || i == lstSearchFields.size()) {
+//				int sv = (i % columns == 0) ? i - columns : i - i % columns;
+//				if (i % columns != 0) {
+//					listGridData = new GridData();
+//					listGridData.verticalSpan = 2;
+//					listGridData.heightHint = 100;
+//					listGridData.horizontalSpan = (columns-(i % columns)) * 2 +1;
+//					listGridData.widthHint = 85;
+//					list.setLayoutData(listGridData);
+//				}
+//				for (int j = sv; j < i; j++) {
+//					SearchField tmpSearchField = lstSearchFields.get(j);
+//					Combo combo = new Combo(control, SWT.READ_ONLY
+//							| SWT.DROP_DOWN);
+//					lstSearchOperators.put(combo, tmpSearchField);
+//					combo.setLayoutData(commonGridData);
+//					if (!tmpSearchField.isRequired()) {
+//						combo.add(OPERATOR_TITLE);
+//					}
+//					for (RedmineSearchFilter.CompareOperator operator : tmpSearchField
+//							.getCompareOperators()) {
+//						combo.add(operator.toString());
+//					}
+//					combo.select(0);
+//					combo.addSelectionListener(new SelectionAdapter() {
+//						public void widgetSelected(SelectionEvent e) {
+//							Combo combo = (Combo) e.widget;
+//							SearchField searchField = lstSearchOperators
+//									.get(combo);
+//							List list = lstSearchValues.get(searchField);
+//							if (combo.getSelectionIndex() == 0) {
+//								list.setEnabled(false);
+//							} else {
+//								String selected = combo.getItem(combo
+//										.getSelectionIndex());
+//								list.setEnabled(CompareOperator.fromString(
+//										selected).useValue());
+//							}
+//						}
+//					});
+//				}
+//			}
+//		}
 	}
 
 	protected Control createUpdateButton(final Composite parent) {
@@ -480,6 +505,50 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		}
 
 	}
+	
+//	private void updateCustomFieldFilter(RedmineProjectData projectData) {
+//		java.util.List<RedmineCustomTicketField> customFields = projectData.getCustomTicketFields();
+//		
+//		Composite control = new Composite(customFilterComposite, SWT.NONE);
+//		control.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		GridLayout layout = new GridLayout(3, false);
+//		control.setLayout(layout);
+//		
+//		GridData listGridData = new GridData();
+//		listGridData.verticalSpan = 2;
+//		listGridData.heightHint = 100;
+//		listGridData.widthHint = 85;
+//
+//		java.util.List<RedmineCustomTicketField> keys 
+//			= new ArrayList<RedmineCustomTicketField>(lstCustomSearchValues.keySet());
+//
+//		
+//		for (RedmineCustomTicketField customField : customFields) {
+//			if (!customField.isSupportFilter()) {
+//				continue;
+//			}
+//			
+//			if (customField.getType()==FieldType.LIST) {
+//				if (keys.contains(customField)) {
+//					keys.remove(customField);
+//				} else {
+//
+//					List list = new List(control, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
+//					list.setLayoutData(listGridData);
+//					lstCustomSearchValues.put(customField, list);
+//					list.setEnabled(false);
+//				}
+//			}
+//		}
+//		
+//		for (RedmineCustomTicketField customField : keys) {
+//			lstCustomSearchValues.remove(customField).dispose();
+//		}
+//
+//		customFilterComposite.setSize(control.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+//		customFilterComposite.layout(true, true);
+//	}
+	
 
 	private void restoreQuery(IRepositoryQuery query) {
 		titleText.setText(query.getSummary());
@@ -699,6 +768,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 				if (selected instanceof RedmineProjectData) {
 					projectData = (RedmineProjectData)selected;
 					RedmineQueryPage.this.updateProjectAttributes(projectData);
+//					RedmineQueryPage.this.updateCustomFieldFilter(projectData);
 				}
 				RedmineQueryPage.this.clearSettings();
 				if (RedmineQueryPage.this.getContainer()!=null) {
