@@ -75,6 +75,16 @@ public class RedmineProjectData implements Serializable {
 		return Collections.unmodifiableList(members);
 	}
 	
+	public List<RedmineMember> getAssignableMembers() {
+		List<RedmineMember> list = new ArrayList<RedmineMember>(members.size());
+		for (RedmineMember redmineMember : members) {
+			if (redmineMember.isAssignable()) {
+				list.add(redmineMember);
+			}
+		}
+		return list;
+	}
+	
 	public List<RedmineCustomTicketField> getCustomTicketFields(int trackerId) {
 		ArrayList<RedmineCustomTicketField> customTicketValues = new ArrayList<RedmineCustomTicketField>();
 		for (RedmineCustomTicketField v : this.customTicketFields) {

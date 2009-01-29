@@ -20,19 +20,32 @@
  *******************************************************************************/
 package org.svenk.redmine.ui.wizard.querypage;
 
-import org.eclipse.jface.viewers.LabelProvider;
-import org.svenk.redmine.core.RedmineProjectData;
-import org.svenk.redmine.core.model.RedmineTicketAttribute;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.Viewer;
+import org.svenk.redmine.core.model.RedmineSearchFilter.CompareOperator;
 
-public class RedmineLabelProvider extends LabelProvider {
-	@Override
-	public String getText(Object element) {
-		if (element instanceof RedmineProjectData) {
-			return ((RedmineProjectData)element).getProject().getName();
-		} else if (element instanceof RedmineTicketAttribute) {
-			return ((RedmineTicketAttribute)element).getName();
+public class RedmineCompareOperatorSelectionListener implements
+		ISelectionChangedListener {
+
+	private final Viewer viewer;
+
+	RedmineCompareOperatorSelectionListener(Viewer viewer) {
+		this.viewer = viewer;
+	}
+
+	public void selectionChanged(SelectionChangedEvent event) {
+
+		if (event.getSelection() instanceof IStructuredSelection) {
+			IStructuredSelection selection = (IStructuredSelection) event
+					.getSelection();
+
+			Object selected = selection.getFirstElement();
+			viewer.getControl().setEnabled(
+					selected instanceof CompareOperator
+							&& ((CompareOperator) selected).useValue());
 		}
-		return super.getText(element);
 	}
 
 }
