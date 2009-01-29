@@ -29,12 +29,13 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.svenk.redmine.core.model.RedmineSearchFilter.SearchField;
 
 class RedmineGuiHelper {
 
 
-	public static void placeElements(final Composite parent, int columns, final java.util.List<SearchField> searchFields, final Map<SearchField, ListViewer> lstSearchValues, final Map<SearchField, ComboViewer> lstSearchOperators) {
+	public static void placeListElements(final Composite parent, int columns, final java.util.List<SearchField> searchFields, final Map<SearchField, ListViewer> lstSearchValues, final Map<SearchField, ComboViewer> lstSearchOperators) {
 
 		Composite control = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(columns * 2, true);
@@ -77,6 +78,32 @@ class RedmineGuiHelper {
 					combo.getControl().setLayoutData(commonGridData);
 				}
 			}
+		}
+	}
+	
+	public static void placeTextElements(final Composite parent, final java.util.List<SearchField> searchFields, final Map<SearchField, Text> txtSearchValues, final Map<SearchField, ComboViewer> txtSearchOperators) {
+		
+		Composite control = new Composite(parent, SWT.NONE);
+		control.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridLayout layout = new GridLayout(3, false);
+		control.setLayout(layout);
+		
+		GridData commonGridData = new GridData();
+		GridData textGridData = new GridData(SWT.FILL, SWT.CENTER, false, true);
+		textGridData.widthHint=300;
+
+		for (SearchField searchField : searchFields) {
+			Label label = new Label(control, SWT.NONE);
+			label.setText(searchField.name());
+			label.setLayoutData(commonGridData);
+
+			ComboViewer combo = txtSearchOperators.get(searchField);
+			combo.getControl().setParent(control);
+			combo.getControl().setLayoutData(commonGridData);
+
+			Text text = txtSearchValues.get(searchField);
+			text.setParent(control);
+			text.setLayoutData(textGridData);
 		}
 	}
 	

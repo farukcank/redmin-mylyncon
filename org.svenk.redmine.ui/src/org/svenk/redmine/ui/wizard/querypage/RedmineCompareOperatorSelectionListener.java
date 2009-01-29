@@ -23,16 +23,16 @@ package org.svenk.redmine.ui.wizard.querypage;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.widgets.Control;
 import org.svenk.redmine.core.model.RedmineSearchFilter.CompareOperator;
 
 public class RedmineCompareOperatorSelectionListener implements
 		ISelectionChangedListener {
 
-	private final Viewer viewer;
+	private final Control control;
 
-	RedmineCompareOperatorSelectionListener(Viewer viewer) {
-		this.viewer = viewer;
+	RedmineCompareOperatorSelectionListener(Control control) {
+		this.control = control;
 	}
 
 	public void selectionChanged(SelectionChangedEvent event) {
@@ -42,9 +42,8 @@ public class RedmineCompareOperatorSelectionListener implements
 					.getSelection();
 
 			Object selected = selection.getFirstElement();
-			viewer.getControl().setEnabled(
-					selected instanceof CompareOperator
-							&& ((CompareOperator) selected).useValue());
+			control.setEnabled(selected instanceof CompareOperator
+					&& ((CompareOperator) selected).useValue());
 		}
 	}
 
