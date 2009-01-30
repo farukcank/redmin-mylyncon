@@ -146,36 +146,36 @@ public class RedmineSearchFilter {
 
 	public enum SearchField {
 
-		STATUS("status_id", true, CompareOperator.OPEN, CompareOperator.IS,
-				RedmineSearchFilter.CompareOperator.IS_NOT,
-				CompareOperator.CLOSED, CompareOperator.ALL), TRACKER(
-				"tracker_id", CompareOperator.IS, CompareOperator.IS_NOT), PRIORITY(
-				"priority_id", CompareOperator.IS, CompareOperator.IS_NOT), ASSIGNED_TO(
-				"assigned_to_id", CompareOperator.IS, CompareOperator.IS_NOT,
-				CompareOperator.NONE, CompareOperator.ALL), AUTHOR("author_id",
-				CompareOperator.IS, CompareOperator.IS_NOT), FIXED_VERSION(
-				"fixed_version_id", CompareOperator.IS, CompareOperator.IS_NOT,
-				CompareOperator.NONE, CompareOperator.ALL),CATEGORY("category_id",
-				CompareOperator.IS,	CompareOperator.IS_NOT, CompareOperator.ALL, 
-				CompareOperator.NONE),SUBJECT("subject",
-				CompareOperator.CONTAINS, CompareOperator.CONTAINS_NOT), DATE_CREATED(
-				"created_on", CompareOperator.DAY_AGO_MORE_THEN,
+		STATUS("status_id", true, true, CompareOperator.OPEN, CompareOperator.IS,
+				CompareOperator.IS_NOT,
+				CompareOperator.CLOSED, CompareOperator.ALL),
+		PRIORITY("priority_id", true, CompareOperator.IS, CompareOperator.IS_NOT),
+		TRACKER("tracker_id", true, CompareOperator.IS, CompareOperator.IS_NOT),
+		FIXED_VERSION("fixed_version_id", true, CompareOperator.IS, CompareOperator.IS_NOT,
+				CompareOperator.NONE, CompareOperator.ALL),
+		ASSIGNED_TO("assigned_to_id", true, CompareOperator.IS, CompareOperator.IS_NOT,
+				CompareOperator.NONE, CompareOperator.ALL),
+		AUTHOR("author_id", true, CompareOperator.IS, CompareOperator.IS_NOT),
+		CATEGORY("category_id", true, CompareOperator.IS,	CompareOperator.IS_NOT, CompareOperator.ALL, 
+				CompareOperator.NONE),
+		SUBJECT("subject",CompareOperator.CONTAINS, CompareOperator.CONTAINS_NOT),
+		DATE_CREATED("created_on", CompareOperator.DAY_AGO_MORE_THEN,
 				CompareOperator.DAY_AGO_LESS_THEN, CompareOperator.DAY_AGO,
-				CompareOperator.TODAY, CompareOperator.CURRENT_WEEK), DATE_UPDATED(
-				"updated_on", CompareOperator.DAY_AGO_MORE_THEN,
+				CompareOperator.TODAY, CompareOperator.CURRENT_WEEK),
+		DATE_UPDATED("updated_on", CompareOperator.DAY_AGO_MORE_THEN,
 				CompareOperator.DAY_AGO_LESS_THEN, CompareOperator.DAY_AGO,
-				CompareOperator.TODAY, CompareOperator.CURRENT_WEEK), DATE_START(
-				"start_date", CompareOperator.DAY_AGO_MORE_THEN,
-				CompareOperator.DAY_AGO_LESS_THEN, CompareOperator.DAY_AGO,
-				CompareOperator.TODAY, CompareOperator.CURRENT_WEEK,
-				CompareOperator.DAY_LATER, CompareOperator.DAY_LATER_LESS_THEN,
-				CompareOperator.DAY_LATER_MORE_THEN), DATE_DUE("start_date",
-				CompareOperator.DAY_AGO_MORE_THEN,
+				CompareOperator.TODAY, CompareOperator.CURRENT_WEEK),
+		DATE_START("start_date", CompareOperator.DAY_AGO_MORE_THEN,
 				CompareOperator.DAY_AGO_LESS_THEN, CompareOperator.DAY_AGO,
 				CompareOperator.TODAY, CompareOperator.CURRENT_WEEK,
 				CompareOperator.DAY_LATER, CompareOperator.DAY_LATER_LESS_THEN,
-				CompareOperator.DAY_LATER_MORE_THEN), DONE_RATIO("done_ratio",
-				CompareOperator.GTE, CompareOperator.LTE);
+				CompareOperator.DAY_LATER_MORE_THEN),
+		DATE_DUE("start_date",CompareOperator.DAY_AGO_MORE_THEN,
+				CompareOperator.DAY_AGO_LESS_THEN, CompareOperator.DAY_AGO,
+				CompareOperator.TODAY, CompareOperator.CURRENT_WEEK,
+				CompareOperator.DAY_LATER, CompareOperator.DAY_LATER_LESS_THEN,
+				CompareOperator.DAY_LATER_MORE_THEN),
+		DONE_RATIO("done_ratio",CompareOperator.GTE, CompareOperator.LTE);
 
 		public static SearchField fromString(String name) {
 			for (SearchField field : values()) {
@@ -198,22 +198,29 @@ public class RedmineSearchFilter {
 		private String fieldName;
 		
 		private boolean required;
+		
+		private boolean listType;
 
 		private List<CompareOperator> operators;
 
-		SearchField(String fieldName, boolean required, CompareOperator... operators) {
+		SearchField(String fieldName, CompareOperator... operators) {
+			this(fieldName, false, false, operators);
+		}
+
+		SearchField(String fieldName, boolean listType, CompareOperator... operators) {
+			this(fieldName, false, listType, operators);
+		}
+		
+		SearchField(String fieldName, boolean required, boolean listType, CompareOperator... operators) {
 			this.fieldName = fieldName;
 			this.required = required;
+			this.listType = listType;
 			this.operators = new ArrayList<CompareOperator>(operators.length);
 			for (CompareOperator compareOperator : operators) {
 				this.operators.add(compareOperator);
 			}
 		}
 
-		SearchField(String fieldName, CompareOperator... operators) {
-			this(fieldName, false, operators);
-		}
-		
 		public boolean containsOperator(CompareOperator operator) {
 			return operators.contains(operator);
 		}
@@ -226,6 +233,10 @@ public class RedmineSearchFilter {
 			return required;
 		}
 
+		public boolean isListType() {
+			return listType;
+		}
+		
 		public String getQueryValue() {
 			return fieldName;
 		}

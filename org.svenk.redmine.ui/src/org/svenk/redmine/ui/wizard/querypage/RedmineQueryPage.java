@@ -30,7 +30,6 @@ import java.util.Map.Entry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -52,7 +51,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -131,25 +129,20 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		setTitle(TITLE);
 		setDescription(DESCRIPTION);
 
+		
+		
 		lstSearchFields = new ArrayList<SearchField>(6);
-		lstSearchFields.add(SearchField.STATUS);
-		lstSearchFields.add(SearchField.PRIORITY);
-		lstSearchFields.add(SearchField.TRACKER);
-		lstSearchFields.add(SearchField.FIXED_VERSION);
-		lstSearchFields.add(SearchField.ASSIGNED_TO);
-		lstSearchFields.add(SearchField.AUTHOR);
-		lstSearchFields.add(SearchField.CATEGORY);
+		txtSearchFields = new ArrayList<SearchField>(6);
+		for (SearchField searchfield :SearchField.values()) {
+			if (searchfield.isListType()) {
+				lstSearchFields.add(searchfield);
+			} else {
+				txtSearchFields.add(searchfield);
+			}
+		}
 
 		lstSearchOperators = new HashMap<SearchField, ComboViewer>(lstSearchFields.size());
 		lstSearchValues = new HashMap<SearchField, ListViewer>(lstSearchFields.size());
-
-		txtSearchFields = new ArrayList<SearchField>(6);
-		txtSearchFields.add(SearchField.SUBJECT);
-		txtSearchFields.add(SearchField.DATE_CREATED);
-		txtSearchFields.add(SearchField.DATE_UPDATED);
-		txtSearchFields.add(SearchField.DATE_START);
-		txtSearchFields.add(SearchField.DATE_DUE);
-		txtSearchFields.add(SearchField.DONE_RATIO);
 
 		txtSearchOperators = new HashMap<SearchField, ComboViewer>(txtSearchFields.size());
 		txtSearchValues = new HashMap<SearchField, Text>(txtSearchFields.size());
