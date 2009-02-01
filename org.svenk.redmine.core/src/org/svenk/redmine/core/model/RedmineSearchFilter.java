@@ -255,7 +255,7 @@ public class RedmineSearchFilter {
 		}
 
 		public String getLabel() {
-			return fieldName;
+			return name();
 		}
 		
 		public String toString() {

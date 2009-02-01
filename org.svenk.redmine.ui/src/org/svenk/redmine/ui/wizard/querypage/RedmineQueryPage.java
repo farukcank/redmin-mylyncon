@@ -22,6 +22,7 @@ package org.svenk.redmine.ui.wizard.querypage;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -105,11 +106,9 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 
 	protected ComboViewer storedQueryViewer;
 
-	protected ArrayList<SearchField> lstSearchFields;
 	protected Map<SearchField, ComboViewer> lstSearchOperators;
 	protected Map<SearchField, ListViewer> lstSearchValues;
 
-	protected ArrayList<SearchField> txtSearchFields;
 	protected Map<SearchField, ComboViewer> txtSearchOperators;
 	protected Map<SearchField, Text> txtSearchValues;
 
@@ -131,27 +130,12 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		setTitle(TITLE);
 		setDescription(DESCRIPTION);
 
-		
-		
-		lstSearchFields = new ArrayList<SearchField>(6);
-		txtSearchFields = new ArrayList<SearchField>(6);
-		for (SearchField searchfield :SearchField.values()) {
-			if (searchfield.isListType()) {
-				if (searchfield!=SearchField.LIST_BASED) {
-					lstSearchFields.add(searchfield);
-				}
-			} else {
-				if (searchfield!=SearchField.TEXT_BASED) {
-					txtSearchFields.add(searchfield);
-				}
-			}
-		}
 
-		lstSearchOperators = new HashMap<SearchField, ComboViewer>(lstSearchFields.size());
-		lstSearchValues = new HashMap<SearchField, ListViewer>(lstSearchFields.size());
+		lstSearchOperators = new HashMap<SearchField, ComboViewer>();
+		lstSearchValues = new HashMap<SearchField, ListViewer>();
 
-		txtSearchOperators = new HashMap<SearchField, ComboViewer>(txtSearchFields.size());
-		txtSearchValues = new HashMap<SearchField, Text>(txtSearchFields.size());
+		txtSearchOperators = new HashMap<SearchField, ComboViewer>();
+		txtSearchValues = new HashMap<SearchField, Text>();
 		
 		customSearchOperators = new HashMap<RedmineCustomTicketField, ComboViewer>();
 		lstCustomSearchValues = new HashMap<RedmineCustomTicketField, ListViewer>();
@@ -237,11 +221,14 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	}
 
 	private void createTextGroup(final Composite control) {
-
 		LabelProvider labelProvider = new RedmineLabelProvider();
+		Collection<SearchField> searchFields = new ArrayList<SearchField>();
 
-		for (int i = 1; i <= txtSearchFields.size(); i++) {
-			SearchField searchField = txtSearchFields.get(i - 1);
+		for (SearchField searchField : SearchField.values()) {
+			if (searchField.isListType() || searchField==SearchField.TEXT_BASED) {
+				continue;
+			}
+			searchFields.add(searchField);
 
 			Text text = new Text(control, SWT.BORDER);
 			text.setEnabled(false);
@@ -260,14 +247,18 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 							txtSearchValues.get(searchField)));
 		}
 		
-		RedmineGuiHelper.placeTextElements(control, txtSearchFields, txtSearchValues, txtSearchOperators);
+		RedmineGuiHelper.placeTextElements(control, searchFields, txtSearchValues, txtSearchOperators);
 	}
 	
 	private void createListGroup(final Composite control) {
 		LabelProvider labelProvider = new RedmineLabelProvider();
-
-		for (int i = 1; i <= lstSearchFields.size(); i++) {
-			SearchField searchField = lstSearchFields.get(i - 1);
+		Collection<SearchField> searchFields = new ArrayList<SearchField>();
+		
+		for (SearchField searchField : SearchField.values()) {
+			if (!searchField.isListType() || searchField==SearchField.LIST_BASED) {
+				continue;
+			}
+			searchFields.add(searchField);
 
 			ListViewer list = new ListViewer(control, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
 			list.setLabelProvider(labelProvider);
@@ -288,7 +279,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 							lstSearchValues.get(searchField).getControl()));
 		}
 		
-		RedmineGuiHelper.placeListElements(control, 4, lstSearchFields, lstSearchValues, lstSearchOperators);
+		RedmineGuiHelper.placeListElements(control, 4, searchFields, lstSearchValues, lstSearchOperators);
 	}
 
 	protected void createUpdateButton(final Composite parent) {
