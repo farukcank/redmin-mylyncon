@@ -54,6 +54,8 @@ public class RedmineContentProvider implements IStructuredContentProvider {
 				tmp.addAll((List)inputElement);
 			}
 			return tmp.toArray();
+		} else if (inputElement instanceof String[]) {
+			return (String[])inputElement;
 		}
 		return null;
 	}
@@ -77,6 +79,8 @@ public class RedmineContentProvider implements IStructuredContentProvider {
 			}
 		} else if (o instanceof RedmineProjectData) {
 			selectLastOrDefault(viewer, o);
+		} else if (o instanceof String) {
+			reselect(viewer, selection);
 		} else if (title!=null) {
 			selectLastOrDefault(viewer, title);
 		}

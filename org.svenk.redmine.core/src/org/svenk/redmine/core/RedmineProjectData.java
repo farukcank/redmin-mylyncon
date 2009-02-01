@@ -95,6 +95,15 @@ public class RedmineProjectData implements Serializable {
 		return Collections.unmodifiableList(customTicketValues);
 	}
 
+	public RedmineCustomTicketField getCustomTicketField(int id) {
+		for (RedmineCustomTicketField customField : customTicketFields) {
+			if (customField.getId()==id) {
+				return customField;
+			}
+		}
+		return null;
+	}
+	
 	public List<RedmineCustomTicketField> getCustomTicketFields() {
 		return Collections.unmodifiableList(this.customTicketFields);
 	}

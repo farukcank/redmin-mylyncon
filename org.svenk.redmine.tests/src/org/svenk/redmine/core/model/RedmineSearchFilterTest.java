@@ -696,7 +696,7 @@ public class RedmineSearchFilterTest {
 	@Test
 	public void testFindFieldsFromSearchQueryParam() {
 		String searchParam = "&fields[]=status_id&operators[status_id]&fields[]=tracker_id&operators[tracker_id]=&fields[]=author_id&operators[author_id]=";
-		List<SearchField> fields = RedmineSearchFilter.findFieldsFromSearchQueryParam(searchParam);
+		List<SearchField> fields = RedmineSearchFilter.findSearchFieldsFromSearchQueryParam(searchParam);
 		assertEquals(3, fields.size());
 		assertEquals(SearchField.STATUS, fields.get(0));
 		assertEquals(SearchField.TRACKER, fields.get(1));
@@ -718,10 +718,10 @@ public class RedmineSearchFilterTest {
 		
 		String searchParam = candidate.toString();
 		
-		assertEquals(CompareOperator.ALL, RedmineSearchFilter.findOperatorFromSearchQueryParam(searchParam, SearchField.STATUS));
-		assertEquals(CompareOperator.LTE, RedmineSearchFilter.findOperatorFromSearchQueryParam(searchParam, SearchField.DATE_UPDATED));
-		assertEquals(CompareOperator.CONTAINS_NOT, RedmineSearchFilter.findOperatorFromSearchQueryParam(searchParam, SearchField.TRACKER));
-		assertNull(RedmineSearchFilter.findOperatorFromSearchQueryParam(searchParam, SearchField.PRIORITY));
+		assertEquals(CompareOperator.ALL, RedmineSearchFilter.findOperatorFromQueryFieldParam(searchParam, SearchField.STATUS));
+		assertEquals(CompareOperator.LTE, RedmineSearchFilter.findOperatorFromQueryFieldParam(searchParam, SearchField.DATE_UPDATED));
+		assertEquals(CompareOperator.CONTAINS_NOT, RedmineSearchFilter.findOperatorFromQueryFieldParam(searchParam, SearchField.TRACKER));
+		assertNull(RedmineSearchFilter.findOperatorFromQueryFieldParam(searchParam, SearchField.PRIORITY));
 	}
 
 	@Test
@@ -734,15 +734,65 @@ public class RedmineSearchFilterTest {
 		
 		String searchParam = candidate.toString();
 		
-		List<String> values = RedmineSearchFilter.findValuesFromSearchQueryParam(searchParam, SearchField.STATUS);
+		List<String> values = RedmineSearchFilter.findValuesFromQueryFieldParam(searchParam, SearchField.STATUS);
 		assertEquals(2, values.size());
 		assertEquals("v1", values.get(0));
 		assertEquals("v2", values.get(1));
-		values = RedmineSearchFilter.findValuesFromSearchQueryParam(searchParam, SearchField.TRACKER);
+		values = RedmineSearchFilter.findValuesFromQueryFieldParam(searchParam, SearchField.TRACKER);
 		assertEquals(1, values.size());
 		assertEquals("v3", values.get(0));
-		values = RedmineSearchFilter.findValuesFromSearchQueryParam(searchParam, SearchField.ASSIGNED_TO);
+		values = RedmineSearchFilter.findValuesFromQueryFieldParam(searchParam, SearchField.ASSIGNED_TO);
 		assertEquals(0, values.size());
 	}
-	
+
+	@Test
+	public void testCustomListValueAppendUrlPart() throws Exception {
+		StringBuffer sb = new StringBuffer();
+		String operator;
+		
+		int idVal = 4;
+		RedmineCustomTicketField customField = 
+			new RedmineCustomTicketField(idVal, RedmineCustomTicketField.FieldType.LIST.name());
+		String id = customField.getQueryValue();
+		
+		RedmineSearchFilter filter = new RedmineSearchFilter(customField);
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.IS);
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.IS.getQueryValue(), "UTF-8");
+		assertEquals("", sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.IS);
+		filter.addValue("3");
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.IS.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"][]=3", sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.IS_NOT);
+		filter.addValue("4");
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.IS_NOT.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"][]=3&values["+id+"][]=4", sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.ALL);
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.ALL.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"][]", sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.NONE);
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.NONE.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"][]", sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.CONTAINS);
+		filter.appendUrlPart(sb);
+		assertEquals("", sb.toString());
+	}
+
 }

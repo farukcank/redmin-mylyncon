@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.svenk.redmine.core.RedmineProjectData;
+
 public class RedmineSearchFilter {
 
 	public enum CompareOperator {
@@ -144,8 +146,12 @@ public class RedmineSearchFilter {
 
 	}
 
-	public enum SearchField {
+	public enum SearchField implements IRedmineQueryField {
 
+		LIST_BASED("LIST_BASED", true, CompareOperator.IS, CompareOperator.IS_NOT,
+				CompareOperator.NONE, CompareOperator.ALL),
+		TEXT_BASED("TEXT_BASED", CompareOperator.IS, CompareOperator.IS_NOT, 
+				CompareOperator.CONTAINS, CompareOperator.CONTAINS_NOT),
 		STATUS("status_id", true, true, CompareOperator.OPEN, CompareOperator.IS,
 				CompareOperator.IS_NOT,
 				CompareOperator.CLOSED, CompareOperator.ALL),
@@ -221,6 +227,13 @@ public class RedmineSearchFilter {
 			}
 		}
 
+		public static SearchField fromCustomTicketField(RedmineCustomTicketField field) {
+			switch (field.getType()) {
+				case LIST: return LIST_BASED;
+			}
+			return TEXT_BASED;
+		}
+		
 		public boolean containsOperator(CompareOperator operator) {
 			return operators.contains(operator);
 		}
@@ -244,9 +257,12 @@ public class RedmineSearchFilter {
 		public String toString() {
 			return fieldName;
 		}
+		
 	}
 
 	private SearchField searchField;
+	
+	private IRedmineQueryField queryField;
 
 	private CompareOperator operator = CompareOperator.IS;
 
@@ -254,8 +270,14 @@ public class RedmineSearchFilter {
 
 	public RedmineSearchFilter(SearchField field) {
 		this.searchField = field;
+		this.queryField = field;
 	}
 
+	public RedmineSearchFilter(RedmineCustomTicketField field) {
+		this.queryField = field;
+		this.searchField = SearchField.fromCustomTicketField(field);
+	}
+	
 	public void addValue(String value) {
 		if (operator.useValue()) {
 			values.add(value);
@@ -266,6 +288,11 @@ public class RedmineSearchFilter {
 		return operator;
 	}
 
+	public RedmineCustomTicketField getCustomTicketField() {
+		return (queryField instanceof RedmineCustomTicketField) ? 
+				(RedmineCustomTicketField)queryField : null;
+	}
+	
 	public SearchField getSearchField() {
 		return searchField;
 	}
@@ -285,7 +312,7 @@ public class RedmineSearchFilter {
 	StringBuffer appendUrlPart(StringBuffer sb) {
 		int length = sb.length();
 		try {
-			if (searchField != null && operator != null) {
+			if (searchField != null && operator != null && searchField.containsOperator(operator)) {
 				if (!operator.useValue()) {
 					values.clear();
 				}
@@ -296,26 +323,23 @@ public class RedmineSearchFilter {
 				case PRIORITY:
 				case CATEGORY:
 				case FIXED_VERSION:
-				case ASSIGNED_TO: {
-					if (searchField.containsOperator(operator)) {
-						if (!operator.useValue() || values.size()>0) {
-							appendFieldAndOperator(sb);
-							appendValues(sb);
-						}
+				case ASSIGNED_TO: 
+				case LIST_BASED: {
+					if (!operator.useValue() || values.size()>0) {
+						appendFieldAndOperator(sb);
+						appendValues(sb);
 					}
 					break;
 				}
 				case SUBJECT: {
-					if (searchField.containsOperator(operator)
-							&& values.size() == 1) {
+					if (values.size() == 1) {
 						appendFieldAndOperator(sb);
 						appendValues(sb);
 					}
 					break;
 				}
 				case DONE_RATIO: {
-					if (searchField.containsOperator(operator)
-							&& values.size() == 1) {
+					if (values.size() == 1) {
 						try {
 							int v = Integer.parseInt(values.get(0));
 							if (0 <= v && v <= 100) {
@@ -336,8 +360,7 @@ public class RedmineSearchFilter {
 							|| operator == CompareOperator.CURRENT_WEEK) {
 						appendFieldAndOperator(sb);
 						appendValues(sb);
-					} else if (searchField.containsOperator(operator)
-							&& values.size() == 1) {
+					} else if (values.size() == 1) {
 						try {
 							int v = Integer.parseInt(values.get(0));
 							if (v > 0) {
@@ -361,8 +384,8 @@ public class RedmineSearchFilter {
 	private void appendFieldAndOperator(StringBuffer sb)
 			throws UnsupportedEncodingException {
 		sb.append("&fields[]=").append(
-				URLEncoder.encode(searchField.getQueryValue(), "UTF-8"));
-		sb.append("&operators[").append(searchField.getQueryValue()).append(
+				URLEncoder.encode(queryField.getQueryValue(), "UTF-8"));
+		sb.append("&operators[").append(queryField.getQueryValue()).append(
 				"]=").append(
 				URLEncoder.encode(operator.getQueryValue(), "UTF-8"));
 	}
@@ -371,19 +394,19 @@ public class RedmineSearchFilter {
 			throws UnsupportedEncodingException {
 		if (values.size() > 0) {
 			for (String value : values) {
-				sb.append("&values[").append(searchField.getQueryValue())
+				sb.append("&values[").append(queryField.getQueryValue())
 						.append("]");
 				sb.append("[]=").append(URLEncoder.encode(value, "UTF-8"));
 			}
 		} else {
-			sb.append("&values[").append(searchField.getQueryValue()).append(
+			sb.append("&values[").append(queryField.getQueryValue()).append(
 					"][]");
 		}
 	}
 	
-	public static List<SearchField> findFieldsFromSearchQueryParam(String param) {
+	public static List<SearchField> findSearchFieldsFromSearchQueryParam(String param) {
 		List<SearchField> fields = new ArrayList<SearchField>();
-		Matcher matcher = Pattern.compile("&fields\\[\\]=(\\w+)").matcher(param);
+		Matcher matcher = Pattern.compile("&fields\\[\\]=([a-z_-]+)").matcher(param);
 		while (matcher.find()) {
 			SearchField field = SearchField.fromString(matcher.group(1));
 			if (field != null) {
@@ -393,9 +416,27 @@ public class RedmineSearchFilter {
 		return fields;
 	}
 	
-	public static CompareOperator findOperatorFromSearchQueryParam(String param, SearchField searchField) {
+	public static List<RedmineCustomTicketField> findCustomTicketFieldsFromSearchQueryParam(RedmineProjectData projectData, String param) {
+		List<RedmineCustomTicketField> fields = new ArrayList<RedmineCustomTicketField>();
+		Matcher matcher = Pattern.compile("&fields\\[\\]=cf_(\\d+)").matcher(param);
+		while (matcher.find()) {
+			try {
+				int id = Integer.parseInt(matcher.group(1));
+				RedmineCustomTicketField customField = 
+					projectData.getCustomTicketField(id);
+				if (customField != null) {
+					fields.add(customField);
+				}
+			} catch (NumberFormatException e) {
+				;
+			}
+		}
+		return fields;
+	}
+	
+	public static CompareOperator findOperatorFromQueryFieldParam(String param, IRedmineQueryField queryField) {
 		StringBuffer pattern = new StringBuffer(".*&operators\\[");
-		pattern.append(searchField.getQueryValue());
+		pattern.append(queryField.getQueryValue());
 		pattern.append("\\]=([^&]+).*");
 		
 		Matcher matcher = Pattern.compile(pattern.toString()).matcher(param);
@@ -407,9 +448,9 @@ public class RedmineSearchFilter {
 		return null;
 	}
 	
-	public static List<String> findValuesFromSearchQueryParam(String param, SearchField searchField) {
+	public static List<String> findValuesFromQueryFieldParam(String param, IRedmineQueryField queryField) {
 		StringBuffer pattern = new StringBuffer("&values\\[");
-		pattern.append(searchField.getQueryValue());
+		pattern.append(queryField.getQueryValue());
 		pattern.append("\\]\\[\\]=([^&]+)");
 		
 		List<String> values = new ArrayList<String>();

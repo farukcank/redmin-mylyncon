@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.svenk.redmine.core.IRedmineClient;
+import org.svenk.redmine.core.RedmineProjectData;
 import org.svenk.redmine.core.model.RedmineSearchFilter.CompareOperator;
 import org.svenk.redmine.core.model.RedmineSearchFilter.SearchField;
 
@@ -38,7 +39,8 @@ public class RedmineSearch {
 	public final static String PROJECT_ID = "PROJECT_ID";
 	public final static String STORED_QUERY_ID = "QUERY_ID";
 	
-	private Map<SearchField, RedmineSearchFilter> filterByFieldField = new HashMap<SearchField, RedmineSearchFilter>();
+	private Map<SearchField, RedmineSearchFilter> filterBySearchField = new HashMap<SearchField, RedmineSearchFilter>();
+	private Map<RedmineCustomTicketField, RedmineSearchFilter> filterByCustomField = new HashMap<RedmineCustomTicketField, RedmineSearchFilter>();
 
 	private RedmineProject project;
 	
@@ -52,17 +54,25 @@ public class RedmineSearch {
 		this.repositoryUrl = repositoryUrl;
 	}
 
-	public void addFilter(SearchField searchField, String operator, String value) {
-		CompareOperator compareOp = CompareOperator.fromString(operator);
-		addFilter(searchField, compareOp, value);
+	public void addFilter(RedmineCustomTicketField customField, CompareOperator operator, String value) {
+		RedmineSearchFilter filter = filterByCustomField.get(customField);
+		if (filter == null) {
+			filter = new RedmineSearchFilter(customField);
+			filter.setOperator(operator);
+			filterByCustomField.put(customField, filter);
+		}
+		
+		filter.addValue(value);
+		
+		queryParam=null;
 	}
-
+	
 	public void addFilter(SearchField searchField, CompareOperator operator, String value) {
-		RedmineSearchFilter filter = filterByFieldField.get(searchField);
+		RedmineSearchFilter filter = filterBySearchField.get(searchField);
 		if (filter == null) {
 			filter = new RedmineSearchFilter(searchField);
 			filter.setOperator(operator);
-			filterByFieldField.put(searchField, filter);
+			filterBySearchField.put(searchField, filter);
 		}
 		
 		filter.addValue(value);
@@ -71,9 +81,13 @@ public class RedmineSearch {
 	}
 	
 	public List<RedmineSearchFilter> getFilters() {
-		return new ArrayList<RedmineSearchFilter>(filterByFieldField.values());
+		return new ArrayList<RedmineSearchFilter>(filterBySearchField.values());
 	}
 
+	public List<RedmineSearchFilter> getCustomFilters() {
+		return new ArrayList<RedmineSearchFilter>(filterByCustomField.values());
+	}
+	
 	public String toQuery() {
 		StringBuffer sb = new StringBuffer(repositoryUrl);
 		sb.append(IRedmineClient.QUERY_URL);
@@ -86,7 +100,11 @@ public class RedmineSearch {
 		if (queryParam==null) {
 			StringBuffer sb = new StringBuffer("project_id=").append(project.getValue());
 			sb.append("&set_filter=1");
-			for (Iterator<RedmineSearchFilter> iterator = filterByFieldField.values().iterator(); iterator.hasNext();) {
+			for (Iterator<RedmineSearchFilter> iterator = filterBySearchField.values().iterator(); iterator.hasNext();) {
+				RedmineSearchFilter filter = iterator.next();
+				filter.appendUrlPart(sb);
+			}
+			for (Iterator<RedmineSearchFilter> iterator = filterByCustomField.values().iterator(); iterator.hasNext();) {
 				RedmineSearchFilter filter = iterator.next();
 				filter.appendUrlPart(sb);
 			}
@@ -95,20 +113,35 @@ public class RedmineSearch {
 		return queryParam;
 	}
 	
-	public static RedmineSearch fromSearchQueryParam(String param, String repositoryUrl) {
+	public static RedmineSearch fromSearchQueryParam(RedmineProjectData projectData, String param, String repositoryUrl) {
 		RedmineSearch search = new RedmineSearch(repositoryUrl);
 		
-		List<SearchField> searchFields = RedmineSearchFilter.findFieldsFromSearchQueryParam(param);
+		List<SearchField> searchFields = 
+			RedmineSearchFilter.findSearchFieldsFromSearchQueryParam(param);
+		List<RedmineCustomTicketField> customFields = 
+			RedmineSearchFilter.findCustomTicketFieldsFromSearchQueryParam(projectData, param);
+		
 		CompareOperator operator;
 		List<String> values;
 		for (SearchField searchField : searchFields) {
-			operator = RedmineSearchFilter.findOperatorFromSearchQueryParam(param, searchField);
-			values = RedmineSearchFilter.findValuesFromSearchQueryParam(param, searchField);
+			operator = RedmineSearchFilter.findOperatorFromQueryFieldParam(param, searchField);
+			values = RedmineSearchFilter.findValuesFromQueryFieldParam(param, searchField);
 			if (values.size()==0) {
 				search.addFilter(searchField, operator, "");
 			} else {
 				for (String string : values) {
 					search.addFilter(searchField, operator, string);
+				}
+			}
+		}
+		for (RedmineCustomTicketField customField : customFields) {
+			operator = RedmineSearchFilter.findOperatorFromQueryFieldParam(param, customField);
+			values = RedmineSearchFilter.findValuesFromQueryFieldParam(param, customField);
+			if (values.size()==0) {
+				search.addFilter(customField, operator, "");
+			} else {
+				for (String string : values) {
+					search.addFilter(customField, operator, string);
 				}
 			}
 		}

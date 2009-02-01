@@ -24,7 +24,7 @@ import java.io.Serializable;
 
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 
-public class RedmineCustomTicketField implements Serializable {
+public class RedmineCustomTicketField implements Serializable, IRedmineQueryField {
 
 	private static final long serialVersionUID = 1L;
 
@@ -183,4 +183,24 @@ public class RedmineCustomTicketField implements Serializable {
 		this.listValues = listValues;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj.getClass().equals(getClass())) {
+			RedmineCustomTicketField custom = (RedmineCustomTicketField)obj;
+			return this.id==custom.id && this.type==custom.type;
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 31 * hash + id;
+		hash = 31 * hash + (null == type ? 0 : type.hashCode());
+		return hash;
+	}
+
+	public String getQueryValue() {
+		return "cf_" + id;
+	}
 }
