@@ -480,6 +480,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			}
 		}
 		
+		RedmineGuiHelper.placeListElements(customComposite, 4, lstCustomSearchValues.keySet(), lstCustomSearchValues, customSearchOperators);
 	}
 	
 

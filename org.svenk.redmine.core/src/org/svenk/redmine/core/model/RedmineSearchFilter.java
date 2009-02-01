@@ -254,6 +254,10 @@ public class RedmineSearchFilter {
 			return fieldName;
 		}
 
+		public String getLabel() {
+			return fieldName;
+		}
+		
 		public String toString() {
 			return fieldName;
 		}

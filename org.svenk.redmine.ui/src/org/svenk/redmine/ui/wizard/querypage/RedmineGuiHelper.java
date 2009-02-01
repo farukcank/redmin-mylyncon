@@ -20,6 +20,7 @@
  *******************************************************************************/
 package org.svenk.redmine.ui.wizard.querypage;
 
+import java.util.Collection;
 import java.util.Map;
 
 import org.eclipse.jface.viewers.ComboViewer;
@@ -30,12 +31,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.svenk.redmine.core.model.RedmineSearchFilter.SearchField;
+import org.svenk.redmine.core.model.IRedmineQueryField;
 
 class RedmineGuiHelper {
 
 
-	public static void placeListElements(final Composite parent, int columns, final java.util.List<SearchField> searchFields, final Map<SearchField, ListViewer> lstSearchValues, final Map<SearchField, ComboViewer> lstSearchOperators) {
+	public static void placeListElements(final Composite parent, int columns, final Collection<? extends IRedmineQueryField> queryFields, final Map<? extends IRedmineQueryField, ListViewer> lstSearchValues, final Map<? extends IRedmineQueryField, ComboViewer> lstSearchOperators) {
 
 		Composite control = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(columns * 2, true);
@@ -49,18 +50,21 @@ class RedmineGuiHelper {
 		listGridData.heightHint = 100;
 		listGridData.widthHint = 85;
 		
-		for(int i=1; i<=searchFields.size(); i++) {
-			SearchField searchField = searchFields.get(i-1);
+		IRedmineQueryField[] fields = 
+			queryFields.toArray(new IRedmineQueryField[queryFields.size()]);
+		
+		for(int i=1; i<=fields.length; i++) {
+			IRedmineQueryField queryField = fields[i-1];
 
 			Label label = new Label(control, SWT.NONE);
-			label.setText(searchField.name());
+			label.setText(queryField.getLabel());
 			label.setLayoutData(commonGridData);
 			
-			ListViewer list = lstSearchValues.get(searchField);
+			ListViewer list = lstSearchValues.get(queryField);
 			list.getControl().setParent(control);
 			list.getControl().setLayoutData(listGridData);
 
-			if (i % columns == 0 || i == searchFields.size()) {
+			if (i % columns == 0 || i == queryFields.size()) {
 				int sv = (i % columns == 0) ? i - columns : i - i % columns;
 				if (i % columns != 0) {
 					listGridData = new GridData();
@@ -71,7 +75,7 @@ class RedmineGuiHelper {
 					list.getControl().setLayoutData(listGridData);
 				}
 				for (int j = sv; j < i; j++) {
-					SearchField tmpSearchField = searchFields.get(j);
+					IRedmineQueryField tmpSearchField = fields[j];
 					
 					ComboViewer combo = lstSearchOperators.get(tmpSearchField);
 					combo.getControl().setParent(control);
@@ -81,7 +85,7 @@ class RedmineGuiHelper {
 		}
 	}
 	
-	public static void placeTextElements(final Composite parent, final java.util.List<SearchField> searchFields, final Map<SearchField, Text> txtSearchValues, final Map<SearchField, ComboViewer> txtSearchOperators) {
+	public static void placeTextElements(final Composite parent, final Collection<? extends IRedmineQueryField> queryFields, final Map<? extends IRedmineQueryField, Text> txtSearchValues, final Map<? extends IRedmineQueryField, ComboViewer> txtSearchOperators) {
 		
 		Composite control = new Composite(parent, SWT.NONE);
 		control.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -92,16 +96,16 @@ class RedmineGuiHelper {
 		GridData textGridData = new GridData(SWT.FILL, SWT.CENTER, false, true);
 		textGridData.widthHint=300;
 
-		for (SearchField searchField : searchFields) {
+		for (IRedmineQueryField queryField : queryFields) {
 			Label label = new Label(control, SWT.NONE);
-			label.setText(searchField.name());
+			label.setText(queryField.getLabel());
 			label.setLayoutData(commonGridData);
 
-			ComboViewer combo = txtSearchOperators.get(searchField);
+			ComboViewer combo = txtSearchOperators.get(queryField);
 			combo.getControl().setParent(control);
 			combo.getControl().setLayoutData(commonGridData);
 
-			Text text = txtSearchValues.get(searchField);
+			Text text = txtSearchValues.get(queryField);
 			text.setParent(control);
 			text.setLayoutData(textGridData);
 		}

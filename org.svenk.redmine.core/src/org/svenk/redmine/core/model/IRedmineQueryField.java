@@ -24,4 +24,6 @@ public interface IRedmineQueryField {
 	
 	public String getQueryValue();
 	
+	public String getLabel();
+	
 }

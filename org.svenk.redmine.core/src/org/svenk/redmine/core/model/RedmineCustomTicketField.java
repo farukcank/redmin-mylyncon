@@ -203,4 +203,8 @@ public class RedmineCustomTicketField implements Serializable, IRedmineQueryFiel
 	public String getQueryValue() {
 		return "cf_" + id;
 	}
+	
+	public String getLabel() {
+		return getName();
+	}
 }
