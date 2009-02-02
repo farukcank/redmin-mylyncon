@@ -106,10 +106,8 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 
 	protected ComboViewer storedQueryViewer;
 
-	protected Map<SearchField, ComboViewer> lstSearchOperators;
+	protected Map<SearchField, ComboViewer> searchOperators;
 	protected Map<SearchField, ListViewer> lstSearchValues;
-
-	protected Map<SearchField, ComboViewer> txtSearchOperators;
 	protected Map<SearchField, Text> txtSearchValues;
 
 	protected final Map<RedmineCustomTicketField, ComboViewer> customSearchOperators;
@@ -131,10 +129,8 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		setDescription(DESCRIPTION);
 
 
-		lstSearchOperators = new HashMap<SearchField, ComboViewer>();
+		searchOperators = new HashMap<SearchField, ComboViewer>();
 		lstSearchValues = new HashMap<SearchField, ListViewer>();
-
-		txtSearchOperators = new HashMap<SearchField, ComboViewer>();
 		txtSearchValues = new HashMap<SearchField, Text>();
 		
 		customSearchOperators = new HashMap<RedmineCustomTicketField, ComboViewer>();
@@ -238,7 +234,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			String defaultValue = searchField.isRequired()?null:OPERATOR_TITLE;
 			combo.setContentProvider(new RedmineContentProvider(defaultValue));
 			combo.setLabelProvider(labelProvider);
-			txtSearchOperators.put(searchField, combo);
+			searchOperators.put(searchField, combo);
 			combo.setInput(searchField.getCompareOperators());
 			combo.setSelection(new StructuredSelection(combo.getElementAt(0)));
 			
@@ -247,7 +243,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 							txtSearchValues.get(searchField)));
 		}
 		
-		RedmineGuiHelper.placeTextElements(control, searchFields, txtSearchValues, txtSearchOperators);
+		RedmineGuiHelper.placeTextElements(control, searchFields, txtSearchValues, searchOperators);
 	}
 	
 	private void createListGroup(final Composite control) {
@@ -270,7 +266,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			String defaultValue = searchField.isRequired()?null:OPERATOR_TITLE;
 			combo.setContentProvider(new RedmineContentProvider(defaultValue));
 			combo.setLabelProvider(labelProvider);
-			lstSearchOperators.put(searchField, combo);
+			searchOperators.put(searchField, combo);
 			combo.setInput(searchField.getCompareOperators());
 			combo.setSelection(new StructuredSelection(combo.getElementAt(0)));
 			
@@ -279,7 +275,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 							lstSearchValues.get(searchField).getControl()));
 		}
 		
-		RedmineGuiHelper.placeListElements(control, 4, searchFields, lstSearchValues, lstSearchOperators);
+		RedmineGuiHelper.placeListElements(control, 4, searchFields, lstSearchValues, searchOperators);
 	}
 
 	protected void createUpdateButton(final Composite parent) {
@@ -511,7 +507,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 					}
 				}
 				list.setSelection(new StructuredSelection(selected));
-				ComboViewer combo = lstSearchOperators.get(field);
+				ComboViewer combo = searchOperators.get(field);
 				combo.setSelection(new StructuredSelection(compOp));
 				list.getControl().setEnabled(compOp.useValue());
 			} else if (txtSearchValues.containsKey(field)) {
@@ -519,7 +515,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 				if (filter.getValues().size() > 0) {
 					text.setText(filter.getValues().get(0));
 				}
-				ComboViewer combo = txtSearchOperators.get(field);
+				ComboViewer combo = searchOperators.get(field);
 				combo.setSelection(new StructuredSelection(compOp));
 				text.setEnabled(compOp.useValue());
 
@@ -544,7 +540,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 						((Text)control).setText(filter.getValues().get(0));
 					}
 				}
-				ComboViewer combo = txtSearchOperators.get(field);
+				ComboViewer combo = searchOperators.get(field);
 				combo.setSelection(new StructuredSelection(compOp));
 				control.setEnabled(compOp.useValue());
 			}
@@ -557,19 +553,15 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	 * Deselect / clear all Settings / Attributes
 	 */
 	protected void clearSettings() {
-		for (ComboViewer combo : lstSearchOperators.values()) {
-			combo.setSelection(new StructuredSelection(combo.getElementAt(0)));
+		for (Entry<SearchField, ListViewer> entry : lstSearchValues.entrySet()) {
+			entry.getValue().setSelection(new StructuredSelection());
+			entry.getValue().getControl().setEnabled(false);
+			searchOperators.get(entry.getKey()).getControl().setEnabled(false);
 		}
-		for (ListViewer list : lstSearchValues.values()) {
-			list.setSelection(new StructuredSelection());
-			list.getControl().setEnabled(false);
-		}
-		for (ComboViewer combo : txtSearchOperators.values()) {
-			combo.setSelection(new StructuredSelection(combo.getElementAt(0)));
-		}
-		for (Text text : txtSearchValues.values()) {
-			text.setText("");
-			text.setEnabled(false);
+		for (Entry<SearchField, Text> entry : txtSearchValues.entrySet()) {
+			entry.getValue().setText("");
+			entry.getValue().setEnabled(false);
+			searchOperators.get(entry.getKey()).getControl().setEnabled(false);
 		}
 	}
 
@@ -642,13 +634,13 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			}
 		}
 		
-		for (Entry<SearchField, ComboViewer> entry : lstSearchOperators.entrySet()) {
-			ComboViewer opCombo = entry.getValue();
+		for (Entry<SearchField, ListViewer> entry : lstSearchValues.entrySet()) {
 			SearchField field = entry.getKey();
+			ListViewer valList = entry.getValue();
+			ComboViewer opCombo = searchOperators.get(field);
 			IStructuredSelection selection = (IStructuredSelection)opCombo.getSelection();
 			if (selection.getFirstElement() instanceof CompareOperator) {
 				CompareOperator operator = (CompareOperator)selection.getFirstElement();
-				ListViewer valList = lstSearchValues.get(field);
 				
 				selection = (IStructuredSelection)valList.getSelection();
 				if (selection.isEmpty()) {
@@ -662,13 +654,13 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 				}
 			}
 		}
-		for (Entry<SearchField, ComboViewer> entry : txtSearchOperators.entrySet()) {
-			ComboViewer opCombo = entry.getValue();
+		for (Entry<SearchField, Text> entry : txtSearchValues.entrySet()) {
 			SearchField field = entry.getKey();
+			Text text = entry.getValue();
+			ComboViewer opCombo = searchOperators.get(field);
 			IStructuredSelection selection = (IStructuredSelection)opCombo.getSelection();
 			if (selection.getFirstElement() instanceof CompareOperator) {
 				CompareOperator operator = (CompareOperator)selection.getFirstElement();
-				Text text = txtSearchValues.get(field);
 				search.addFilter(field, operator, text.getText().trim());
 			}
 		}
