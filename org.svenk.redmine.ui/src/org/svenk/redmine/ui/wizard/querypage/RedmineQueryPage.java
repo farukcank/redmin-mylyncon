@@ -67,6 +67,7 @@ import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.RedmineProjectData;
 import org.svenk.redmine.core.RedmineRepositoryConnector;
 import org.svenk.redmine.core.exception.RedmineException;
+import org.svenk.redmine.core.model.IRedmineQueryField;
 import org.svenk.redmine.core.model.RedmineCustomTicketField;
 import org.svenk.redmine.core.model.RedmineSearch;
 import org.svenk.redmine.core.model.RedmineSearchFilter;
@@ -106,13 +107,13 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 
 	protected ComboViewer storedQueryViewer;
 
-	protected Map<SearchField, ComboViewer> searchOperators;
-	protected Map<SearchField, ListViewer> lstSearchValues;
-	protected Map<SearchField, Text> txtSearchValues;
+	protected Map<IRedmineQueryField, ComboViewer> searchOperators;
+	protected Map<IRedmineQueryField, ListViewer> lstSearchValues;
+	protected Map<IRedmineQueryField, Text> txtSearchValues;
 
-	protected final Map<RedmineCustomTicketField, ComboViewer> customSearchOperators;
-	protected final Map<RedmineCustomTicketField, ListViewer> lstCustomSearchValues;
-	protected final Map<RedmineCustomTicketField, Control> txtCustomSearchValues;
+	protected final Map<IRedmineQueryField, ComboViewer> customSearchOperators;
+	protected final Map<IRedmineQueryField, ListViewer> lstCustomSearchValues;
+	protected final Map<IRedmineQueryField, Control> txtCustomSearchValues;
 
 	protected Button updateButton;
 	protected RedmineClientData data;
@@ -129,15 +130,14 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		setDescription(DESCRIPTION);
 
 
-		searchOperators = new HashMap<SearchField, ComboViewer>();
-		lstSearchValues = new HashMap<SearchField, ListViewer>();
-		txtSearchValues = new HashMap<SearchField, Text>();
+		searchOperators = new HashMap<IRedmineQueryField, ComboViewer>();
+		lstSearchValues = new HashMap<IRedmineQueryField, ListViewer>();
+		txtSearchValues = new HashMap<IRedmineQueryField, Text>();
 		
-		customSearchOperators = new HashMap<RedmineCustomTicketField, ComboViewer>();
-		lstCustomSearchValues = new HashMap<RedmineCustomTicketField, ListViewer>();
-		txtCustomSearchValues = new HashMap<RedmineCustomTicketField, Control>();
+		customSearchOperators = new HashMap<IRedmineQueryField, ComboViewer>();
+		lstCustomSearchValues = new HashMap<IRedmineQueryField, ListViewer>();
+		txtCustomSearchValues = new HashMap<IRedmineQueryField, Control>();
 
-//		lstCustomSearchValues = new HashMap<RedmineCustomTicketField, List>();
 	}
 
 	public RedmineQueryPage(TaskRepository repository) {
@@ -397,10 +397,10 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		java.util.List<RedmineCustomTicketField> customFields = projectData.getCustomTicketFields();
 		
 
-		java.util.List<RedmineCustomTicketField> lstKeys 
-			= new ArrayList<RedmineCustomTicketField>(lstCustomSearchValues.keySet());
-		java.util.List<RedmineCustomTicketField> txtKeys 
-		= new ArrayList<RedmineCustomTicketField>(txtCustomSearchValues.keySet());
+		java.util.List<IRedmineQueryField> lstKeys 
+			= new ArrayList<IRedmineQueryField>(lstCustomSearchValues.keySet());
+		java.util.List<IRedmineQueryField> txtKeys 
+		= new ArrayList<IRedmineQueryField>(txtCustomSearchValues.keySet());
 
 		for (RedmineCustomTicketField customField : customFields) {
 			if (!customField.isSupportFilter()) {
@@ -490,97 +490,102 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			storedQueryViewer.setSelection(new StructuredSelection(storedQuery==null ? QUERY_SELECT_TITLE : storedQuery));
 		}
 		
-		
-		for (RedmineSearchFilter filter : search.getFilters()) {
-			SearchField field = filter.getSearchField();
-			CompareOperator compOp = filter.getOperator();
-
-			if (lstSearchValues.containsKey(field)) {
-				ListViewer list = lstSearchValues.get(field);
-				java.util.List<String> oldValues = filter.getValues();
-				RedmineTicketAttribute[] selected = new RedmineTicketAttribute[oldValues.size()];
-				for (int i=oldValues.size()-1; i>=0; i--) {
-					try {
-						selected[i] = attributeValue2Attribute(projectData, field, Integer.parseInt(oldValues.get(i)));
-					} catch (RuntimeException e) {
-						;
-					}
-				}
-				list.setSelection(new StructuredSelection(selected));
-				ComboViewer combo = searchOperators.get(field);
-				combo.setSelection(new StructuredSelection(compOp));
-				list.getControl().setEnabled(compOp.useValue());
-			} else if (txtSearchValues.containsKey(field)) {
-				Text text = txtSearchValues.get(field);
-				if (filter.getValues().size() > 0) {
-					text.setText(filter.getValues().get(0));
-				}
-				ComboViewer combo = searchOperators.get(field);
-				combo.setSelection(new StructuredSelection(compOp));
-				text.setEnabled(compOp.useValue());
-
-			}
-		}
-	
-		for (RedmineSearchFilter filter : search.getCustomFilters()) {
-			RedmineCustomTicketField field = filter.getCustomTicketField();
-			CompareOperator compOp = filter.getOperator();
-			
-			if (lstCustomSearchValues.containsKey(field)) {
-				ListViewer list = lstCustomSearchValues.get(field);
-				java.util.List<String> oldValues = filter.getValues();
-				list.setSelection(new StructuredSelection(oldValues));
-				ComboViewer combo = customSearchOperators.get(field);
-				combo.setSelection(new StructuredSelection(compOp));
-				list.getControl().setEnabled(compOp.useValue());
-			} else if (txtCustomSearchValues.containsKey(field)) {
-				Control control = txtCustomSearchValues.get(field);
-				if (filter.getValues().size() > 0) {
-					if (control instanceof Text) {
-						((Text)control).setText(filter.getValues().get(0));
-					}
-				}
-				ComboViewer combo = searchOperators.get(field);
-				combo.setSelection(new StructuredSelection(compOp));
-				control.setEnabled(compOp.useValue());
-			}
-		}
+		restoreListValues(projectData, search, searchOperators, lstSearchValues);
+		restoreTextValues(projectData, search, searchOperators, txtSearchValues);
+		restoreListValues(projectData, search, customSearchOperators, lstCustomSearchValues);
+		restoreTextValues(projectData, search, customSearchOperators, txtCustomSearchValues);
 		
 		getContainer().updateButtons();
+	}
+	
+	private void restoreListValues(RedmineProjectData projectData, RedmineSearch search, Map<? extends IRedmineQueryField, ComboViewer> operators, Map<? extends IRedmineQueryField, ListViewer> lists) {
+		for (Entry<? extends IRedmineQueryField, ListViewer> entry : lists.entrySet()) {
+			IRedmineQueryField queryField = entry.getKey();
+			RedmineSearchFilter searchFilter = search.getFilter(queryField);
+			if (searchFilter != null) {
+				ListViewer list = entry.getValue();
+				ComboViewer combo = operators.get(queryField);
+				CompareOperator operator = searchFilter.getOperator();
+				
+				combo.setSelection(new StructuredSelection(operator));
+				if (operator.useValue()) {
+					list.getControl().setEnabled(true);
+					
+					java.util.List<String> oldValues = searchFilter.getValues();
+					Object[] selected = new Object[oldValues.size()];
+					for (int i=oldValues.size()-1; i>=0; i--) {
+						try {
+							selected[i] = attributeValue2Attribute(projectData, queryField, oldValues.get(i));
+						} catch (RuntimeException e) {}
+					}
+					list.setSelection(new StructuredSelection(selected));
+				}
+			}
+		}
+	}
+	
+	private void restoreTextValues(RedmineProjectData projectData, RedmineSearch search, Map<? extends IRedmineQueryField, ComboViewer> operators, Map<? extends IRedmineQueryField, ? extends Control> controls) {
+		for (Entry<? extends IRedmineQueryField, ? extends Control> entry : controls.entrySet()) {
+			IRedmineQueryField queryField = entry.getKey();
+			RedmineSearchFilter searchFilter = search.getFilter(queryField);
+			if (searchFilter != null) {
+				Control control = entry.getValue();
+				ComboViewer combo = operators.get(queryField);
+				CompareOperator operator = searchFilter.getOperator();
+
+				combo.setSelection(new StructuredSelection(operator));
+				if (operator.useValue()) {
+					control.setEnabled(true);
+
+					if (searchFilter.getValues().size() > 0) {
+						String oldValue = searchFilter.getValues().get(0);
+						if (control instanceof Text) {
+							((Text)control).setText(oldValue);
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	/**
 	 * Deselect / clear all Settings / Attributes
 	 */
 	protected void clearSettings() {
-		for (Entry<SearchField, ListViewer> entry : lstSearchValues.entrySet()) {
+		for (Entry<IRedmineQueryField, ListViewer> entry : lstSearchValues.entrySet()) {
 			entry.getValue().setSelection(new StructuredSelection());
 			entry.getValue().getControl().setEnabled(false);
 			searchOperators.get(entry.getKey()).getControl().setEnabled(false);
 		}
-		for (Entry<SearchField, Text> entry : txtSearchValues.entrySet()) {
+		for (Entry<IRedmineQueryField, Text> entry : txtSearchValues.entrySet()) {
 			entry.getValue().setText("");
 			entry.getValue().setEnabled(false);
 			searchOperators.get(entry.getKey()).getControl().setEnabled(false);
 		}
 	}
 
-	private RedmineTicketAttribute attributeValue2Attribute(RedmineProjectData projectData, SearchField field, int value) {
-		switch (field) {
-		case STATUS:
-			return data.getStatus(value);
-		case PRIORITY:
-			return data.getPriority(value);
-		case TRACKER:
-			return projectData.getTracker(value);
-		case FIXED_VERSION:
-			return projectData.getVersion(value);
-		case AUTHOR:
-			return projectData.getMember(value);
-		case ASSIGNED_TO:
-			return projectData.getMember(value);
-		case CATEGORY:
-			return projectData.getCategory(value);
+	private Object attributeValue2Attribute(RedmineProjectData projectData, IRedmineQueryField field, String txtValue) {
+		if (field instanceof RedmineCustomTicketField) {
+			return txtValue;
+		} else if (field instanceof SearchField) {
+			SearchField searchField = (SearchField)field;
+			int value = Integer.parseInt(txtValue);
+			switch (searchField) {
+			case STATUS:
+				return data.getStatus(value);
+			case PRIORITY:
+				return data.getPriority(value);
+			case TRACKER:
+				return projectData.getTracker(value);
+			case FIXED_VERSION:
+				return projectData.getVersion(value);
+			case AUTHOR:
+				return projectData.getMember(value);
+			case ASSIGNED_TO:
+				return projectData.getMember(value);
+			case CATEGORY:
+				return projectData.getCategory(value);
+			}
 		}
 		throw new IllegalArgumentException();
 	}
@@ -634,60 +639,57 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			}
 		}
 		
-		for (Entry<SearchField, ListViewer> entry : lstSearchValues.entrySet()) {
-			SearchField field = entry.getKey();
-			ListViewer valList = entry.getValue();
-			ComboViewer opCombo = searchOperators.get(field);
-			IStructuredSelection selection = (IStructuredSelection)opCombo.getSelection();
-			if (selection.getFirstElement() instanceof CompareOperator) {
-				CompareOperator operator = (CompareOperator)selection.getFirstElement();
-				
-				selection = (IStructuredSelection)valList.getSelection();
-				if (selection.isEmpty()) {
-					search.addFilter(field, operator, "");
-				} else {
-					Iterator<?> valIterator = selection.iterator();
-					while(valIterator.hasNext()) {
-						RedmineTicketAttribute attribute = (RedmineTicketAttribute)valIterator.next();
-						search.addFilter(field, operator, ""+attribute.getValue());
-					}
-				}
-			}
-		}
-		for (Entry<SearchField, Text> entry : txtSearchValues.entrySet()) {
-			SearchField field = entry.getKey();
-			Text text = entry.getValue();
-			ComboViewer opCombo = searchOperators.get(field);
-			IStructuredSelection selection = (IStructuredSelection)opCombo.getSelection();
-			if (selection.getFirstElement() instanceof CompareOperator) {
-				CompareOperator operator = (CompareOperator)selection.getFirstElement();
-				search.addFilter(field, operator, text.getText().trim());
-			}
-		}
-
-		for (Entry<RedmineCustomTicketField, ListViewer> entry : lstCustomSearchValues.entrySet()) {
-			RedmineCustomTicketField customField = entry.getKey();
-			ComboViewer opCombo = customSearchOperators.get(customField);
-			ListViewer valList = entry.getValue();
-//			SearchField field = entry.getKey();
-			IStructuredSelection selection = (IStructuredSelection)opCombo.getSelection();
-			if (selection.getFirstElement() instanceof CompareOperator) {
-				CompareOperator operator = (CompareOperator)selection.getFirstElement();
-				
-				selection = (IStructuredSelection)valList.getSelection();
-				if (selection.isEmpty()) {
-					search.addFilter(customField, operator, "");
-				} else {
-					Iterator<?> valIterator = selection.iterator();
-					while(valIterator.hasNext()) {
-						search.addFilter(customField, operator, valIterator.next().toString());
-					}
-				}
-			}
-		}
+		buildListValueSearchPart(search, searchOperators, lstSearchValues);
+		buildTextValueSearchPart(search, searchOperators, txtSearchValues);
+		buildListValueSearchPart(search, customSearchOperators, lstCustomSearchValues);
+		buildTextValueSearchPart(search, customSearchOperators, txtCustomSearchValues);
 		
 		
 		return search;
+	}
+	
+	protected void buildListValueSearchPart(RedmineSearch search, Map<? extends IRedmineQueryField, ComboViewer> operators, Map<? extends IRedmineQueryField, ListViewer> values) {
+		for (Entry<? extends IRedmineQueryField, ListViewer> entry : values.entrySet()) {
+			IRedmineQueryField queryField = entry.getKey();
+			ListViewer valList = entry.getValue();
+			ComboViewer opCombo = operators.get(queryField);
+			IStructuredSelection selection = (IStructuredSelection)opCombo.getSelection();
+			if (selection.getFirstElement() instanceof CompareOperator) {
+				CompareOperator operator = (CompareOperator)selection.getFirstElement();
+				
+				selection = (IStructuredSelection)valList.getSelection();
+				if (selection.isEmpty()) {
+					search.addFilter(queryField, operator, "");
+				} else {
+					Iterator<?> valIterator = selection.iterator();
+					while(valIterator.hasNext()) {
+						Object obj = valIterator.next();
+						if  (obj instanceof RedmineTicketAttribute) {
+							RedmineTicketAttribute attribute = 
+								(RedmineTicketAttribute)obj;
+							search.addFilter(queryField, operator, ""+attribute.getValue());
+						} else {
+							search.addFilter(queryField, operator, obj.toString());
+						}
+					}
+				}
+			}
+		}
+	}
+
+	protected void buildTextValueSearchPart(RedmineSearch search, Map<? extends IRedmineQueryField, ComboViewer> operators, Map<? extends IRedmineQueryField, ? extends Control> values) {
+		for (Entry<? extends IRedmineQueryField, ? extends Control> entry : values.entrySet()) {
+			IRedmineQueryField queryField = entry.getKey();
+			Control	control = entry.getValue();
+			ComboViewer opCombo = operators.get(queryField);
+			IStructuredSelection selection = (IStructuredSelection)opCombo.getSelection();
+			if (selection.getFirstElement() instanceof CompareOperator) {
+				CompareOperator operator = (CompareOperator)selection.getFirstElement();
+				if (control instanceof Text) {
+					search.addFilter(queryField, operator, ((Text)control).getText().trim());
+				}
+			}
+		}
 	}
 
 	@Override

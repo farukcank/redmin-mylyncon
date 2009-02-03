@@ -29,6 +29,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.svenk.redmine.core.model.IRedmineQueryField;
@@ -38,6 +39,11 @@ class RedmineGuiHelper {
 
 	public static void placeListElements(final Composite parent, int columns, final Collection<? extends IRedmineQueryField> queryFields, final Map<? extends IRedmineQueryField, ListViewer> lstSearchValues, final Map<? extends IRedmineQueryField, ComboViewer> lstSearchOperators) {
 
+		Control[] oldChildren = parent.getChildren();
+		if (oldChildren.length>0 && oldChildren[0] instanceof Composite) {
+			oldChildren[0].dispose();
+		}
+		
 		Composite control = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(columns * 2, true);
 		control.setLayout(layout);

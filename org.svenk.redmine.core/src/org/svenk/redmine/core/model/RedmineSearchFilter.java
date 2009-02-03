@@ -297,8 +297,8 @@ public class RedmineSearchFilter {
 				(RedmineCustomTicketField)queryField : null;
 	}
 	
-	public SearchField getSearchField() {
-		return searchField;
+	public IRedmineQueryField getQueryField() {
+		return queryField;
 	}
 	
 	public List<String> getValues() {

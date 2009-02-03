@@ -54,7 +54,15 @@ public class RedmineSearch {
 		this.repositoryUrl = repositoryUrl;
 	}
 
-	public void addFilter(RedmineCustomTicketField customField, CompareOperator operator, String value) {
+	public void addFilter(IRedmineQueryField queryField, CompareOperator operator, String value) {
+		if (queryField instanceof RedmineCustomTicketField) {
+			addFilter((RedmineCustomTicketField)queryField, operator, value);
+		} else if (queryField instanceof SearchField) {
+			addFilter((SearchField)queryField, operator, value);
+		}
+	}
+	
+	private void addFilter(RedmineCustomTicketField customField, CompareOperator operator, String value) {
 		RedmineSearchFilter filter = filterByCustomField.get(customField);
 		if (filter == null) {
 			filter = new RedmineSearchFilter(customField);
@@ -67,7 +75,7 @@ public class RedmineSearch {
 		queryParam=null;
 	}
 	
-	public void addFilter(SearchField searchField, CompareOperator operator, String value) {
+	private void addFilter(SearchField searchField, CompareOperator operator, String value) {
 		RedmineSearchFilter filter = filterBySearchField.get(searchField);
 		if (filter == null) {
 			filter = new RedmineSearchFilter(searchField);
@@ -80,8 +88,13 @@ public class RedmineSearch {
 		queryParam=null;
 	}
 	
-	public List<RedmineSearchFilter> getFilters() {
-		return new ArrayList<RedmineSearchFilter>(filterBySearchField.values());
+	public RedmineSearchFilter getFilter(IRedmineQueryField queryField) {
+		if (queryField instanceof RedmineCustomTicketField) {
+			return filterByCustomField.get(queryField);
+		} else if (queryField instanceof SearchField) {
+			return filterBySearchField.get(queryField);
+		}
+		throw new IllegalArgumentException();
 	}
 
 	public List<RedmineSearchFilter> getCustomFilters() {
