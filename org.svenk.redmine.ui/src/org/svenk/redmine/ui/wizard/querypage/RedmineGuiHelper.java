@@ -31,22 +31,16 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.svenk.redmine.core.model.IRedmineQueryField;
 
 class RedmineGuiHelper {
 
 
 	public static void placeListElements(final Composite parent, int columns, final Collection<? extends IRedmineQueryField> queryFields, final Map<? extends IRedmineQueryField, ListViewer> lstSearchValues, final Map<? extends IRedmineQueryField, ComboViewer> lstSearchOperators) {
-
-		Control[] oldChildren = parent.getChildren();
-		if (oldChildren.length>0 && oldChildren[0] instanceof Composite) {
-			oldChildren[0].dispose();
-		}
 		
-		Composite control = new Composite(parent, SWT.NONE);
+		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(columns * 2, true);
-		control.setLayout(layout);
+		composite.setLayout(layout);
 
 		GridData commonGridData = new GridData(GridData.BEGINNING, GridData.BEGINNING, false, false);
 		commonGridData.horizontalAlignment = SWT.FILL;
@@ -62,12 +56,12 @@ class RedmineGuiHelper {
 		for(int i=1; i<=fields.length; i++) {
 			IRedmineQueryField queryField = fields[i-1];
 
-			Label label = new Label(control, SWT.NONE);
+			Label label = new Label(composite, SWT.NONE);
 			label.setText(queryField.getLabel());
 			label.setLayoutData(commonGridData);
 			
 			ListViewer list = lstSearchValues.get(queryField);
-			list.getControl().setParent(control);
+			list.getControl().setParent(composite);
 			list.getControl().setLayoutData(listGridData);
 
 			if (i % columns == 0 || i == queryFields.size()) {
@@ -84,36 +78,35 @@ class RedmineGuiHelper {
 					IRedmineQueryField tmpSearchField = fields[j];
 					
 					ComboViewer combo = lstSearchOperators.get(tmpSearchField);
-					combo.getControl().setParent(control);
+					combo.getControl().setParent(composite);
 					combo.getControl().setLayoutData(commonGridData);
 				}
 			}
 		}
 	}
 	
-	public static void placeTextElements(final Composite parent, final Collection<? extends IRedmineQueryField> queryFields, final Map<? extends IRedmineQueryField, Text> txtSearchValues, final Map<? extends IRedmineQueryField, ComboViewer> txtSearchOperators) {
+	public static void placeTextElements(final Composite parent, final Collection<? extends IRedmineQueryField> queryFields, final Map<? extends IRedmineQueryField, ? extends Control> txtSearchValues, final Map<? extends IRedmineQueryField, ComboViewer> txtSearchOperators) {
 		
-		Composite control = new Composite(parent, SWT.NONE);
-		control.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(3, false);
-		control.setLayout(layout);
+		composite.setLayout(layout);
 		
 		GridData commonGridData = new GridData();
-		GridData textGridData = new GridData(SWT.FILL, SWT.CENTER, false, true);
-		textGridData.widthHint=300;
+		GridData textGridData = new GridData(SWT.FILL, SWT.CENTER, true, true);
+		textGridData.minimumWidth=300;
 
 		for (IRedmineQueryField queryField : queryFields) {
-			Label label = new Label(control, SWT.NONE);
+			Label label = new Label(composite, SWT.NONE);
 			label.setText(queryField.getLabel());
 			label.setLayoutData(commonGridData);
 
 			ComboViewer combo = txtSearchOperators.get(queryField);
-			combo.getControl().setParent(control);
+			combo.getControl().setParent(composite);
 			combo.getControl().setLayoutData(commonGridData);
 
-			Text text = txtSearchValues.get(queryField);
-			text.setParent(control);
-			text.setLayoutData(textGridData);
+			Control control = txtSearchValues.get(queryField);
+			control.setParent(composite);
+			control.setLayoutData(textGridData);
 		}
 	}
 	

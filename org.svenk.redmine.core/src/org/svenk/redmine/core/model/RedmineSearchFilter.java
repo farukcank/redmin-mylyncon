@@ -148,11 +148,12 @@ public class RedmineSearchFilter {
 
 	public enum SearchField implements IRedmineQueryField {
 
-		LIST_BASED("LIST_BASED", true, CompareOperator.IS, CompareOperator.IS_NOT,
+		LIST_BASED("LIST_BASED", true, false, true, CompareOperator.IS, CompareOperator.IS_NOT,
 				CompareOperator.NONE, CompareOperator.ALL),
-		TEXT_BASED("TEXT_BASED", CompareOperator.IS, CompareOperator.IS_NOT, 
+		TEXT_BASED("TEXT_BASED", true, false, false, CompareOperator.IS, CompareOperator.IS_NOT, 
 				CompareOperator.CONTAINS, CompareOperator.CONTAINS_NOT),
-		STATUS("status_id", true, true, CompareOperator.OPEN, CompareOperator.IS,
+		BOOLEAN_BASED("BOOLEAN_BASED", true, false, false, CompareOperator.IS, CompareOperator.IS_NOT),
+		STATUS("status_id", false, true, true, CompareOperator.OPEN, CompareOperator.IS,
 				CompareOperator.IS_NOT,
 				CompareOperator.CLOSED, CompareOperator.ALL),
 		PRIORITY("priority_id", true, CompareOperator.IS, CompareOperator.IS_NOT),
@@ -206,27 +207,30 @@ public class RedmineSearchFilter {
 		private boolean required;
 		
 		private boolean listType;
+		
+		private boolean generic;
 
 		private List<CompareOperator> operators;
 
 		SearchField(String fieldName, CompareOperator... operators) {
-			this(fieldName, false, false, operators);
+			this(fieldName, false, false, false, operators);
 		}
 
 		SearchField(String fieldName, boolean listType, CompareOperator... operators) {
-			this(fieldName, false, listType, operators);
+			this(fieldName, false, false, listType, operators);
 		}
-		
-		SearchField(String fieldName, boolean required, boolean listType, CompareOperator... operators) {
+
+		SearchField(String fieldName, boolean generic, boolean required, boolean listType, CompareOperator... operators) {
 			this.fieldName = fieldName;
 			this.required = required;
 			this.listType = listType;
+			this.generic = generic;
 			this.operators = new ArrayList<CompareOperator>(operators.length);
 			for (CompareOperator compareOperator : operators) {
 				this.operators.add(compareOperator);
 			}
 		}
-
+		
 		public static SearchField fromCustomTicketField(RedmineCustomTicketField field) {
 			switch (field.getType()) {
 				case LIST: return LIST_BASED;
@@ -246,9 +250,14 @@ public class RedmineSearchFilter {
 			return required;
 		}
 
+		public boolean isGeneric() {
+			return generic;
+		}
+
 		public boolean isListType() {
 			return listType;
 		}
+		
 		
 		public String getQueryValue() {
 			return fieldName;
@@ -261,7 +270,8 @@ public class RedmineSearchFilter {
 		public String toString() {
 			return fieldName;
 		}
-		
+
+
 	}
 
 	private SearchField searchField;

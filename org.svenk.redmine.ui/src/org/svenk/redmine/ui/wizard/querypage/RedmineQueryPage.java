@@ -216,21 +216,22 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		});
 	}
 
-	private void createTextGroup(final Composite control) {
+	private void createTextGroup(final Composite parent) {
+		
 		LabelProvider labelProvider = new RedmineLabelProvider();
 		Collection<SearchField> searchFields = new ArrayList<SearchField>();
 
 		for (SearchField searchField : SearchField.values()) {
-			if (searchField.isListType() || searchField==SearchField.TEXT_BASED) {
+			if (searchField.isListType() || searchField.isGeneric()) {
 				continue;
 			}
 			searchFields.add(searchField);
 
-			Text text = new Text(control, SWT.BORDER);
+			Text text = new Text(parent, SWT.BORDER);
 			text.setEnabled(false);
 			txtSearchValues.put(searchField, text);
 			
-			ComboViewer combo = new ComboViewer(control, SWT.READ_ONLY | SWT.DROP_DOWN);
+			ComboViewer combo = new ComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN);
 			String defaultValue = searchField.isRequired()?null:OPERATOR_TITLE;
 			combo.setContentProvider(new RedmineContentProvider(defaultValue));
 			combo.setLabelProvider(labelProvider);
@@ -243,26 +244,27 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 							txtSearchValues.get(searchField)));
 		}
 		
-		RedmineGuiHelper.placeTextElements(control, searchFields, txtSearchValues, searchOperators);
+		RedmineGuiHelper.placeTextElements(parent, searchFields, txtSearchValues, searchOperators);
 	}
 	
-	private void createListGroup(final Composite control) {
+	private void createListGroup(final Composite parent) {
+		
 		LabelProvider labelProvider = new RedmineLabelProvider();
 		Collection<SearchField> searchFields = new ArrayList<SearchField>();
 		
 		for (SearchField searchField : SearchField.values()) {
-			if (!searchField.isListType() || searchField==SearchField.LIST_BASED) {
+			if (!searchField.isListType() || searchField.isGeneric()) {
 				continue;
 			}
 			searchFields.add(searchField);
 
-			ListViewer list = new ListViewer(control, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
+			ListViewer list = new ListViewer(parent, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
 			list.setLabelProvider(labelProvider);
 			list.setContentProvider(new RedmineContentProvider());
 			list.getControl().setEnabled(false);
 			lstSearchValues.put(searchField, list);
 
-			ComboViewer combo = new ComboViewer(control, SWT.READ_ONLY | SWT.DROP_DOWN);
+			ComboViewer combo = new ComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN);
 			String defaultValue = searchField.isRequired()?null:OPERATOR_TITLE;
 			combo.setContentProvider(new RedmineContentProvider(defaultValue));
 			combo.setLabelProvider(labelProvider);
@@ -275,7 +277,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 							lstSearchValues.get(searchField).getControl()));
 		}
 		
-		RedmineGuiHelper.placeListElements(control, 4, searchFields, lstSearchValues, searchOperators);
+		RedmineGuiHelper.placeListElements(parent, 4, searchFields, lstSearchValues, searchOperators);
 	}
 
 	protected void createUpdateButton(final Composite parent) {
@@ -402,6 +404,13 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		java.util.List<IRedmineQueryField> txtKeys 
 		= new ArrayList<IRedmineQueryField>(txtCustomSearchValues.keySet());
 
+		Collection<Composite> oldComposites = new ArrayList(2);
+		for (Control child : customComposite.getChildren()) {
+			if (child instanceof Composite) {
+				oldComposites.add((Composite)child);
+			}
+		}
+
 		for (RedmineCustomTicketField customField : customFields) {
 			if (!customField.isSupportFilter()) {
 				continue;
@@ -410,7 +419,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			Control control = null;
 			ComboViewer combo = null;
 			SearchField searchfield = null;
-			
+
 			switch(customField.getType()) {
 				case LIST : {
 					ListViewer list = null;
@@ -431,19 +440,18 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 				case STRING :
 				case TEXT :
 				case INT :
+				case DATE :
 				case FLOAT : {
-					continue;
-//					if (txtCustomSearchValues.get(customField) instanceof Text) {
-//						txtKeys.remove(customField);
-//						control = txtCustomSearchValues.get(customField);
-//					} else {
-//						control = new Text(customComposite, SWT.BORDER);
-//						txtCustomSearchValues.put(customField, control);
-//						searchfield = SearchField.fromCustomTicketField(customField);
-//					}
-//					break;
+					if (txtCustomSearchValues.get(customField) instanceof Text) {
+						txtKeys.remove(customField);
+						control = txtCustomSearchValues.get(customField);
+					} else {
+						control = new Text(customComposite, SWT.BORDER);
+						txtCustomSearchValues.put(customField, control);
+						searchfield = SearchField.fromCustomTicketField(customField);
+					}
+					break;
 				}
-				case DATE : continue ;
 				case BOOL : continue ;
 			}
 			
@@ -467,7 +475,12 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			}
 		}
 		
+		for (Composite old : oldComposites) {
+			old.dispose();
+		}
+		
 		RedmineGuiHelper.placeListElements(customComposite, 4, lstCustomSearchValues.keySet(), lstCustomSearchValues, customSearchOperators);
+		RedmineGuiHelper.placeTextElements(customComposite, txtCustomSearchValues.keySet(), txtCustomSearchValues, customSearchOperators);
 	}
 	
 
