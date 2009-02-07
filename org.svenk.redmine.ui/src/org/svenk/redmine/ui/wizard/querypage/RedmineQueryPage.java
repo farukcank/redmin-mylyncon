@@ -52,6 +52,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -437,6 +438,21 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 					list.setInput(customField.getListValues());
 					break;
 				}
+				case BOOL : {
+					if (txtCustomSearchValues.get(customField) instanceof Button) {
+						txtKeys.remove(customField);
+						control = txtCustomSearchValues.get(customField);
+					} else {
+						Combo bool = new Combo(customComposite, SWT.BORDER | SWT.READ_ONLY);
+						bool.add("True");
+						bool.add("False");
+						bool.select(0);
+						control = bool;
+						txtCustomSearchValues.put(customField, control);
+						searchfield = SearchField.fromCustomTicketField(customField);
+					}
+					break;
+				}
 				case STRING :
 				case TEXT :
 				case INT :
@@ -452,7 +468,6 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 					}
 					break;
 				}
-				case BOOL : continue ;
 			}
 			
 			if (searchfield==null) {

@@ -80,6 +80,7 @@ public class RedmineSearchFilterTest {
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.IS_NOT);
+		filter.addValue("3");
 		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.IS_NOT.getQueryValue(), "UTF-8");
@@ -113,6 +114,7 @@ public class RedmineSearchFilterTest {
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.IS_NOT);
+		filter.addValue("3");
 		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.IS_NOT.getQueryValue(), "UTF-8");
@@ -145,6 +147,7 @@ public class RedmineSearchFilterTest {
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.IS_NOT);
+		filter.addValue("3");
 		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.IS_NOT.getQueryValue(), "UTF-8");
@@ -177,6 +180,7 @@ public class RedmineSearchFilterTest {
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.IS_NOT);
+		filter.addValue("3");
 		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.IS_NOT.getQueryValue(), "UTF-8");
@@ -209,6 +213,7 @@ public class RedmineSearchFilterTest {
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.IS_NOT);
+		filter.addValue("3");
 		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.IS_NOT.getQueryValue(), "UTF-8");
@@ -253,6 +258,7 @@ public class RedmineSearchFilterTest {
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.IS_NOT);
+		filter.addValue("3");
 		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.IS_NOT.getQueryValue(), "UTF-8");
@@ -296,6 +302,7 @@ public class RedmineSearchFilterTest {
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.CONTAINS_NOT);
+		filter.addValue("some_text");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.CONTAINS_NOT.getQueryValue(), "UTF-8");
 		assertEquals("&fields[]=subject&operators[subject]=" + operator + "&values[subject][]=some_text", sb.toString());
@@ -305,11 +312,6 @@ public class RedmineSearchFilterTest {
 		filter.appendUrlPart(sb);
 		assertEquals("", sb.toString());
 
-		sb.setLength(0);
-		filter.setOperator(CompareOperator.CONTAINS_NOT);
-		filter.addValue("some_text");
-		filter.appendUrlPart(sb);
-		assertEquals("", sb.toString());
 	}
 	
 	@Test
@@ -353,6 +355,7 @@ public class RedmineSearchFilterTest {
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.LTE);
+		filter.addValue("50");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.LTE.getQueryValue(), "UTF-8");
 		assertEquals("&fields[]=done_ratio&operators[done_ratio]=" + operator + "&values[done_ratio][]=50", sb.toString());
@@ -406,12 +409,14 @@ public class RedmineSearchFilterTest {
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.DAY_AGO_LESS_THEN);
+		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.DAY_AGO_LESS_THEN.getQueryValue(), "UTF-8");
 		assertEquals("&fields[]=created_on&operators[created_on]=" + operator + "&values[created_on][]=4", sb.toString());
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.DAY_AGO);
+		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.DAY_AGO.getQueryValue(), "UTF-8");
 		assertEquals("&fields[]=created_on&operators[created_on]=" + operator + "&values[created_on][]=4", sb.toString());
@@ -420,12 +425,6 @@ public class RedmineSearchFilterTest {
 		filter.setOperator(CompareOperator.IS);
 		filter.appendUrlPart(sb);
 		filter.setOperator(CompareOperator.IS);
-		assertEquals("", sb.toString());
-		
-		sb.setLength(0);
-		filter.setOperator(CompareOperator.DAY_AGO_LESS_THEN);
-		filter.addValue("4");
-		filter.appendUrlPart(sb);
 		assertEquals("", sb.toString());
 	}
 	
@@ -472,24 +471,20 @@ public class RedmineSearchFilterTest {
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.DAY_AGO_LESS_THEN);
+		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.DAY_AGO_LESS_THEN.getQueryValue(), "UTF-8");
 		assertEquals("&fields[]=updated_on&operators[updated_on]=" + operator + "&values[updated_on][]=4", sb.toString());
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.DAY_AGO);
+		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.DAY_AGO.getQueryValue(), "UTF-8");
 		assertEquals("&fields[]=updated_on&operators[updated_on]=" + operator + "&values[updated_on][]=4", sb.toString());
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.IS);
-		filter.appendUrlPart(sb);
-		filter.setOperator(CompareOperator.IS);
-		assertEquals("", sb.toString());
-		
-		sb.setLength(0);
-		filter.setOperator(CompareOperator.DAY_AGO_LESS_THEN);
 		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		assertEquals("", sb.toString());
@@ -553,43 +548,41 @@ public class RedmineSearchFilterTest {
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.DAY_AGO_LESS_THEN);
+		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.DAY_AGO_LESS_THEN.getQueryValue(), "UTF-8");
 		assertEquals("&fields[]=start_date&operators[start_date]=" + operator + "&values[start_date][]=4", sb.toString());
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.DAY_AGO);
+		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.DAY_AGO.getQueryValue(), "UTF-8");
 		assertEquals("&fields[]=start_date&operators[start_date]=" + operator + "&values[start_date][]=4", sb.toString());
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.DAY_LATER);
+		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.DAY_LATER.getQueryValue(), "UTF-8");
 		assertEquals("&fields[]=start_date&operators[start_date]=" + operator + "&values[start_date][]=4", sb.toString());
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.DAY_LATER_LESS_THEN);
+		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.DAY_LATER_LESS_THEN.getQueryValue(), "UTF-8");
 		assertEquals("&fields[]=start_date&operators[start_date]=" + operator + "&values[start_date][]=4", sb.toString());
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.DAY_LATER_MORE_THEN);
+		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.DAY_LATER_MORE_THEN.getQueryValue(), "UTF-8");
 		assertEquals("&fields[]=start_date&operators[start_date]=" + operator + "&values[start_date][]=4", sb.toString());
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.IS);
-		filter.appendUrlPart(sb);
-		filter.setOperator(CompareOperator.IS);
-		assertEquals("", sb.toString());
-		
-		sb.setLength(0);
-		filter.setOperator(CompareOperator.DAY_AGO_LESS_THEN);
-		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		assertEquals("", sb.toString());
 	}
@@ -652,43 +645,41 @@ public class RedmineSearchFilterTest {
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.DAY_AGO_LESS_THEN);
+		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.DAY_AGO_LESS_THEN.getQueryValue(), "UTF-8");
 		assertEquals("&fields[]=start_date&operators[start_date]=" + operator + "&values[start_date][]=4", sb.toString());
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.DAY_AGO);
+		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.DAY_AGO.getQueryValue(), "UTF-8");
 		assertEquals("&fields[]=start_date&operators[start_date]=" + operator + "&values[start_date][]=4", sb.toString());
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.DAY_LATER);
+		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.DAY_LATER.getQueryValue(), "UTF-8");
 		assertEquals("&fields[]=start_date&operators[start_date]=" + operator + "&values[start_date][]=4", sb.toString());
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.DAY_LATER_LESS_THEN);
+		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.DAY_LATER_LESS_THEN.getQueryValue(), "UTF-8");
 		assertEquals("&fields[]=start_date&operators[start_date]=" + operator + "&values[start_date][]=4", sb.toString());
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.DAY_LATER_MORE_THEN);
+		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.DAY_LATER_MORE_THEN.getQueryValue(), "UTF-8");
 		assertEquals("&fields[]=start_date&operators[start_date]=" + operator + "&values[start_date][]=4", sb.toString());
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.IS);
-		filter.appendUrlPart(sb);
-		filter.setOperator(CompareOperator.IS);
-		assertEquals("", sb.toString());
-		
-		sb.setLength(0);
-		filter.setOperator(CompareOperator.DAY_AGO_LESS_THEN);
-		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		assertEquals("", sb.toString());
 	}
@@ -772,6 +763,7 @@ public class RedmineSearchFilterTest {
 		
 		sb.setLength(0);
 		filter.setOperator(CompareOperator.IS_NOT);
+		filter.addValue("3");
 		filter.addValue("4");
 		filter.appendUrlPart(sb);
 		operator = URLEncoder.encode(CompareOperator.IS_NOT.getQueryValue(), "UTF-8");
@@ -795,4 +787,173 @@ public class RedmineSearchFilterTest {
 		assertEquals("", sb.toString());
 	}
 
+	@Test
+	public void testCustomTextValueAppendUrlPart() throws Exception {
+		StringBuffer sb = new StringBuffer();
+		String operator;
+		
+		int idVal = 4;
+		RedmineCustomTicketField customField = 
+			new RedmineCustomTicketField(idVal, RedmineCustomTicketField.FieldType.TEXT.name());
+		String id = customField.getQueryValue();
+		
+		RedmineSearchFilter filter = new RedmineSearchFilter(customField);
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.IS);
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.IS.getQueryValue(), "UTF-8");
+		assertEquals("", sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.IS);
+		filter.addValue("istext");
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.IS.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"][]=istext", sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.IS_NOT);
+		filter.addValue("isnottext");
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.IS_NOT.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"][]=isnottext", sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.CONTAINS);
+		filter.addValue("containstext");
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.CONTAINS.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"][]=containstext", sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.CONTAINS_NOT);
+		filter.addValue("containsnottext");
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.CONTAINS_NOT.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"][]=containsnottext", sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.NONE);
+		filter.appendUrlPart(sb);
+		assertEquals("", sb.toString());
+	}
+
+	@Test
+	public void testCustomDateValueAppendUrlPart() throws Exception {
+		StringBuffer sb = new StringBuffer();
+		String operator;
+
+		int idVal = 4;
+		RedmineCustomTicketField customField = 
+			new RedmineCustomTicketField(idVal, RedmineCustomTicketField.FieldType.DATE.name());
+		String id = customField.getQueryValue();
+		
+		RedmineSearchFilter filter = new RedmineSearchFilter(customField);
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.TODAY);
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.TODAY.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"]", sb.toString(), sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.CURRENT_WEEK);
+		filter.addValue("4");
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.CURRENT_WEEK.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"]", sb.toString(), sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.DAY_AGO_MORE_THEN);
+		filter.addValue("4");
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.DAY_AGO_MORE_THEN.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"][]=4", sb.toString(), sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.DAY_AGO_LESS_THEN);
+		filter.addValue("4");
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.DAY_AGO_LESS_THEN.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"][]=4", sb.toString(), sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.DAY_AGO);
+		filter.addValue("4");
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.DAY_AGO.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"][]=4", sb.toString(), sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.DAY_LATER);
+		filter.addValue("4");
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.DAY_LATER.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"][]=4", sb.toString(), sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.DAY_LATER_LESS_THEN);
+		filter.addValue("4");
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.DAY_LATER_LESS_THEN.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"][]=4", sb.toString(), sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.DAY_LATER_MORE_THEN);
+		filter.addValue("4");
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.DAY_LATER_MORE_THEN.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"][]=4", sb.toString(), sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.IS);
+		filter.appendUrlPart(sb);
+		assertEquals("", sb.toString());
+	}
+
+	@Test
+	public void testCustomBooleanValueAppendUrlPart() throws Exception {
+		StringBuffer sb = new StringBuffer();
+		String operator;
+		
+		int idVal = 4;
+		RedmineCustomTicketField customField = 
+			new RedmineCustomTicketField(idVal, RedmineCustomTicketField.FieldType.BOOL.name());
+		String id = customField.getQueryValue();
+		
+		RedmineSearchFilter filter = new RedmineSearchFilter(customField);
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.IS);
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.IS.getQueryValue(), "UTF-8");
+		assertEquals("", sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.IS);
+		filter.addValue("2");
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.IS.getQueryValue(), "UTF-8");
+		assertEquals("", sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.IS);
+		filter.addValue("1");
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.IS.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"][]=1", sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.IS_NOT);
+		filter.addValue("0");
+		filter.appendUrlPart(sb);
+		operator = URLEncoder.encode(CompareOperator.IS_NOT.getQueryValue(), "UTF-8");
+		assertEquals("&fields[]="+id+"&operators["+id+"]=" + operator + "&values["+id+"][]=0", sb.toString());
+		
+		sb.setLength(0);
+		filter.setOperator(CompareOperator.CONTAINS);
+		filter.appendUrlPart(sb);
+		assertEquals("", sb.toString());
+	}
 }

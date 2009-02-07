@@ -152,6 +152,11 @@ public class RedmineSearchFilter {
 				CompareOperator.NONE, CompareOperator.ALL),
 		TEXT_BASED("TEXT_BASED", true, false, false, CompareOperator.IS, CompareOperator.IS_NOT, 
 				CompareOperator.CONTAINS, CompareOperator.CONTAINS_NOT),
+		DATE_BASED("DATE_BASED", true, false, false, CompareOperator.DAY_AGO_MORE_THEN,
+				CompareOperator.DAY_AGO_LESS_THEN, CompareOperator.DAY_AGO,
+				CompareOperator.TODAY, CompareOperator.CURRENT_WEEK,
+				CompareOperator.DAY_LATER, CompareOperator.DAY_LATER_LESS_THEN,
+				CompareOperator.DAY_LATER_MORE_THEN),
 		BOOLEAN_BASED("BOOLEAN_BASED", true, false, false, CompareOperator.IS, CompareOperator.IS_NOT),
 		STATUS("status_id", false, true, true, CompareOperator.OPEN, CompareOperator.IS,
 				CompareOperator.IS_NOT,
@@ -234,6 +239,8 @@ public class RedmineSearchFilter {
 		public static SearchField fromCustomTicketField(RedmineCustomTicketField field) {
 			switch (field.getType()) {
 				case LIST: return LIST_BASED;
+				case DATE: return DATE_BASED;
+				case BOOL: return BOOLEAN_BASED;
 			}
 			return TEXT_BASED;
 		}
@@ -293,7 +300,7 @@ public class RedmineSearchFilter {
 	}
 	
 	public void addValue(String value) {
-		if (operator.useValue()) {
+		if (operator!=null && operator.useValue()) {
 			values.add(value);
 		}
 	}
@@ -321,6 +328,7 @@ public class RedmineSearchFilter {
 		} else {
 			this.operator = null;
 		}
+		values.clear();
 	}
 	
 	StringBuffer appendUrlPart(StringBuffer sb) {
@@ -345,10 +353,25 @@ public class RedmineSearchFilter {
 					}
 					break;
 				}
-				case SUBJECT: {
+				case SUBJECT: 
+				case TEXT_BASED: {
 					if (values.size() == 1) {
 						appendFieldAndOperator(sb);
 						appendValues(sb);
+					}
+					break;
+				}
+				case BOOLEAN_BASED: {
+					if (values.size() == 1) {
+						try {
+							int v = Integer.parseInt(values.get(0));
+							if (v==0 || v==1) {
+								appendFieldAndOperator(sb);
+								appendValues(sb);
+							}
+						} catch (NumberFormatException ex) {
+							;
+						}
 					}
 					break;
 				}
@@ -366,6 +389,7 @@ public class RedmineSearchFilter {
 					}
 					break;
 				}
+				case DATE_BASED:
 				case DATE_START:
 				case DATE_DUE:
 				case DATE_CREATED:
