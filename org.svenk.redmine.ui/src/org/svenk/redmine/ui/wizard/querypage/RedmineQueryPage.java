@@ -320,6 +320,10 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 					}
 					if (query != null && query.getAttribute(RedmineSearch.SEARCH_PARAMS) != null) {
 						restoreQuery(query);
+					} else {
+						projectViewer.setSelection(new StructuredSelection(PROJECT_SELECT_TITLE));
+						storedQueryViewer.setInput(new String[]{QUERY_SELECT_TITLE});
+						storedQueryViewer.setSelection(new StructuredSelection(QUERY_SELECT_TITLE));
 					}
 				}
 			});
