@@ -52,7 +52,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -74,6 +73,7 @@ import org.svenk.redmine.core.model.RedmineSearch;
 import org.svenk.redmine.core.model.RedmineSearchFilter;
 import org.svenk.redmine.core.model.RedmineStoredQuery;
 import org.svenk.redmine.core.model.RedmineTicketAttribute;
+import org.svenk.redmine.core.model.RedmineCustomTicketField.FieldType;
 import org.svenk.redmine.core.model.RedmineSearchFilter.CompareOperator;
 import org.svenk.redmine.core.model.RedmineSearchFilter.SearchField;
 
@@ -90,6 +90,12 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	private static final String QUERY_SELECT_TITLE = "Select a serverside stored query or create a new";
 
 	private static final String OPERATOR_TITLE = "Disabled";
+	
+	private static final String OPERATOR_BOOLEAN_TRUE = "true";
+
+	private static final String TAB_STANDARD = "Master data";
+
+	private static final String TAB_CUSTOM = "Custom fields";
 
 	private IRepositoryQuery query;
 
@@ -174,8 +180,8 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		settingsFolder.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		final TabItem mainItem = new TabItem(settingsFolder, SWT.NONE);
 		final TabItem customItem = new TabItem(settingsFolder, SWT.NONE);
-		mainItem.setText("MAIN FILTER - RENAME");
-		customItem.setText("CUSTOM FILTER - RENAME");
+		mainItem.setText(TAB_STANDARD);
+		customItem.setText(TAB_CUSTOM);
 		
 		final Composite commonComposite = new Composite(settingsFolder, SWT.NONE);
 		commonComposite.setLayout(layout);
@@ -405,7 +411,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		java.util.List<IRedmineQueryField> txtKeys 
 		= new ArrayList<IRedmineQueryField>(txtCustomSearchValues.keySet());
 
-		Collection<Composite> oldComposites = new ArrayList(2);
+		Collection<Composite> oldComposites = new ArrayList<Composite>(2);
 		for (Control child : customComposite.getChildren()) {
 			if (child instanceof Composite) {
 				oldComposites.add((Composite)child);
@@ -443,11 +449,10 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 						txtKeys.remove(customField);
 						control = txtCustomSearchValues.get(customField);
 					} else {
-						Combo bool = new Combo(customComposite, SWT.BORDER | SWT.READ_ONLY);
-						bool.add("True");
-						bool.add("False");
-						bool.select(0);
-						control = bool;
+						Text text = new Text(customComposite, SWT.NONE);
+						text.setText(OPERATOR_BOOLEAN_TRUE);
+						text.setEditable(false);
+						control = text;
 						txtCustomSearchValues.put(customField, control);
 						searchfield = SearchField.fromCustomTicketField(customField);
 					}
@@ -565,7 +570,9 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 				if (operator.useValue()) {
 					control.setEnabled(true);
 
-					if (searchFilter.getValues().size() > 0) {
+					if (searchFilter.getValues().size() > 0 
+							&& !(queryField instanceof RedmineCustomTicketField 
+							&& ((RedmineCustomTicketField)queryField).getType()==FieldType.BOOL)) {
 						String oldValue = searchFilter.getValues().get(0);
 						if (control instanceof Text) {
 							((Text)control).setText(oldValue);
@@ -714,7 +721,12 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			if (selection.getFirstElement() instanceof CompareOperator) {
 				CompareOperator operator = (CompareOperator)selection.getFirstElement();
 				if (control instanceof Text) {
-					search.addFilter(queryField, operator, ((Text)control).getText().trim());
+					if (queryField instanceof RedmineCustomTicketField 
+							&& ((RedmineCustomTicketField)queryField).getType()==FieldType.BOOL) {
+						search.addFilter(queryField, operator, "1");
+					} else {
+						search.addFilter(queryField, operator, ((Text)control).getText().trim());
+					}
 				}
 			}
 		}
