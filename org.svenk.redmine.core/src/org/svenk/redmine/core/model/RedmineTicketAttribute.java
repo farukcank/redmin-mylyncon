@@ -24,7 +24,7 @@ import java.io.Serializable;
 
 public class RedmineTicketAttribute implements Comparable<RedmineTicketAttribute>, Serializable {
 
-	private static final long serialVersionUID = 5764142938785947211L;
+	private static final long serialVersionUID = 1L;
 
 	private final String name;
 
@@ -55,6 +55,13 @@ public class RedmineTicketAttribute implements Comparable<RedmineTicketAttribute
 	@Override
 	public boolean equals(Object obj) {
 		return obj.getClass().equals(getClass()) && ((RedmineTicketAttribute)obj).getValue()==getValue();
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 31 * hash + value;
+		return hash;
 	}
 
 }

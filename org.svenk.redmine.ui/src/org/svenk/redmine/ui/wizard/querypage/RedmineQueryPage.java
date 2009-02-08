@@ -518,12 +518,13 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		titleText.setText(query.getSummary());
 
 		projectData = data.getProjectFromName(query.getAttribute(RedmineSearch.PROJECT_NAME));
-		updateProjectAttributes(projectData);
+		projectViewer.setSelection(new StructuredSelection(projectData));
+
+		//NOTE : Don't call updateProjectAttributes(projectData) - projectViewer's SeletionListener call this method !!!
 
 		RedmineSearch search = RedmineSearch.fromSearchQueryParam(projectData, query.getAttribute(RedmineSearch.SEARCH_PARAMS), getTaskRepository().getRepositoryUrl());
 		search.setProject(projectData.getProject());
 		
-		projectViewer.setSelection(new StructuredSelection(projectData));
 
 		if (client.supportServersideStoredQueries()) {
 			String storedQueryIdString = query.getAttribute(RedmineSearch.STORED_QUERY_ID);

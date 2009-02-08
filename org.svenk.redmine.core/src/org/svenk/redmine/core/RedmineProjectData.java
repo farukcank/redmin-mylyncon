@@ -35,7 +35,7 @@ import org.svenk.redmine.core.model.RedmineVersion;
 
 public class RedmineProjectData implements Serializable {
 	
-	private static final long serialVersionUID = 4L;
+	private static final long serialVersionUID = 5L;
 
 	RedmineProject project;
 	
@@ -195,7 +195,14 @@ public class RedmineProjectData implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof RedmineProjectData && ((RedmineProjectData)obj).getProject().equals(getProject());
+		return obj.getClass().equals(this.getClass()) && ((RedmineProjectData)obj).getProject().equals(getProject());
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 31 * hash + (null == project ? 0 : project.hashCode());
+		return hash;
 	}
 
 }
