@@ -29,8 +29,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.svenk.redmine.core.model.IRedmineQueryField;
 
 class RedmineGuiHelper {
@@ -85,7 +85,7 @@ class RedmineGuiHelper {
 		}
 	}
 	
-	public static void placeTextElements(final Composite parent, final Collection<? extends IRedmineQueryField> queryFields, final Map<? extends IRedmineQueryField, ? extends Control> txtSearchValues, final Map<? extends IRedmineQueryField, ComboViewer> txtSearchOperators) {
+	public static void placeTextElements(final Composite parent, final Collection<? extends IRedmineQueryField> queryFields, final Map<? extends IRedmineQueryField, Text> txtSearchValues, final Map<? extends IRedmineQueryField, ComboViewer> txtSearchOperators) {
 		
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(3, false);
@@ -104,9 +104,9 @@ class RedmineGuiHelper {
 			combo.getControl().setParent(composite);
 			combo.getControl().setLayoutData(commonGridData);
 
-			Control control = txtSearchValues.get(queryField);
-			control.setParent(composite);
-			control.setLayoutData(textGridData);
+			Text text = txtSearchValues.get(queryField);
+			text.setParent(composite);
+			text.setLayoutData(textGridData);
 		}
 	}
 	
