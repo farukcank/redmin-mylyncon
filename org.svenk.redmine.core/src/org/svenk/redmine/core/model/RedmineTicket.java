@@ -269,6 +269,8 @@ public class RedmineTicket {
 			
 			if (customField.getType()==FieldType.DATE && attributeValue.length()>0) {
 				attributeValue = RedmineUtil.toFormatedRedmineDate(RedmineUtil.parseDate(attributeValue));
+			} else if (customField.getType()==FieldType.BOOL && attributeValue.length()>0) {
+				attributeValue = Boolean.parseBoolean(attributeValue) ? "1" : "0";
 			}
 			this.putCustomFieldValue(Integer.valueOf(customField.getId()), attributeValue);
 		}
