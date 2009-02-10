@@ -43,6 +43,7 @@ import org.svenk.redmine.core.model.RedmineProject;
 import org.svenk.redmine.core.model.RedmineStoredQuery;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicketJournal;
+import org.svenk.redmine.core.model.RedmineTicketRelation;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
 import org.svenk.redmine.core.model.RedmineTracker;
 import org.svenk.redmine.core.model.RedmineVersion;
@@ -67,6 +68,8 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	private final static String RPC_GET_TICKET_ALLOWED_STATUS = "Ticket.FindAllowedStatusesForIssue";
 
 	private final static String RPC_GET_TICKET_UPDATED_ID = "Ticket.FindTicketsByLastUpdate";
+
+	private final static String RPC_GET_TICKET_RELATIONS = "Ticket.FindRelationsForIssue";
 	
 	private final static String RPC_PROJECT_FIND_ALL = "Project.FindAll";
 
@@ -166,6 +169,10 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	protected List<RedmineAttachment> getAttachmentsByTicket(int id) throws RedmineException {
 		return parseResponse2Attachment(execute(RPC_GET_TICKET_ATTACHMENTS, new Integer(id)));
 	}
+
+	protected List<RedmineTicketRelation> getRelationsByTicket(int id) throws RedmineException {
+		return parseResponse2Relation(execute(RPC_GET_TICKET_RELATIONS, new Integer(id)));
+	}
 	
 	public void search(String searchParam, String projectId, String storedQueryId, List<RedmineTicket> tickets, IProgressMonitor monitor)
 			throws RedmineException {
@@ -202,6 +209,14 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			}
 		}
 		
+		if (supportTaskRelations()) {
+			List<RedmineTicketRelation> relations = getRelationsByTicket(ticket.getId());
+			if (relations!=null) {
+				for (RedmineTicketRelation relation : relations) {
+					ticket.addRelation(relation);
+				}
+			}
+		}
 	}
 
 	public List<Integer> getChangedTicketId(Integer projectId, Date changedSince, IProgressMonitor monitor) throws RedmineException {
@@ -596,6 +611,28 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		return attachments;
 	}
 	
+	private List<RedmineTicketRelation> parseResponse2Relation(Object response) throws RedmineException {
+		List<RedmineTicketRelation> relations = null;
+		if (response instanceof Object[]) {
+			Object[] maps = (Object[]) response;
+			relations = new ArrayList<RedmineTicketRelation>(maps.length);
+			
+			RedmineTicketRelation relation;
+			for (Object object : maps) {
+				if (object instanceof HashMap) {
+					HashMap<String, Object> map = parseResponse2HashMap(object);
+					relation = new RedmineTicketRelation(
+							Integer.parseInt(map.get("id").toString()),
+							Integer.parseInt(map.get("from").toString()), 
+							Integer.parseInt(map.get("to").toString()), 
+							map.get("type").toString());
+					relations.add(relation);
+				}
+			}
+		}
+		return relations;
+	}
+	
 	private List<Integer> parseResponse2IntegerList(Object response) throws RedmineException {
 		List<Integer> result = null;
 		if (response instanceof Object[]) {
@@ -625,6 +662,10 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	}
 
 	public boolean supportServersideStoredQueries() {
+		return wsVersion >= PLUGIN_VERSION_2_3;
+	}
+	
+	public boolean supportTaskRelations() {
 		return wsVersion >= PLUGIN_VERSION_2_3;
 	}
 }

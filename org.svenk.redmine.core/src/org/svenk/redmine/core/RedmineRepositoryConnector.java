@@ -21,12 +21,14 @@
 package org.svenk.redmine.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,11 +49,14 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.eclipse.mylyn.tasks.core.data.TaskDataCollector;
 import org.eclipse.mylyn.tasks.core.data.TaskMapper;
+import org.eclipse.mylyn.tasks.core.data.TaskRelation;
 import org.eclipse.mylyn.tasks.core.sync.ISynchronizationSession;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.RedmineSearch;
 import org.svenk.redmine.core.model.RedmineTicket;
+import org.svenk.redmine.core.model.RedmineTicketRelation;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
+import org.svenk.redmine.core.model.RedmineTicketRelation.RelationType;
 import org.svenk.redmine.core.util.RedmineTaskDataValidator;
 import org.svenk.redmine.core.util.RedmineUtil;
 
@@ -216,7 +221,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 			int projectId = clientData.getProjectFromName(projectName).getProject().getValue();
 			task.setAttribute(TaskAttribute.PRODUCT, ""+projectId);
 
-//			RedmineProjectData projectData = getClientManager().getRedmineClient(repository).getClientData().getProjectFromId(Integer.parseInt(projectId));
+			//			RedmineProjectData projectData = getClientManager().getRedmineClient(repository).getClientData().getProjectFromId(Integer.parseInt(projectId));
 //			boolean issueEditAllowed = projectData.getProject().isIssueEditAllowed();
 //			
 //			int allowedStatusCount = taskData.getRoot().getMappedAttribute(RedmineAttribute.STATUS.getRedmineKey()).getOptions().size();
@@ -226,6 +231,32 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 
 	}
 
+	@Override
+	public Collection<TaskRelation> getTaskRelations(TaskData taskData) {
+		TaskAttribute attr = taskData.getRoot().getMappedAttribute(
+				RedmineAttribute.RELATION.getRedmineKey());
+		if (attr!=null) {
+			Map<String, String> options = attr.getOptions();
+			Collection<TaskRelation> relations = 
+				new ArrayList<TaskRelation>(options.size());
+			
+			int taskId = Integer.parseInt(taskData.getTaskId());
+			for(Entry<String, String> option : options.entrySet()) {
+				RedmineTicketRelation relation = 
+					RedmineTicketRelation.fromAttributeName(
+							Integer.parseInt(option.getKey()), option.getValue());
+				
+				if (relation!=null && relation.getType()==RelationType.BLOCKS) {
+					TaskRelation taskRelation = relation.getFromTicket()==taskId 
+						? TaskRelation.parentTask("" + relation.getToTicket()) 
+						: TaskRelation.subtask("" + relation.getFromTicket());
+					relations.add(taskRelation);
+				}
+			}
+			return relations;
+		}
+		return super.getTaskRelations(taskData);
+	}
 	
 	@Override
 	public void preSynchronization(ISynchronizationSession session, IProgressMonitor monitor) throws CoreException {

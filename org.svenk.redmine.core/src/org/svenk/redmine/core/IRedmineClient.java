@@ -95,4 +95,6 @@ public interface IRedmineClient {
 	public void refreshRepositorySettings(TaskRepository repository);
 	
 	public boolean supportServersideStoredQueries();
+
+	public boolean supportTaskRelations();
 }

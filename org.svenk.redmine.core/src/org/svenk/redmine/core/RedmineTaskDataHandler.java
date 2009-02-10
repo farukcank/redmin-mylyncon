@@ -313,6 +313,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 			
 			createAttribute(data, RedmineAttribute.COMMENT);
 			createAttribute(data, RedmineAttribute.STATUS, ticket.getStatuses(), false);
+			createAttribute(data, RedmineAttribute.RELATION, ticket.getRelations(), false);
 		} else {
 			createAttribute(data, RedmineAttribute.STATUS, client.getClientData().getStatuses(), false);
 		}

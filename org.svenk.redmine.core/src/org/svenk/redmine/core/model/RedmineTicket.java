@@ -49,7 +49,7 @@ public class RedmineTicket {
 		PRIORITY("priority"),
 		PROJECT("project", true), 
 //		PROJECTION("projection"),
-//		RELATIONSHIPS("relationships"),
+		RELATIONSHIPS("relationships"),
 		AUTHOR("autor", true),  
 //		REPRODUCIBILITY("reproducibility"), 
 //		RESOLUTION("resolution"), 
@@ -115,6 +115,7 @@ public class RedmineTicket {
 	private List<RedmineTicketJournal> journals;
 	private List<RedmineAttachment> attachments;
 	private List<RedmineTicketStatus> statuses;
+	private List<RedmineTicketRelation> relations;
 	
 
 	public RedmineTicket() {
@@ -217,6 +218,13 @@ public class RedmineTicket {
 		attachments.add(attachment);
 	}
 	
+	public void addRelation(RedmineTicketRelation relation) {
+		if (relations==null) {
+			relations = new ArrayList<RedmineTicketRelation>();
+		}
+		relations.add(relation);
+	}
+	
 	public RedmineAttachment[] getAttachments() {
 		return attachments==null ? null : attachments.toArray(new RedmineAttachment[0]);
 	}
@@ -227,6 +235,10 @@ public class RedmineTicket {
 
 	public void setStatuses(List<RedmineTicketStatus> statuses) {
 		this.statuses = statuses;
+	}
+	
+	public List<RedmineTicketRelation> getRelations() {
+		return relations==null ? null : Collections.unmodifiableList(relations);
 	}
 	
 	public static RedmineTicket fromTaskData(TaskData taskData, RedmineClientData clientData) {
