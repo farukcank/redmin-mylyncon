@@ -20,14 +20,16 @@
  *******************************************************************************/
 package org.svenk.redmine.ui.wizard;
 
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.List;
 import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.RedmineProjectData;
 import org.svenk.redmine.core.model.RedmineTracker;
@@ -42,7 +44,7 @@ public class RedmineTrackerPage extends WizardPage {
 	
 	private final IRedmineClient client;
 	
-	private List trackerList;
+	private ListViewer trackerList;
 	
 	public RedmineTrackerPage(IRedmineClient client) {
 		super(PAGE_NAME);
@@ -58,22 +60,21 @@ public class RedmineTrackerPage extends WizardPage {
 		GridLayout layout = new GridLayout(1, false);
 		control.setLayout(layout);
 
-		trackerList = new List(control, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL);
-		trackerList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		trackerList.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
+		trackerList = new ListViewer(control, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL);
+		trackerList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		trackerList.setContentProvider(new RedmineContentProvider());
+		trackerList.setLabelProvider(new RedmineLabelProvider());
+		trackerList.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
 				RedmineTrackerPage.this.setPageComplete(RedmineTrackerPage.this.isPageComplete());
 			}
 		});
-		
 		setControl(control);
-
 	}
 
 	@Override
 	public boolean isPageComplete() {
-		return trackerList.getSelectionCount()==1;
+		return getSelectedTracker()!=null;
 	}
 	
 	@Override
@@ -83,19 +84,22 @@ public class RedmineTrackerPage extends WizardPage {
 		RedmineProjectPage projectPage = (RedmineProjectPage)getWizard().getPage(RedmineProjectPage.PAGE_NAME);
 		RedmineProjectData projectData = client.getClientData().getProjectFromName(projectPage.getSelectedProjectName());
 
-		String selectedValue = trackerList.getSelectionIndex()>-1 ? trackerList.getItem(trackerList.getSelectionIndex()) : "";
-		trackerList.removeAll();
-		for (RedmineTracker tracker : projectData.getTrackers()) {
-			trackerList.add(tracker.getName());
-			if (tracker.getName().equals(selectedValue)) {
-				trackerList.select(trackerList.getItemCount()-1);
-			}
+		RedmineTracker tracker = getSelectedTracker();
+		trackerList.setInput(projectData.getTrackers());
+		if (tracker != null) {
+			trackerList.setSelection(new StructuredSelection(tracker));
 		}
 		
 	}
 
-	public String getSelectedTrackerName() {
-		return trackerList.getItem(trackerList.getSelectionIndex());
+	public RedmineTracker getSelectedTracker() {
+		if (trackerList.getSelection() instanceof IStructuredSelection) {
+			IStructuredSelection selection = (IStructuredSelection)trackerList.getSelection();
+			if (!selection.isEmpty()) {
+				return (RedmineTracker)selection.getFirstElement();
+			}
+		}
+		return null;
 	}
-
+	
 }

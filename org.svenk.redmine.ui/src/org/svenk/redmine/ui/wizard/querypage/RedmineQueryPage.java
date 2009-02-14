@@ -76,6 +76,7 @@ import org.svenk.redmine.core.model.RedmineTicketAttribute;
 import org.svenk.redmine.core.model.RedmineCustomTicketField.FieldType;
 import org.svenk.redmine.core.model.RedmineSearchFilter.CompareOperator;
 import org.svenk.redmine.core.model.RedmineSearchFilter.SearchField;
+import org.svenk.redmine.ui.wizard.RedmineLabelProvider;
 
 public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 

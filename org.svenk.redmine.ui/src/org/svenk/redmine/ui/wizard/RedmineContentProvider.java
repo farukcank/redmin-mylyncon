@@ -18,21 +18,40 @@
  * Contributors:
  *     Sven Krzyzak - adapted Trac implementation for Redmine
  *******************************************************************************/
-package org.svenk.redmine.ui.wizard.querypage;
+package org.svenk.redmine.ui.wizard;
 
-import org.eclipse.jface.viewers.LabelProvider;
-import org.svenk.redmine.core.RedmineProjectData;
-import org.svenk.redmine.core.model.RedmineTicketAttribute;
+import java.util.Collection;
 
-public class RedmineLabelProvider extends LabelProvider {
-	@Override
-	public String getText(Object element) {
-		if (element instanceof RedmineProjectData) {
-			return ((RedmineProjectData)element).getProject().getName();
-		} else if (element instanceof RedmineTicketAttribute) {
-			return ((RedmineTicketAttribute)element).getName();
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.widgets.Display;
+
+public class RedmineContentProvider implements IStructuredContentProvider {
+
+	public Object[] getElements(Object inputElement) {
+		if (inputElement instanceof Collection) {
+			Collection<?> collection = (Collection<?>)inputElement;
+			return collection.toArray(new Object[collection.size()]);
 		}
-		return super.getText(element);
+		return null;
 	}
 
+	public void dispose() {
+	}
+
+	public void inputChanged(final Viewer viewer, Object oldInput, Object newInput) {
+		if (oldInput==null || newInput==null) {
+			return;
+		}
+		reselect(viewer, viewer.getSelection());
+	}
+	
+	private void reselect(final Viewer viewer, final ISelection selection) {
+		Display.getCurrent().asyncExec(new Runnable() {
+			public void run() {
+				viewer.setSelection(selection, true);
+			}
+		});
+	}
 }

@@ -404,9 +404,12 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 				for (Object customValue : (Object[])customValues) {
 					if (customValue instanceof HashMap) {
 						HashMap<String, Object> customValueMap = parseResponse2HashMap(customValue);
-						Integer customFieldId = (Integer)customValueMap.get("custom_field_id");
-						String customFieldValue = customValueMap.get("value").toString();
-						ticket.putCustomFieldValue(customFieldId, customFieldValue);
+						//Workaround: the value is missing sometimes, i don't know why
+						if (customValueMap.get("value")!=null) {
+							Integer customFieldId = (Integer)customValueMap.get("custom_field_id");
+							String customFieldValue = customValueMap.get("value").toString();
+							ticket.putCustomFieldValue(customFieldId, customFieldValue);
+						}
 					}
 				}
 			}

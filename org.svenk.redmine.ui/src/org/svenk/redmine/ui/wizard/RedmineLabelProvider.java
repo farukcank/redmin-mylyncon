@@ -18,36 +18,21 @@
  * Contributors:
  *     Sven Krzyzak - adapted Trac implementation for Redmine
  *******************************************************************************/
-package org.svenk.redmine.core;
+package org.svenk.redmine.ui.wizard;
 
-import org.eclipse.mylyn.tasks.core.ITask.PriorityLevel;
-import org.eclipse.mylyn.tasks.core.data.TaskData;
-import org.eclipse.mylyn.tasks.core.data.TaskMapper;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.svenk.redmine.core.RedmineProjectData;
+import org.svenk.redmine.core.model.RedmineTicketAttribute;
 
-public class RedmineTaskMapper extends TaskMapper implements IRedmineTaskMapping {
-
-	private final IRedmineClient client;
-	
-	public RedmineTaskMapper(TaskData taskData, IRedmineClient client) {
-		super(taskData);
-		this.client = client;
-	}
-	
+public class RedmineLabelProvider extends LabelProvider {
 	@Override
-	public PriorityLevel getPriorityLevel() {
-		PriorityLevel level =  super.getPriorityLevel();
-		if (client != null) {
-			int priority = client.getClientData().getPriority(getPriority()).getPosition();
-			level = PriorityLevel.fromLevel(priority>5 ? 1 : 6-priority);
+	public String getText(Object element) {
+		if (element instanceof RedmineProjectData) {
+			return ((RedmineProjectData)element).getProject().getName();
+		} else if (element instanceof RedmineTicketAttribute) {
+			return ((RedmineTicketAttribute)element).getName();
 		}
-		return level;
+		return super.getText(element);
 	}
 
-	public void setTracker(String value) {
-		setValue(RedmineAttribute.TRACKER.getRedmineKey(), value);
-	}
-	
-	public String getTracker() {
-		return getValue(RedmineAttribute.TRACKER.getRedmineKey());
-	}
 }

@@ -207,7 +207,6 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 	public RepositoryResponse postTaskData(TaskRepository repository,
 			TaskData taskData, Set<TaskAttribute> oldAttributes,
 			IProgressMonitor monitor) throws CoreException {
-		// TODO Auto-generated method stub
 		
 		IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
 		
@@ -250,7 +249,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 			
 			//Input from wizard
 			RedmineProjectData projectData = client.getClientData().getProjectFromName(initializationData.getProduct());
-			int trackerId = projectData.getTracker(((IRedmineTaskMapping)initializationData).getTracker()).getValue();
+			int trackerId = Integer.parseInt(((IRedmineTaskMapping)initializationData).getTracker());
 
 			//Initialize new ticket
 			RedmineTicket ticket = new RedmineTicket();
@@ -263,7 +262,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 			TaskAttribute attr = data.getRoot().getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey());
 			attr.setValue(projectData.getProject().getName());
 			attr = data.getRoot().getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey());
-			attr.setValue(""+projectData.getTracker(((IRedmineTaskMapping)initializationData).getTracker()).getValue());
+			attr.setValue(""+trackerId);
 						
 			createCustomAttributes(data, client, ticket, projectData);
 			
@@ -286,6 +285,8 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 			return true;
 		} catch (OperationCanceledException e) {
 			throw e;
+		} catch (NumberFormatException e) {
+			throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
 		} catch (RedmineException e) {
 			throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
 		}

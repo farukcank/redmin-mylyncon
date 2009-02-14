@@ -60,7 +60,7 @@ public class NewRedmineTaskWizard extends NewTaskWizard implements INewWizard {
 	@Override
 	protected ITaskMapping getInitializationData() {
 		final String product = projectPage.getSelectedProjectName();
-		final String tracker = trackerPage.getSelectedTrackerName();
+		final int trackerId = trackerPage.getSelectedTracker().getValue();
 		
 		return new AbstractRedmineTaskMapping() {
 			@Override
@@ -68,7 +68,7 @@ public class NewRedmineTaskWizard extends NewTaskWizard implements INewWizard {
 				return product;
 			}
 			public String getTracker() {
-				return tracker;
+				return ""+trackerId;
 			}
 			
 		};
