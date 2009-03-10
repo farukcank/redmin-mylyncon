@@ -161,10 +161,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 	public boolean hasTaskChanged(TaskRepository taskRepository, ITask task,
 			TaskData taskData) {
 		
-//		RedmineTaskMapper taskMapper = getTaskMapping(taskData);
 		if (taskData.isPartial()) {
-			//TODO dürfte gar nicht pasieren
-			System.out.println("Partial is true ???");
 			throw new RuntimeException("Partial is true ???");
 		} else {
 			TaskAttribute attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.DATE_UPDATED.getRedmineKey());
@@ -174,7 +171,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 				return !RedmineUtil.parseDate(localeDate).equals(repositoryDate);
 			}
 		}
-		return false;
+		return true;
 	}
 
 
