@@ -26,7 +26,9 @@ class IssueService < BaseService
   end
 
   def find_ticket_by_id(id)
-    IssueDto.create(@issue)
+    dto = IssueDto.create(@issue)
+    complete_dto(@issue, dto)
+    return dto
   end
   
   def find_allowed_statuses_for_issue(id)
@@ -60,7 +62,7 @@ class IssueService < BaseService
       issues = Issue.find :all,
                          :include => [ :assigned_to, :status, :tracker, :project, :priority, :category, :fixed_version ],
                          :conditions => @query.statement
-      issues.collect! {|x|IssueDto.create(x)}
+      issues.collect! {|x|complete_dto(x, IssueDto.create(x))}
       return issues.compact
     else
       nil
@@ -100,6 +102,29 @@ class IssueService < BaseService
       query = querydecoder.query
     end
     return query
+  end
+
+  def complete_dto issue, dto
+    statuses = issue.new_statuses_allowed_to(User.current)
+    if !statuses.include?(issue.status)
+      statuses.unshift(issue.status);
+    end
+    statuses.collect! {|x|IssueStatusDto.create(x)}
+    dto.all_status = statuses.compact
+
+    journals = issue.journals.find(:all, :conditions => ["notes IS NOT NULL"])
+    journals.collect! {|x|JournalDto.create(x)}
+    dto.all_journals = journals.compact
+
+    attachments = issue.attachments
+    attachments.collect! {|x|AttachmentDto.create(x)}
+    dto.all_attachments = attachments.compact
+
+    relations = issue.relations
+    relations.collect! {|x|IssueRelationDto.create(x)}
+    dto.all_relations = relations.compact
+
+    return dto
   end
   
 end

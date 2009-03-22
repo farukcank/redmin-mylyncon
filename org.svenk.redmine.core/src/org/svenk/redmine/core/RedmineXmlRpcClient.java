@@ -54,6 +54,7 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 
 	private final static double PLUGIN_VERSION_2_2 = 2.2;
 	private final static double PLUGIN_VERSION_2_3 = 2.3;
+	private final static double PLUGIN_VERSION_2_5 = 2.5;
 	
 	private final static String URL_ENDPOINT = "/eclipse_mylyn_connector/api";
 
@@ -153,8 +154,14 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	} 
 
 	public RedmineTicket getTicket(int id, IProgressMonitor monitor) throws RedmineException {
-		RedmineTicket ticket =  parseResponse2Ticket(execute(RPC_TICKET_BY_ID, new Integer(id)));
-		completeTicket(ticket);
+		Object respose = execute(RPC_TICKET_BY_ID, new Integer(id));
+		RedmineTicket ticket =  parseResponse2Ticket(respose);
+		
+		if (supportOptimizedCommunicatinProtocol()) {
+			completeTicket(ticket, respose);
+		} else {
+			completeTicket(ticket);
+		}
 		return ticket;
 	}
 
@@ -185,7 +192,11 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			Object[] maps = (Object[]) response;
 			for (Object object : maps) {
 				RedmineTicket ticket = parseResponse2Ticket(object);
-				completeTicket(ticket);
+				if (supportOptimizedCommunicatinProtocol()) {
+					completeTicket(ticket, object);
+				} else {
+					completeTicket(ticket);
+				}
 				tickets.add(ticket);
 			}
 		}
@@ -211,6 +222,36 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		
 		if (supportTaskRelations()) {
 			List<RedmineTicketRelation> relations = getRelationsByTicket(ticket.getId());
+			if (relations!=null) {
+				for (RedmineTicketRelation relation : relations) {
+					ticket.addRelation(relation);
+				}
+			}
+		}
+	}
+	
+	protected void completeTicket(RedmineTicket ticket, Object response) throws RedmineException {
+		HashMap<String, Object> map = parseResponse2HashMap(response);
+
+		List<RedmineTicketStatus> statuses = parseResponse2Statuses(map.get("all_status"));
+		ticket.setStatuses(statuses);
+
+		List<RedmineTicketJournal> journals = parseResponse2Journals(map.get("all_journals"));
+		if (journals!=null) {
+			for (RedmineTicketJournal journal : journals) {
+				ticket.addJournal(journal);
+			}
+		}
+
+		List<RedmineAttachment> attachments = parseResponse2Attachment(map.get("all_attachments"));
+		if (attachments!=null) {
+			for (RedmineAttachment attachment : attachments) {
+				ticket.addAttachment(attachment);
+			}
+		}
+		
+		if (supportTaskRelations()) {
+			List<RedmineTicketRelation> relations = parseResponse2Relation(map.get("all_relations"));
 			if (relations!=null) {
 				for (RedmineTicketRelation relation : relations) {
 					ticket.addRelation(relation);
@@ -670,5 +711,9 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	
 	public boolean supportTaskRelations() {
 		return wsVersion >= PLUGIN_VERSION_2_3;
+	}
+	
+	public boolean supportOptimizedCommunicatinProtocol() {
+		return wsVersion >= PLUGIN_VERSION_2_5;
 	}
 }

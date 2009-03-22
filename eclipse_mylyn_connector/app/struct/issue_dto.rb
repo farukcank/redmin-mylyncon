@@ -1,4 +1,8 @@
 require File.dirname(__FILE__) + '/custom_value_dto'
+require File.dirname(__FILE__) + '/issue_status_dto'
+require File.dirname(__FILE__) + '/journal_dto'
+require File.dirname(__FILE__) + '/attachment_dto'
+require File.dirname(__FILE__) + '/issue_relation_dto'
 
 class IssueDto < ActionWebService::Struct
 #:category, :status, :priority, :fixed_version, :start_date,  :estimated_hours
@@ -18,6 +22,10 @@ class IssueDto < ActionWebService::Struct
   member :done_ratio, :int
   member :estimated_hours, :string  #float
   member :custom_values, [CustomValueDto]
+  member :all_status, [IssueStatusDto]
+  member :all_journals, [JournalDto]
+  member :all_attachments, [AttachmentDto]
+  member :all_relations, [IssueRelationDto]
   
   def self.create issue
     custom_values = issue.custom_values
@@ -44,19 +52,5 @@ class IssueDto < ActionWebService::Struct
     )
 #    rescue
 #      nil
-  end
-  
-  def self.to_hash dto
-    attrs = Hash.new
-#    self.instance_variables.each {|k| attrs[k.sub(/^@/, '')]=self.instance_variable_get(k)}
-    dto.each {|k,v| attrs[k]=v}
-    
-    attrs['fixed_version_id'] = attrs['version_id']
-    attrs.delete('version_id')
-    attrs.delete('project_id')
-    attrs.delete('tracker_id')
-    attrs.delete('author')
-    
-    return attrs
   end
 end

@@ -161,16 +161,13 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 	public boolean hasTaskChanged(TaskRepository taskRepository, ITask task,
 			TaskData taskData) {
 		
-		if (taskData.isPartial()) {
-			throw new RuntimeException("Partial is true ???");
-		} else {
-			TaskAttribute attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.DATE_UPDATED.getRedmineKey());
-			String repositoryDate = attribute.getValue();
-			Date localeDate = task.getModificationDate();
-			if (localeDate!=null) {
-				return !RedmineUtil.parseDate(localeDate).equals(repositoryDate);
-			}
+		TaskAttribute attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.DATE_UPDATED.getRedmineKey());
+		String repositoryDate = attribute.getValue();
+		Date localeDate = task.getModificationDate();
+		if (localeDate!=null) {
+			return !RedmineUtil.parseDate(localeDate).equals(repositoryDate);
 		}
+
 		return true;
 	}
 
@@ -210,13 +207,12 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 		}
 		
 		
-		if (!taskData.isPartial()) {
 //			Date date = task.getModificationDate();
 //			task.setAttribute(TASK_KEY_UPDATE_DATE, (date != null) ? TracUtil.toTracTime(date) + "" : null);
 			
-			String projectName = taskData.getRoot().getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey()).getValue();
-			int projectId = clientData.getProjectFromName(projectName).getProject().getValue();
-			task.setAttribute(TaskAttribute.PRODUCT, ""+projectId);
+		String projectName = taskData.getRoot().getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey()).getValue();
+		int projectId = clientData.getProjectFromName(projectName).getProject().getValue();
+		task.setAttribute(TaskAttribute.PRODUCT, ""+projectId);
 
 			//			RedmineProjectData projectData = getClientManager().getRedmineClient(repository).getClientData().getProjectFromId(Integer.parseInt(projectId));
 //			boolean issueEditAllowed = projectData.getProject().isIssueEditAllowed();
@@ -224,7 +220,6 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 //			int allowedStatusCount = taskData.getRoot().getMappedAttribute(RedmineAttribute.STATUS.getRedmineKey()).getOptions().size();
 			
 			
-		}
 
 	}
 
