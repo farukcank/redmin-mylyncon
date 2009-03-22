@@ -57,7 +57,7 @@
 		<delete dir="${buildDirectory}/archive/updatesite" />
 
 		<scp todir="${sf.username}@frs.sf.net:/home/users/s/sv/sven-k/uploads/" password="${sf.password}" verbose="true" trust="true" file="${buildDirectory}/archive/redmine-mylyn_${forceContextQualifier}.zip" />
-		<maven-sf project="${sf.project.unixname}" package="Archived Update-Site" release="nightly" user="${sf.username}" password="${sf.password}" srcdir="${buildDirectory}/archive" />
+		<maven-sf project="${sf.project.unixname}" package="Archived Update-Site" release="nightly" user="${sf.username}" password="${sf.password}" srcdir="${buildDirectory}/archive" groupId="${sf.project.groupId}" />
 
 	</target>
 	
@@ -87,7 +87,7 @@
 			</fileset>
 		</scp>
 
-		<maven-sf project="${sf.project.unixname}" package="update-site content" release="nightly" user="${sf.username}" password="${sf.password}" srcdir="${buildDirectory}/sfrelease" />
+		<maven-sf project="${sf.project.unixname}" package="update-site content" release="nightly" user="${sf.username}" password="${sf.password}" srcdir="${buildDirectory}/sfrelease" groupId="${sf.project.groupId}" />
 	
 	</target>
 </project>
