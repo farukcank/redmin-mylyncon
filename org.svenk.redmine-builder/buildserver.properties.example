@@ -1,0 +1,19 @@
+buildHome=<parent directory of this file>
+buildDirectory=
+
+eclipseDir=<path to eclipse 3.4 with aspectj, mylyn and orbit-tools>
+
+os=linux
+arch=x86_64
+ws=gtk
+
+buildType=N
+buildTarget=main
+
+mail.host=
+mail.user=
+mail.password=
+mail.from=
+mail.to=
+
+

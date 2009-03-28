@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Redmine-Mylyn Build" default="main">
+	<description>
+            description
+    </description>
+	
+
+	<import file="${buildHome}/build-files/publish/publish.xml"/>
+
+	<!-- need for BundleFileLocator -->
+	<taskdef resource="org/pluginbuilder/anttasks/pluginbuildertasks.properties" classpath="${buildHome}/build-files/lib/pluginbuilder-anttasks.jar" />
+
+	<property name="logDir" value="${buildDirectory}/logs"/>
+
+	<target name="-prepare" >
+		<property name="updatesite" value="${buildDirectory}/updatesite" />
+		
+		<tstamp />
+
+		<!-- determine buildfiles -->
+		<BundleFileLocator eclipseInstallationRoot="${eclipseDir}" bundleId="org.eclipse.pde.build" filePath="scripts/build.xml" property="buildfile" />
+		
+		<!-- determine launcher -->
+		<BundleFileLocator eclipseInstallationRoot="${eclipseDir}" bundleId="org.eclipse.equinox.launcher" property="equinoxjar" />		
+
+		<!-- init logging -->
+		<mkdir dir="${logDir}"/>
+		<record name="${logDir}/build.log"/>
+		
+		<!-- update sources -->
+		<echo>"Updating sources ..."</echo>
+		<exec executable="svn" output="${logDir}/svnupdate.log" >
+			<arg value="update"/>
+			<arg value="${buildHome}/svnfetch"/>
+		</exec>
+		<mkdir dir="${updatesite}"/>
+		
+		<!-- Copy Map-Files into Builddirectory -->
+		<delete dir="${buildDirectory}/maps" />
+		<mkdir dir="${buildDirectory}/maps" />
+		<copy todir="${buildDirectory}/maps" >
+			<fileset dir="${buildHome}/build-files/maps">
+				<include name="*.map"/>
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="-checkforchanges">
+		<property file="${logDir}/lastbuildrevision.log" />
+		<echo>"Software revision of last build: ${lastsvnrevision}"</echo>
+
+		<!-- svn reversion of this build -->
+		<exec executable="svn" output="~getbuildnr.xml">
+			<arg value="info" />
+			<arg value="--xml" />
+			<arg value="${buildHome}/svnfetch" />
+		</exec>
+		<xmlproperty file="~getbuildnr.xml" collapseAttributes="true" />
+		<property name="newsvnrevision" value="${info.entry.commit.revision}" />
+		<delete file="~getbuildnr.xml" />
+		<echo>"Software revision of this build: ${newsvnrevision}"</echo>
+
+		<property name="forceContextQualifier" value="${buildType}${DSTAMP}${TSTAMP}-r${newsvnrevision}"/>
+
+		<condition property="build.skip">
+			<and>
+				<isset property="lastsvnrevision"/>
+				<equals arg1="${lastsvnrevision}" arg2="${newsvnrevision}" />
+			</and>
+		</condition>
+	</target>
+	
+	<target name="-build" description="Call the Equinox Laucher" unless="build.skip" >
+
+		<java classname="org.eclipse.equinox.launcher.Main" fork="true" 
+			failonerror="false" >
+			<arg value="-application" />
+			<arg value="org.eclipse.ant.core.antRunner" />
+			<arg value="-buildfile" />
+			<arg value="${buildfile}" />
+			<arg value="${buildTarget}" />
+			<jvmarg value="-Dbuilder=${buildHome}/build-files" />
+			<jvmarg value="-DjavacFailOnError=true"/>
+			<jvmarg value="-DbuildDirectory=${buildDirectory}"/>
+			<jvmarg value="-DeclipseDir=${eclipseDir}"/>
+			<jvmarg value="-DbuildHome=${buildHome}"/>
+			<jvmarg value="-DforceContextQualifier=${forceContextQualifier}"/>
+			<jvmarg value="-DbuildProperties=${buildHome}/build-files/build.properties"/>
+			<jvmarg value="-Dupdatesite=${updatesite}"/>
+			<jvmarg value="-DbuildType=${buildType}"/>
+			<jvmarg value="-Dsf.password=${sf.password}"/>
+			
+			<classpath>
+				<pathelement location="${equinoxjar}" />
+			</classpath>
+
+		</java>
+	</target>
+
+	<!-- check for build error -->
+	<target name="-checkforfailure">
+		<condition property="build.failure">
+			<isfileselected file="${logDir}/build.log">
+				<contains text="BUILD FAILED" casesensitive="true" />
+			</isfileselected>
+		</condition>
+		<condition property="build.success">
+			<and>
+				<not>
+					<isset property="build.skip" />
+				</not>
+				<not>
+					<isset property="build.failure" />
+				</not>
+			</and>
+		</condition>
+
+	</target>
+
+	<target name="-savebuildrevision" depends="-checkforfailure" if="build.success" >
+		<propertyfile file="${logDir}/lastbuildrevision.log">
+			<entry key="lastsvnrevision" value="${newsvnrevision}"/>
+		</propertyfile>
+	</target>
+	
+	<target name="-publish" depends="-checkforfailure" if="build.success" >
+		<antcall target="publish.sf" />
+	</target>
+	
+	<target name="main" description="Run the ..."  depends="-prepare, -checkforchanges" >
+		<antcall target="-build" />
+		<antcall target="-publish" />
+		<antcall target="-savebuildrevision" />
+	</target>
+
+	<target name="mailresult" depends="-checkforfailure, -mailfailure, -mailsuccess" />
+
+	<target name="-mailsuccess" unless="build.failure">
+		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build erfolgreich">
+			<from address="${mail.from}" />
+			<to address="${mail.to}" />
+			<message>Build von Redmine-Mylyn Connector erfolgreich durchgeführt</message>
+			<fileset dir="${logDir}">
+				<include name="*.*" />
+			</fileset>
+		</mail>
+	</target>
+
+	<target name="-mailfailure" if="build.failure" unless="build.skip">
+		<mail mailhost="${mail.host}" user="${mail.user}" password="${mail.password}" subject="Build FEHLGESCHLAGEN">
+			<from address="${mail.from}" />
+			<to address="${mail.to}" />
+			<message>Build von Redmine-Mylyn Connector FEHLGESCHLAGEN</message>
+			<fileset dir="${logDir}">
+				<include name="*.*" />
+			</fileset>
+		</mail>
+	</target>
+
+</project>

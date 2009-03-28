@@ -1,0 +1,93 @@
+<project name="publish">
+	<dirname property="ant.file.publish.dir" file="${ant.file.publish}" />
+
+	<import file="${buildHome}/build-files/common.xml"/>
+	
+	<taskdef classname="net.sourceforge.ant.FileRelease" name="maven-sf">
+		<classpath>
+			<fileset dir="${ant.file.publish.dir}/lib" >
+				<include name="*.jar" />
+			</fileset>
+		</classpath>
+	</taskdef>
+
+	<target name="publish.sf" depends="-publish.sf.checkAccount, -create.site.xml, -publish.sf" >
+	</target>
+ 	
+	<target name="-publish.sf.checkAccount">
+		<property file="${buildHome}/build-files/account.properties" />
+		<condition property="missingAccount">
+			<not>
+				<and>
+					<isset property="sf.password"/>
+					<not>
+						<equals arg1="${sf.password}" arg2="" trim="true"/>
+					</not>
+				</and>
+			</not>
+		</condition>
+	</target>
+	
+ 	<!-- create the (nightly) site.xml -->
+	<target name="-create.site.xml" depends="nightlycheck" if="isNightly">
+	</target>
+
+	<target name="-publish.sf" depends="nightlycheck" if="isNightly" unless="missingAccount" >
+		<property name="sf.user" value="${sf.username}" />
+		<tstamp>
+			<format property="sf.releasedate" pattern="MM/dd/yyyy" />
+		</tstamp>
+		
+		<antcall target="-publish.sf.frs" />
+		<antcall target="-publish.sf.site" />
+		<antcall target="-publish.sf.archive" />
+	</target>
+
+	<target name="-publish.sf.archive" >
+		<delete dir="${buildDirectory}/archive" />
+		<mkdir dir="${buildDirectory}/archive/updatesite"/>
+		<copy todir="${buildDirectory}/archive/updatesite" >
+			<fileset dir="${updatesite}" />
+		</copy>
+		
+		<echo file="${buildDirectory}/archive/updatesite/README.TXT" append="false">Project Website: http://sourceforge.net/projects/redmin-mylyncon/${line.separator}</echo>
+		<echo file="${buildDirectory}/archive/updatesite/README.TXT" append="true">Eclipse Updatesite: http://redmin-mylyncon.sourceforge.net/update-site/nightly/${line.separator}</echo>
+		
+		<zip destfile="${buildDirectory}/archive/redmine-mylyn_${forceContextQualifier}.zip" basedir="${buildDirectory}/archive" compress="true" update="false" />
+		<delete dir="${buildDirectory}/archive/updatesite" />
+
+		<scp todir="${sf.username}@frs.sf.net:/home/users/s/sv/sven-k/uploads/" password="${sf.password}" verbose="true" trust="true" file="${buildDirectory}/archive/redmine-mylyn_${forceContextQualifier}.zip" />
+		<maven-sf project="${sf.project.unixname}" package="Archived Update-Site" release="nightly" user="${sf.username}" password="${sf.password}" srcdir="${buildDirectory}/archive" groupId="${sf.project.groupId}" />
+
+	</target>
+	
+	<target name="-publish.sf.site" >
+		<scp todir="${sf.username},${sf.project.unixname}@web.sf.net:/home/groups/r/re/redmin-mylyncon/htdocs/update-site/nightly/" password="${sf.password}" verbose="true" trust="true" >
+			<fileset dir="${updatesite}" >
+				<include name="**/*.xml"/>
+				<exclude name="**/*.jar"/>
+			</fileset>
+		</scp>
+	</target>
+
+	<target name="-publish.sf.frs">
+		<delete dir="${buildDirectory}/sfrelease" />
+		<mkdir dir="${buildDirectory}/sfrelease"/>
+
+		<copy todir="${buildDirectory}/sfrelease" >
+			<fileset dir="${updatesite}/features" />
+		</copy>
+		<copy todir="${buildDirectory}/sfrelease" >
+			<fileset dir="${updatesite}/plugins" />
+		</copy>
+
+		<scp remoteTodir="${sf.username}@frs.sf.net:/home/users/s/sv/sven-k/uploads/" password="${sf.password}" verbose="true" trust="true" >
+			<fileset dir="${buildDirectory}/sfrelease" >
+			    <include name="*.jar"/>
+			</fileset>
+		</scp>
+
+		<maven-sf project="${sf.project.unixname}" package="update-site content" release="nightly" user="${sf.username}" password="${sf.password}" srcdir="${buildDirectory}/sfrelease" groupId="${sf.project.groupId}" />
+	
+	</target>
+</project>

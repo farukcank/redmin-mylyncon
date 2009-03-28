@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Redmine-Mylyn Build" default="main">
+
+	<taskdef name="sfpublish"
+		classname="org.apache.tools.ant.taskdefs.optional.sourceforge.SourceForgePublish">
+		<classpath>
+			<fileset dir="${buildHome}/build-files/publish/lib">
+				<include name="*.jar" />
+			</fileset>
+		</classpath>
+
+	</taskdef>
+
+	<target name="main">
+		<property file="${buildHome}/build-files/account.properties" />
+		<property name="sf.user" value="${sf.username}" />
+		<property name="forceContextQualifier" value="N200811142139-r137" />
+
+		<sfpublish releasename="nightly" packagename="update-site content"
+			packagehidden="yes" hidden="yes" projectshortname="${sf.project.unixname}"
+			username="${sf.user}" password="${sf.password}" releasedate="6/28/2003">
+			<filespec filetype="jar" processortype="platform_independent"
+				file="${buildHome}/build-files/account.properties.example" />
+		</sfpublish>
+	</target>
+
+</project>

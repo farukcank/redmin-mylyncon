@@ -1,0 +1,10 @@
+Required dependencies
+	-mail.jar
+	-activation.jar
+
+dependencies:
+	mylyn-feature/plugin
+	orbit collection
+	
+buildserver.properties:
+	buildserver specific settings

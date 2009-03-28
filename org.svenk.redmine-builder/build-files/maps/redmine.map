@@ -1,0 +1,4 @@
+feature@org.svenk.redmine_feature= COPY, ${buildHome}/svnfetch, org.svenk.redmine-feature
+plugin@org.svenk.redmine.dependency= COPY, ${buildHome}/svnfetch, org.svenk.redmine.dependency
+plugin@org.svenk.redmine.core= COPY, ${buildHome}/svnfetch, org.svenk.redmine.core
+plugin@org.svenk.redmine.ui= COPY, ${buildHome}/svnfetch, org.svenk.redmine.ui
