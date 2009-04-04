@@ -101,7 +101,7 @@ public class RedmineRepositorySettingsPage extends
 			@SuppressWarnings("restriction")
 			protected void validateEditorExtension(TaskRepository repository) throws CoreException {
 				String editorExtension = repository.getProperty(TaskEditorExtensions.REPOSITORY_PROPERTY_EDITOR_EXTENSION);
-				if (!editorExtension.equals(EXTENSION_ID_PLAIN) && !editorExtension.equals(EXTENSION_ID_TEXTILE)) {
+				if (!(editorExtension==null || editorExtension.equals(EXTENSION_ID_PLAIN) || editorExtension.equals(EXTENSION_ID_TEXTILE))) {
 					throw new CoreException(new Status(IStatus.WARNING, RedmineCorePlugin.PLUGIN_ID, WRONG_EXTENSION));
 				}
 				
