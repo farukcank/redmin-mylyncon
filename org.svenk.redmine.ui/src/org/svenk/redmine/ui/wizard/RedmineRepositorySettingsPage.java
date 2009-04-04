@@ -25,6 +25,9 @@ import java.net.URL;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorExtensions;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.mylyn.tasks.ui.wizards.AbstractRepositorySettingsPage;
@@ -37,10 +40,15 @@ import org.svenk.redmine.core.exception.RedmineException;
 public class RedmineRepositorySettingsPage extends
 		AbstractRepositorySettingsPage {
 
+	private static final String EXTENSION_ID_TEXTILE = "org.eclipse.mylyn.wikitext.tasks.ui.editor.textileTaskEditorExtension";
+	private static final String EXTENSION_ID_PLAIN = "none";
+	
 	private static final String TITLE = "Redmine Repository Settings";
 
 	private static final String DESCRIPTION = "Example: www.your-domain.de/redmine";
 	
+	private static final String WRONG_EXTENSION = "Redmine uses Textile as Markup-Language";
+
 	private String checkedUrl = null;
 	
 	private String version = null;
@@ -86,6 +94,17 @@ public class RedmineRepositorySettingsPage extends
 					throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
 				}
 				RedmineRepositorySettingsPage.this.checkedUrl = repository.getRepositoryUrl();
+				
+				validateEditorExtension(repository);
+			}
+			
+			@SuppressWarnings("restriction")
+			protected void validateEditorExtension(TaskRepository repository) throws CoreException {
+				String editorExtension = repository.getProperty(TaskEditorExtensions.REPOSITORY_PROPERTY_EDITOR_EXTENSION);
+				if (!editorExtension.equals(EXTENSION_ID_PLAIN) && !editorExtension.equals(EXTENSION_ID_TEXTILE)) {
+					throw new CoreException(new Status(IStatus.WARNING, RedmineCorePlugin.PLUGIN_ID, WRONG_EXTENSION));
+				}
+				
 			}
 		};
 	}

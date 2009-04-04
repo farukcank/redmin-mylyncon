@@ -21,5 +21,12 @@
             id="org.svenk.redmine.ui.pageFactory">
       </pageFactory>
    </extension>
+   <extension
+         point="org.eclipse.mylyn.tasks.ui.taskEditorExtensions">
+      <repositoryAssociation
+            connectorKind="redmine"
+            taskEditorExtension="org.eclipse.mylyn.wikitext.tasks.ui.editor.textileTaskEditorExtension">
+      </repositoryAssociation>
+   </extension>
 
 </plugin>
