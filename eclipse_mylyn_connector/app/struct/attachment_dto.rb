@@ -31,7 +31,7 @@ class AttachmentDto < ActionWebService::Struct
     AttachmentDto.new(
       :id => attachment.id,
       :author_id => attachment.author_id,
-      :author_name => attachment.author.name,
+      :author_name => attachment.author==nil ? "Anonymous" : attachment.author.name,
       :created_on => attachment.created_on,
       :filename => attachment.filename,
       :filesize => attachment.filesize,

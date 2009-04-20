@@ -37,7 +37,7 @@ class IssueDto < ActionWebService::Struct
       :project_id => issue.project_id,
       :subject => issue.subject,
       :description => issue.description,
-      :author => issue.author.name,
+      :author => issue.author==nil ? "Anonymous" : issue.author.name,
       :assigned_to_id => issue.assigned_to_id,
       :created_on => issue.created_on,
       :updated_on => issue.updated_on,

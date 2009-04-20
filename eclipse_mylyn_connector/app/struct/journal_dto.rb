@@ -27,7 +27,7 @@ class JournalDto < ActionWebService::Struct
       :id => journal.id,
       :issue_id => journal.journalized_id,
       :author_id => journal.user_id,
-      :author_name => journal.user.name,
+      :author_name => journal.user==nil ? "Anonymous" : journal.user.name,
       :notes => journal.notes,
       :created_on => journal.created_on,
       :editable_by_user => journal.editable_by?(User.current)
