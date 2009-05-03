@@ -1,6 +1,8 @@
 <project name="Tooling build targets" >
 
-	<target name="custom.clean" depends="-custom.clean.updatesite" />
+	<target name="custom.clean" >
+		<delete dir="${buildDirectory}/tmp/${collectingFolder}" />
+	</target>
 
 	<target name="custom.postGenerate" >
 		<xslt style="${buildHome}/build-files/aspectj.xsl" basedir="${buildDirectory}/plugins" destdir="${buildDirectory}/plugins" extension=".aspect.out.xml" includes="*/build.xml"></xslt>
@@ -12,12 +14,7 @@
 			</fileset>
 		</move>
 	</target>
-
-	<!-- remove last nightly update-site -->
-	<target name="-custom.clean.updatesite" depends="nightlycheck" if="isNightly">
-		<delete dir="${updatesite}" />
-	</target>
-
+	
 	<!-- check for nightly build -->
 	<target name="nightlycheck">
 		<condition property="isNightly">

@@ -43,6 +43,12 @@
 				<include name="*.map"/>
 			</fileset>
 		</copy>
+		
+		<!-- workaround: assert, that sf.password isset @see publish.xml -->
+		<condition property="sf.password" value="">
+			<not><isset property="sf.password"/></not>
+		</condition>
+
 	</target>
 	
 	<target name="-checkforchanges">
@@ -87,6 +93,7 @@
 			<jvmarg value="-DforceContextQualifier=${forceContextQualifier}"/>
 			<jvmarg value="-DbuildProperties=${buildHome}/build-files/build.properties"/>
 			<jvmarg value="-Dupdatesite=${updatesite}"/>
+			<jvmarg value="-DarchivePrefix=${archivePrefix}"/>
 			<jvmarg value="-DbuildType=${buildType}"/>
 			<jvmarg value="-Dsf.password=${sf.password}"/>
 			
@@ -129,7 +136,9 @@
 	
 	<target name="main" description="Run the ..."  depends="-prepare, -checkforchanges" >
 		<antcall target="-build" />
+		<!--
 		<antcall target="-publish" />
+		-->
 		<antcall target="-savebuildrevision" />
 	</target>
 

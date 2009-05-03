@@ -8,6 +8,9 @@
 	<property name="allElementsFile" location="${eclipse.pdebuild.templates}/headless-build/allElements.xml"/>
 
 	<import file="${buildHome}/build-files/common.xml" />
+	<import file="${buildHome}/build-files/update-site.xml" />
+	<import file="${buildHome}/build-files/publish/publish.xml" />
+	
 	<import file="${allElementsFile}" />
 	<target name="allElements">
 		<antcall target="allElementsDelegator" />
@@ -142,6 +145,8 @@
 	<!-- ===================================================================== -->
 	<target name="postBuild">
 		<antcall target="gatherLogs" />
+		<antcall target="updatesite" />
+		<antcall target="publish" />
 	</target>
 
 	<!-- ===================================================================== -->
@@ -154,6 +159,7 @@
 	<!-- Steps to do to publish the build results -->
 	<!-- ===================================================================== -->
 	<target name="publish">
+		<antcall target="publish.sf" />
 	</target>
 
 	<!-- ===================================================================== -->

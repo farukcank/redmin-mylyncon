@@ -1,8 +1,8 @@
 <project name="publish">
 	<dirname property="ant.file.publish.dir" file="${ant.file.publish}" />
 
-	<import file="${buildHome}/build-files/common.xml"/>
-	
+	<import file="../common.xml" />
+
 	<taskdef classname="net.sourceforge.ant.FileRelease" name="maven-sf">
 		<classpath>
 			<fileset dir="${ant.file.publish.dir}/lib" >
@@ -11,45 +11,25 @@
 		</classpath>
 	</taskdef>
 
-	<target name="publish.sf" depends="-publish.sf.checkAccount, -create.site.xml, -publish.sf" >
-	</target>
- 	
-	<target name="-publish.sf.checkAccount">
-		<property file="${buildHome}/build-files/account.properties" />
-		<condition property="missingAccount">
-			<not>
-				<and>
-					<isset property="sf.password"/>
-					<not>
-						<equals arg1="${sf.password}" arg2="" trim="true"/>
-					</not>
-				</and>
-			</not>
-		</condition>
-	</target>
-	
- 	<!-- create the (nightly) site.xml -->
-	<target name="-create.site.xml" depends="nightlycheck" if="isNightly">
-		<property file="${buildDirectory}/finalFeaturesVersions.properties" />
-		<echoxml file="${updatesite}/site.xml">
-			<site>
-			   <description url="http://redmin-mylyncon.sourceforge.net/update-site/nightly/">
-			      Provides Task List integration, offline support and rich editing for the open source Redmine project management.
-			   </description>
-			   <feature url="features/org.svenk.redmine_feature_${org.svenk.redmine_feature}" id="org.svenk.redmine_feature" version="${org.svenk.redmine_feature}">
-			      <category name="mylyn_integration"/>
-			   </feature>
-			   <category-def name="mylyn_integration" label="Mylyn Integration"/>
-			</site>
-		</echoxml>
+
+	<target name="publish.sf" depends="-publish.sf.checkAccount, -publish.sf" >
 	</target>
 
+	<!-- checks, that password for SF is configured -->
+	<target name="-publish.sf.checkAccount">
+		<property file="${buildHome}/build-files/account.properties" />
+		<condition property="missingAccount" >
+			<equals arg1="${sf.password}" arg2="" trim="true"/>
+		</condition>
+	</target>
+
+	
 	<target name="-publish.sf" depends="nightlycheck" if="isNightly" unless="missingAccount" >
 		<property name="sf.user" value="${sf.username}" />
 		<tstamp>
 			<format property="sf.releasedate" pattern="MM/dd/yyyy" />
 		</tstamp>
-		
+
 		<antcall target="-publish.sf.frs" />
 		<antcall target="-publish.sf.site" />
 		<antcall target="-publish.sf.archive" />
@@ -61,10 +41,10 @@
 		<copy todir="${buildDirectory}/archive/updatesite" >
 			<fileset dir="${updatesite}" />
 		</copy>
-		
+
 		<echo file="${buildDirectory}/archive/updatesite/README.TXT" append="false">Project Website: http://sourceforge.net/projects/redmin-mylyncon/${line.separator}</echo>
 		<echo file="${buildDirectory}/archive/updatesite/README.TXT" append="true">Eclipse Updatesite: http://redmin-mylyncon.sourceforge.net/update-site/nightly/${line.separator}</echo>
-		
+
 		<zip destfile="${buildDirectory}/archive/redmine-mylyn_${forceContextQualifier}.zip" basedir="${buildDirectory}/archive" compress="true" update="false" />
 		<delete dir="${buildDirectory}/archive/updatesite" />
 
@@ -72,7 +52,7 @@
 		<maven-sf project="${sf.project.unixname}" package="Archived Update-Site" release="nightly" user="${sf.username}" password="${sf.password}" srcdir="${buildDirectory}/archive" groupId="${sf.project.groupId}" />
 
 	</target>
-	
+
 	<target name="-publish.sf.site" >
 		<scp todir="${sf.username},${sf.project.unixname}@web.sf.net:/home/groups/r/re/redmin-mylyncon/htdocs/update-site/nightly/" password="${sf.password}" verbose="true" trust="true" >
 			<fileset dir="${updatesite}" >
@@ -95,11 +75,11 @@
 
 		<scp remoteTodir="${sf.username}@frs.sf.net:/home/users/s/sv/sven-k/uploads/" password="${sf.password}" verbose="true" trust="true" >
 			<fileset dir="${buildDirectory}/sfrelease" >
-			    <include name="*.jar"/>
+				<include name="*.jar"/>
 			</fileset>
 		</scp>
 
 		<maven-sf project="${sf.project.unixname}" package="update-site content" release="nightly" user="${sf.username}" password="${sf.password}" srcdir="${buildDirectory}/sfrelease" groupId="${sf.project.groupId}" />
-	
+
 	</target>
 </project>

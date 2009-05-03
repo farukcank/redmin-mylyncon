@@ -62,8 +62,6 @@ Java and all Java-based trademarks are trademarks of Sun Microsystems, Inc. in t
 
    <url>
       <update label="Redmine Mylyn Connector" url="http://redmin-mylyncon.sourceforge.net/update-site/nightly"/>
-      <discovery label="Mylyn Update for Eclipse 3.4" url="http://download.eclipse.org/tools/mylyn/update/e3.4"/>
-      <discovery label="Mylyn Update for Eclipse 3.3" url="http://download.eclipse.org/tools/mylyn/update/e3.3/"/>
    </url>
 
    <plugin
