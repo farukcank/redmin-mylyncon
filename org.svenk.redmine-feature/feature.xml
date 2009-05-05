@@ -7,7 +7,7 @@
    <description url="http://redmin-mylyncon.wiki.sourceforge.net/Features">
       Provides Task List integration, offline support and rich editing
 for the open source Redmine project management.
-Note: This version is under development.
+Note: This version supports only the XML-RPC version of Redmine plugin.
    </description>
 
    <copyright url="epl-v10.html">
@@ -64,6 +64,27 @@ Java and all Java-based trademarks are trademarks of Sun Microsystems, Inc. in t
       <update label="Redmine Mylyn Connector" url="http://redmin-mylyncon.sourceforge.net/update-site/nightly"/>
    </url>
 
+   <requires>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.mylyn.tasks.core" version="3.1.0" match="compatible"/>
+      <import plugin="org.eclipse.mylyn.commons.net" version="3.1.0" match="compatible"/>
+      <import plugin="org.apache.xmlrpc" version="3.0.0"/>
+      <import plugin="org.eclipse.mylyn.commons.core" version="3.1.0" match="compatible"/>
+      <import plugin="org.svenk.redmine.dependency" version="3.1.0" match="greaterOrEqual"/>
+      <import plugin="javax.xml.bind" version="2.0.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.mylyn.tasks.ui" version="3.1.0" match="compatible"/>
+      <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.search"/>
+      <import plugin="org.eclipse.mylyn.monitor.core" version="3.1.0" match="compatible"/>
+      <import plugin="org.eclipse.ui.forms"/>
+      <import plugin="org.svenk.redmine.core" version="3.1.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="javax.xml"/>
+      <import plugin="org.eclipse.osgi"/>
+      <import plugin="org.apache.commons.logging"/>
+   </requires>
+
    <plugin
          id="org.svenk.redmine.core"
          download-size="0"
@@ -80,6 +101,41 @@ Java and all Java-based trademarks are trademarks of Sun Microsystems, Inc. in t
 
    <plugin
          id="org.svenk.redmine.dependency"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.xmlrpc"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.ws.commons.util"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.codec"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.httpclient"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.logging"
          download-size="0"
          install-size="0"
          version="0.0.0"
