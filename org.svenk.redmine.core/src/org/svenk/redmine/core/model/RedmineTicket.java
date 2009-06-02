@@ -21,20 +21,35 @@
 package org.svenk.redmine.core.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlList;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.RedmineClientData;
 import org.svenk.redmine.core.RedmineProjectData;
+import org.svenk.redmine.core.client.adapter.CustomValueXmlAdapter;
 import org.svenk.redmine.core.model.RedmineCustomTicketField.FieldType;
 import org.svenk.redmine.core.util.RedmineUtil;
 
+@XmlRootElement(name="issue")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class RedmineTicket {
 
 	public enum Key {
@@ -107,14 +122,40 @@ public class RedmineTicket {
 		}
 	}
 
+	
+	@XmlAttribute(required=true)
 	private int id;
-	private Date lastChanged;
+	
+	@XmlElement(name="createdOn")
+	@XmlSchemaType(name="dateTime")
 	private Date created;
+
+	@XmlElement(name="updatedOn")
+	@XmlSchemaType(name="dateTime")
+	private Date lastChanged;
+	
 	private Map<Key, String> valueByKey = new HashMap<Key, String>();
-	private Map<Integer, String> valueByCustomFieldId = new HashMap<Integer, String>();
+
+	@XmlElement(name="customValues")
+	@XmlJavaTypeAdapter(CustomValueXmlAdapter.class)
+	private HashMap<Integer, String> valueByCustomFieldId = new HashMap<Integer, String>();
+	
+	@XmlElementWrapper(name="journals")
+	@XmlElement(name="journal")
 	private List<RedmineTicketJournal> journals;
+
+	@XmlElementWrapper(name="attachments")
+	@XmlElement(name="attachment")
 	private List<RedmineAttachment> attachments;
+	
+	@XmlTransient
 	private List<RedmineTicketStatus> statuses;
+	
+	@XmlList
+	@XmlElement
+	private List<Integer> availableStatus;
+
+	@XmlTransient
 	private List<RedmineTicketRelation> relations;
 	
 
@@ -145,6 +186,9 @@ public class RedmineTicket {
 	}
 	
 	public void putCustomFieldValue(Integer customFieldId, String value) {
+		if (valueByCustomFieldId==null) {
+			valueByCustomFieldId = new HashMap<Integer, String>();
+		}
 		valueByCustomFieldId.put(customFieldId, value);
 	}
 	
@@ -157,16 +201,13 @@ public class RedmineTicket {
 	}
 	
 	public Map<Integer, String> getCustomValues() {
+		if (valueByCustomFieldId==null) {
+			valueByCustomFieldId = new HashMap<Integer, String>(0);
+		}
 		return Collections.unmodifiableMap(valueByCustomFieldId);
 	}
 
-	public Date getLastChanged() {
-		return lastChanged;
-	}
 
-	public void setLastChanged(Date lastChanged) {
-		this.lastChanged = lastChanged;
-	}
 
 	public int getId() {
 		return id;
@@ -176,8 +217,8 @@ public class RedmineTicket {
 		return created;
 	}
 
-	public void setCreated(Date created) {
-		this.created = created;
+	public Date getLastChanged() {
+		return lastChanged;
 	}
 
 	public String getValue(Key key) {
@@ -237,6 +278,16 @@ public class RedmineTicket {
 		this.statuses = statuses;
 	}
 	
+	//TODO nach Entfernung des XmlRpc Clients den Status überarbeiten 
+	public void completeAvailableStatus(RedmineClientData clientData) {
+		statuses.clear();
+		if (availableStatus != null) {
+			for (Integer intval : availableStatus) {
+				statuses.add(clientData.getStatus(intval));
+			}
+		}
+	}
+	
 	public List<RedmineTicketRelation> getRelations() {
 		return relations==null ? null : Collections.unmodifiableList(relations);
 	}
@@ -287,4 +338,75 @@ public class RedmineTicket {
 			this.putCustomFieldValue(Integer.valueOf(customField.getId()), attributeValue);
 		}
 	}
+
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+
+	public void setLastChanged(Date lastChanged) {
+		this.lastChanged = lastChanged;
+	}
+
+	/* Setter methods for XML binding */
+	
+	@XmlElement
+	public void setSubject(String value) {
+		putBuiltinValue(Key.SUBJECT, value);
+	}
+
+	@XmlElement
+	public void setDescription(String value) {
+		putBuiltinValue(Key.DESCRIPTION, value);
+	}
+
+	@XmlElement
+	public void setAuthor(String value) {
+		putBuiltinValue(Key.AUTHOR, value);
+	}
+
+	@XmlElement
+	public void setProjectId(int value){
+		putBuiltinValue(Key.PROJECT, value);
+	}
+	
+	@XmlElement
+	public void setTrackerId(int value){
+		putBuiltinValue(Key.TRACKER, value);
+	}
+	
+	@XmlElement
+	public void setPriorityId(int value){
+		putBuiltinValue(Key.PRIORITY, value);
+	}
+	
+	@XmlElement
+	public void setStatusId(int value){
+		putBuiltinValue(Key.STATUS, value);
+	}
+	
+	@XmlElement
+	public void setCategoryId(int value){
+		putBuiltinValue(Key.CATEGORY, value);
+	}
+	
+	@XmlElement
+	public void setFixedVersionId(int value){
+		putBuiltinValue(Key.VERSION, value);
+	}
+	
+	@XmlElement
+	public void setAssignedToId(int value){
+		putBuiltinValue(Key.ASSIGNED_TO, value);
+	}
+
+	@XmlElement
+	public void setDoneRatio(int value){
+		putBuiltinValue(Key.DONE_RATIO, value);
+	}
+
+	@XmlElement
+	public void setEstimatedHours(int value){
+		putBuiltinValue(Key.ESTIMATED_HOURS, value);
+	}
+		
 }

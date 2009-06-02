@@ -60,7 +60,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 
 	protected final static double REDMINE_VERSION_8 = 0.8D;
 
-	private final HttpClient httpClient;
+	protected final HttpClient httpClient;
 	
 	protected AbstractWebLocation location;
 	

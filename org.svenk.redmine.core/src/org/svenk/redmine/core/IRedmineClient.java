@@ -32,7 +32,6 @@ import org.svenk.redmine.core.model.RedmineTicket;
 
 
 public interface IRedmineClient {
-	
 
 //	public static final String CHARSET = "UTF-8";
 //

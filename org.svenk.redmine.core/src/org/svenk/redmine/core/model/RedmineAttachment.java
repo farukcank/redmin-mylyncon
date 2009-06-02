@@ -22,25 +22,52 @@ package org.svenk.redmine.core.model;
 
 import java.util.Date;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlTransient;
+
+@XmlRootElement(name="attachment")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class RedmineAttachment {
 
+	@XmlAttribute
 	private int id;
 	
+	//TODO Nach XmlRpc Umbau entfernen
+	@XmlTransient
 	private int authorId;
 	
+	@XmlElement(name="author")
 	private String authorName;
 	
+	@XmlElement(name="createdOn")
+	@XmlSchemaType(name="dateTime")
 	private Date created;
 	
+	@XmlElement
 	private String filename;
 	
+	@XmlElement
 	private int filesize;
 	
+	@XmlElement
 	private String digest;
 	
+	@XmlElement
 	private String contentType;
 
+	@XmlElement
 	private String description;
+
+	/**
+	 * a non-argument constructor is required for JAXB
+	 */
+	private RedmineAttachment() {
+	}
 
 	public RedmineAttachment(int id) {
 		setId(id);
@@ -52,10 +79,6 @@ public class RedmineAttachment {
 
 	private void setId(int id) {
 		this.id = id;
-	}
-
-	public int getAuthorId() {
-		return authorId;
 	}
 
 	public void setAuthorId(int authorId) {

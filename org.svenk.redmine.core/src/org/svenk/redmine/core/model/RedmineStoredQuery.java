@@ -22,8 +22,10 @@ package org.svenk.redmine.core.model;
 
 public class RedmineStoredQuery extends RedmineTicketAttribute {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 
+	private RedmineStoredQuery(){} //required for JAXB
+	
 	public RedmineStoredQuery(String name, int value) {
 		super(name, value);
 	}

@@ -22,8 +22,10 @@ package org.svenk.redmine.core.model;
 
 public class RedmineTracker extends RedmineTicketAttribute {
 
-	private static final long serialVersionUID = -6925207253433570620L;
+	private static final long serialVersionUID = 2L;
 
+	private RedmineTracker(){} //required for JAXB
+	
 	public RedmineTracker(String name, int value) {
 		super(name, value);
 	}

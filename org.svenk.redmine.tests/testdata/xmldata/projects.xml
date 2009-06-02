@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projects xmlns="http://redmin-mylyncon.sf.net/schemas/WS-API-2.5">
+	<project id="1" >
+		<name>Project 1</name>
+		<identifier>project1</identifier>
+		<issueEditAllowed>true</issueEditAllowed>
+		<trackers>
+			<tracker id="1">
+				<name>Fehler</name>
+				<position>1</position>
+			</tracker>
+			<tracker id="2">
+				<name>Feature</name>
+				<position>1</position>
+			</tracker>
+			<tracker id="3">
+				<name>Unterstützung</name>
+				<position>1</position>
+			</tracker>
+		</trackers>
+		<versions>
+			<version id="2">
+				<name>version 2</name>
+				<completed>true</completed>
+			</version>
+			<version id="1">
+				<name>version 1</name>
+				<completed>true</completed>
+			</version>
+		</versions>
+		<members>
+			<member id="3">
+				<name>devel FN devel SN</name>
+				<assignable>true</assignable>
+				<emailAddress />
+				<emailNotification>false</emailNotification>
+			</member>
+		</members>
+		<issueCategories>
+			<issueCategory id="1">
+				<name>category 1</name>
+			</issueCategory>
+		</issueCategories>
+		<issueCustomFields>
+			<issueCustomField id="1">
+				<name>cf text 5-10</name>
+				<fieldFormat>string</fieldFormat>
+				<minLength>5</minLength>
+				<maxLength>10</maxLength>
+				<regexp>^[A-Z]\w+</regexp>
+				<possibleValues />
+				<trackers>1 3 4</trackers>
+				<defaultValue />
+				<required>true</required>
+				<filter>true</filter>
+			</issueCustomField>
+			<issueCustomField id="2">
+				<name>cf longtext</name>
+				<fieldFormat>text</fieldFormat>
+				<minLength>0</minLength>
+				<maxLength>0</maxLength>
+				<regexp />
+				<possibleValues></possibleValues>
+				<trackers>1</trackers>
+				<defaultValue />
+				<required>false</required>
+				<filter>false</filter>
+			</issueCustomField>
+			<issueCustomField id="5">
+				<name>cf list</name>
+				<fieldFormat>list</fieldFormat>
+				<minLength>0</minLength>
+				<maxLength>0</maxLength>
+				<regexp />
+				<possibleValues>
+					<possibleValue>ie6</possibleValue>
+					<possibleValue>ie7</possibleValue>
+					<possibleValue>ff</possibleValue>
+				</possibleValues>
+				<trackers>1 2</trackers>
+				<defaultValue>ff</defaultValue>
+				<required>true</required>
+				<filter>true</filter>
+			</issueCustomField>
+		</issueCustomFields>
+		<queries>
+			<query id="2">
+				<name>alle tickets</name>
+			</query>
+			<query id="3">
+				<name>some tickets</name>
+			</query>
+		</queries>
+	</project>
+	<project id="2" >
+		<name>Project 2</name>
+		<identifier>project2</identifier>
+		<issueEditAllowed>false</issueEditAllowed>
+		<trackers>
+			<tracker id="1">
+				<name>Fehler</name>
+				<position>1</position>
+			</tracker>
+			<tracker id="2">
+				<name>Feature</name>
+				<position>1</position>
+			</tracker>
+			<tracker id="3">
+				<name>Unterstützung</name>
+				<position>1</position>
+			</tracker>
+		</trackers>
+		<versions>
+			<version id="2">
+				<name>version 2</name>
+				<completed>true</completed>
+			</version>
+			<version id="1">
+				<name>version 1</name>
+				<completed>true</completed>
+			</version>
+		</versions>
+		<members>
+			<member id="3">
+				<name>devel FN devel SN</name>
+				<assignable>true</assignable>
+				<emailAddress />
+				<emailNotification>false</emailNotification>
+			</member>
+		</members>
+		<issueCategories>
+			<issueCategory id="1">
+				<name>category 1</name>
+			</issueCategory>
+		</issueCategories>
+		<issueCustomFields>
+			<issueCustomField id="1">
+				<name>cf text 5-10</name>
+				<fieldFormat>string</fieldFormat>
+				<minLength>5</minLength>
+				<maxLength>10</maxLength>
+				<regexp>^[A-Z]\w+</regexp>
+				<possibleValues />
+				<trackers>1</trackers>
+				<defaultValue />
+				<required>true</required>
+				<filter>true</filter>
+			</issueCustomField>
+			<issueCustomField id="2">
+				<name>cf longtext</name>
+				<fieldFormat>string</fieldFormat>
+				<minLength>0</minLength>
+				<maxLength>0</maxLength>
+				<regexp />
+				<possibleValues></possibleValues>
+				<trackers>1</trackers>
+				<defaultValue />
+				<required>false</required>
+				<filter>false</filter>
+			</issueCustomField>
+			<issueCustomField id="5">
+				<name>cf list</name>
+				<fieldFormat>string</fieldFormat>
+				<minLength>0</minLength>
+				<maxLength>0</maxLength>
+				<regexp />
+				<possibleValues>
+					<possibleValue>ie6</possibleValue>
+					<possibleValue>ie7</possibleValue>
+					<possibleValue>ff</possibleValue>
+				</possibleValues>
+				<trackers>1 2</trackers>
+				<defaultValue />
+				<required>true</required>
+				<filter>true</filter>
+			</issueCustomField>
+		</issueCustomFields>
+		<queries>
+			<query id="2">
+				<name>alle tickets</name>
+			</query>
+		</queries>
+	</project>
+</projects>

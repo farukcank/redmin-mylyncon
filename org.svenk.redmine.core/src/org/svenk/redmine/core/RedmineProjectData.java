@@ -25,6 +25,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import org.svenk.redmine.core.client.adapter.ProjectDataXmlAdapter;
 import org.svenk.redmine.core.model.RedmineCustomTicketField;
 import org.svenk.redmine.core.model.RedmineIssueCategory;
 import org.svenk.redmine.core.model.RedmineMember;
@@ -33,25 +40,41 @@ import org.svenk.redmine.core.model.RedmineStoredQuery;
 import org.svenk.redmine.core.model.RedmineTracker;
 import org.svenk.redmine.core.model.RedmineVersion;
 
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlJavaTypeAdapter(org.svenk.redmine.core.client.adapter.ProjectDataXmlAdapter.class)
 public class RedmineProjectData implements Serializable {
 	
 	private static final long serialVersionUID = 5L;
 
 	RedmineProject project;
 	
+	@XmlElementWrapper(name="trackers")
+	@XmlElement(name="tracker")
 	List<RedmineTracker> trackers = new ArrayList<RedmineTracker>(); 
 	
+	@XmlElementWrapper(name="issueCategories")
+	@XmlElement(name="issueCategory")
 	List<RedmineIssueCategory> categorys = new ArrayList<RedmineIssueCategory>(); 
 	
+	@XmlElementWrapper(name="versions")
+	@XmlElement(name="version")
 	List<RedmineVersion> versions = new ArrayList<RedmineVersion>(); 
 	
+	@XmlElementWrapper(name="members")
+	@XmlElement(name="member")
 	List<RedmineMember> members = new ArrayList<RedmineMember>();
 	
+	@XmlElementWrapper(name="issueCustomFields")
+	@XmlElement(name="issueCustomField")
 	List<RedmineCustomTicketField> customTicketFields = new ArrayList<RedmineCustomTicketField>();
 
+	@XmlElementWrapper(name="queries")
+	@XmlElement(name="query")
 	List<RedmineStoredQuery> storedQueries = new ArrayList<RedmineStoredQuery>();
 	
-	RedmineProjectData(RedmineProject project) {
+	protected RedmineProjectData() {} //required for JAXB
+	
+	public RedmineProjectData(RedmineProject project) {
 		this.project = project;
 	}
 	

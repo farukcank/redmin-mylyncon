@@ -20,12 +20,22 @@
  *******************************************************************************/
 package org.svenk.redmine.core.model;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+
+@XmlAccessorType(XmlAccessType.FIELD)
 public class RedmineTicketStatus extends RedmineTicketAttribute {
 
-	private static final long serialVersionUID = 105940839933562260L;
+	private static final long serialVersionUID = 2L;
 
+	@XmlElement
 	private boolean closed;
+	
+	@XmlElement(name="default")
 	private boolean defaultStatus;
+
+	private RedmineTicketStatus(){} // required for JAXB
 
 	public RedmineTicketStatus(String name, int value) {
 		super(name, value);

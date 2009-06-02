@@ -18,17 +18,13 @@
  * Contributors:
  *     Sven Krzyzak - adapted Trac implementation for Redmine
  *******************************************************************************/
-package org.svenk.redmine.core.model;
+package org.svenk.redmine.core.client.container;
 
-public class RedmineVersion extends RedmineTicketAttribute {
+import java.util.ArrayList;
+import java.util.List;
 
-	private static final long serialVersionUID = 2L;
+import org.svenk.redmine.core.model.RedmineCustomValue;
 
-	private RedmineVersion(){} //required for JAXB
-
-	public RedmineVersion(String name, int value) {
-		super(name, value);
-		// TODO Auto-generated constructor stub
-	}
-
+public class CustomValues {
+	public List<RedmineCustomValue> customValue = new ArrayList<RedmineCustomValue>();
 }

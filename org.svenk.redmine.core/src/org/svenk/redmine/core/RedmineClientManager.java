@@ -53,6 +53,10 @@ public class RedmineClientManager implements IRepositoryListener {
 		readCache();
 	}
 
+	public void getAvailableClientImplementationsDescription() {
+		
+	}
+	
 	public synchronized IRedmineClient getRedmineClient(TaskRepository taskRepository){
 		String repositoryUrl = taskRepository.getRepositoryUrl();
 		IRedmineClient repository = clientByUrl.get(repositoryUrl);

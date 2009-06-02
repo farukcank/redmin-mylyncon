@@ -22,11 +22,21 @@ package org.svenk.redmine.core.model;
 
 import java.io.Serializable;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlList;
+import javax.xml.bind.annotation.XmlType;
+
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 
+@XmlAccessorType(XmlAccessType.FIELD)
 public class RedmineCustomTicketField implements Serializable, IRedmineQueryField {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 
 	public final static String TASK_KEY_PREFIX = "task.redmine.custom.";
 
@@ -61,29 +71,45 @@ public class RedmineCustomTicketField implements Serializable, IRedmineQueryFiel
 		
 	}
 	
+	@XmlAttribute
 	private int id;
 	
 	private FieldType type;
 	
+	@XmlElement
 	private String name;
 	
-	private int min, max;
+	@XmlElement(name="minLength")
+	private int min;
 	
+	@XmlElement(name="maxLength")
+	private int max;
+	
+	@XmlElement(name="regexp")
 	private String validationRegex;
 	
+	@XmlElement
 	private String defaultValue;
 	
+	@XmlElement
 	private boolean required;
 	
+	@XmlElement(name="filter")
 	private boolean supportFilter;
 	
+	@XmlList
+	@XmlElement(name="trackers")
 	private int[] trackerId;
 	
+	@XmlElementWrapper(name="possibleValues")
+	@XmlElement(name="possibleValue")
 	private String [] listValues;
+	
+	private RedmineCustomTicketField() {} //required for JAXB
 	
 	public RedmineCustomTicketField(int id, String type) {
 		setId(id);
-		setType(type);
+		setFieldFormat(type);
 	}
 
 	public  boolean usableForTracker(int trackerId) {
@@ -107,7 +133,8 @@ public class RedmineCustomTicketField implements Serializable, IRedmineQueryFiel
 		return type;
 	}
 
-	private void setType(String type) {
+	@XmlElement(name="fieldFormat")
+	private void setFieldFormat(String type) {
 		this.type = FieldType.fromString(type);
 	}
 
@@ -175,7 +202,14 @@ public class RedmineCustomTicketField implements Serializable, IRedmineQueryFiel
 		this.trackerId = trackerId;
 	}
 
+	/**
+	 * 
+	 * @return never null
+	 */
 	public String[] getListValues() {
+		if (listValues==null) {
+			listValues = new String[0];
+		}
 		return listValues;
 	}
 

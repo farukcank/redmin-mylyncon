@@ -22,14 +22,21 @@ package org.svenk.redmine.core.model;
 
 import java.io.Serializable;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+
 public class RedmineTicketAttribute implements Comparable<RedmineTicketAttribute>, Serializable {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 
-	private final String name;
+	@XmlAttribute(name="id")
+	private int value;
 
-	private final int value;
+	@XmlElement
+	private String name;
 
+	protected RedmineTicketAttribute(){} // required for JAXB
+	
 	public RedmineTicketAttribute(String name, int value) {
 		this.name = name;
 		this.value = value;

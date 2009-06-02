@@ -18,17 +18,29 @@
  * Contributors:
  *     Sven Krzyzak - adapted Trac implementation for Redmine
  *******************************************************************************/
-package org.svenk.redmine.core.model;
+package org.svenk.redmine.core.client.adapter;
 
-public class RedmineVersion extends RedmineTicketAttribute {
+import java.util.HashMap;
 
-	private static final long serialVersionUID = 2L;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-	private RedmineVersion(){} //required for JAXB
+import org.svenk.redmine.core.client.container.CustomValues;
+import org.svenk.redmine.core.model.RedmineCustomValue;
 
-	public RedmineVersion(String name, int value) {
-		super(name, value);
-		// TODO Auto-generated constructor stub
+public class CustomValueXmlAdapter extends XmlAdapter<CustomValues, HashMap<Integer, String>> {
+
+	@Override
+	public CustomValues marshal(HashMap<Integer, String> v) throws Exception {
+		return null;
+	}
+
+	@Override
+	public HashMap<Integer, String> unmarshal(CustomValues v) throws Exception {
+		HashMap<Integer, String> map = new HashMap<Integer, String>(v.customValue.size());
+		for (RedmineCustomValue value : v.customValue) {
+			map.put(value.getCustomFieldId(), value.getValue());
+		}
+		return map;
 	}
 
 }

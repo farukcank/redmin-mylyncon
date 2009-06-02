@@ -25,7 +25,7 @@ import java.util.StringTokenizer;
 
 public class RedmineTicketRelation extends RedmineTicketAttribute {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 	
 	public enum RelationType {
 		BLOCKS, PRECEDES, DUPLICATES, RELATES;

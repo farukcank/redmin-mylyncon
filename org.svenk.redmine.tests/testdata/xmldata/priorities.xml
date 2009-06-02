@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<priorities xmlns="http://redmin-mylyncon.sf.net/schemas/WS-API-2.5">
+  <priority id="0">
+    <name>name</name>
+    <position>1</position>
+    <default>true</default>
+  </priority>
+  <priority id="4">
+    <name>vier</name>
+    <position>2</position>
+    <default>true</default>
+  </priority>
+</priorities>

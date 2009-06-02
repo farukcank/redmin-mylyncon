@@ -18,84 +18,36 @@
  * Contributors:
  *     Sven Krzyzak - adapted Trac implementation for Redmine
  *******************************************************************************/
-package org.svenk.redmine.core.model;
 
-import java.util.Date;
+package org.svenk.redmine.core.model;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlValue;
 
-@XmlRootElement(name="journal")
+@XmlRootElement(name="customValue")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class RedmineTicketJournal {
+public class RedmineCustomValue {
 
 	@XmlAttribute
-	private int id;
+	private int customFieldId;
 	
-	@XmlElement
-	private String notes;
+	@XmlValue
+	private String value;
 	
-	@XmlElement(name="createdOn")
-	@XmlSchemaType(name="dateTime")
-	private Date created;
-
-	//TODO Nach XmlRpc Umbau entfernen
-	@XmlTransient
-	private int authorId;
-	
-	@XmlElement(name="author")
-	private String authorName;
-	
-	@XmlElement(name="editableByUser")
-	private boolean editable;
-
-	public int getId() {
-		return id;
+	public int getCustomFieldId() {
+		return customFieldId;
 	}
-
-	public void setId(int id) {
-		this.id = id;
+	public void setCustomFieldId(int customFieldId) {
+		this.customFieldId = customFieldId;
 	}
-
-	public String getNotes() {
-		return notes;
+	public String getValue() {
+		return value;
 	}
-
-	public void setNotes(String notes) {
-		this.notes = notes;
-	}
-
-	public Date getCreated() {
-		return created;
-	}
-
-	public void setCreated(Date created) {
-		this.created = created;
-	}
-
-	public void setAuthorId(int authorId) {
-		this.authorId = authorId;
-	}
-
-	public String getAuthorName() {
-		return authorName;
-	}
-
-	public void setAuthorName(String authorName) {
-		this.authorName = authorName;
-	}
-
-	public boolean isEditable() {
-		return editable;
-	}
-
-	public void setEditable(boolean editable) {
-		this.editable = editable;
+	public void setValue(String value) {
+		this.value = value;
 	}
 	
 }

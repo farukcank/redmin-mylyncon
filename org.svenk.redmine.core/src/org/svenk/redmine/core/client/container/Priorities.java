@@ -18,17 +18,18 @@
  * Contributors:
  *     Sven Krzyzak - adapted Trac implementation for Redmine
  *******************************************************************************/
-package org.svenk.redmine.core.model;
+package org.svenk.redmine.core.client.container;
 
-public class RedmineVersion extends RedmineTicketAttribute {
+import java.util.List;
 
-	private static final long serialVersionUID = 2L;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-	private RedmineVersion(){} //required for JAXB
+import org.svenk.redmine.core.model.RedminePriority;
 
-	public RedmineVersion(String name, int value) {
-		super(name, value);
-		// TODO Auto-generated constructor stub
-	}
-
+@XmlRootElement(name="priorities")
+public class Priorities {
+	
+	@XmlElement(name="priority")
+	public List<RedminePriority> priorities;
 }

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<issues xmlns="http://redmin-mylyncon.sf.net/schemas/WS-API-2.5">
+	<issue id="7">
+		<subject>a new bug</subject><!-- leer == fehler -->
+		<description>short description</description>
+		<author>anonymous</author>
+		<createdOn unixtime="1111111111">0001-01-01T00:00:00</createdOn>
+		<updatedOn unixtime="1111111111">0001-01-01T00:00:00</updatedOn>
+		<projectId>1</projectId> <!-- leer == fehler -->
+		<trackerId>1</trackerId><!-- leer == fehler -->
+		<priorityId>1</priorityId>
+		<statusId>1</statusId><!-- leer == fehler -->
+		<categoryId>1</categoryId>
+		<fixedVersionId>1</fixedVersionId>
+		<assignedToId>1</assignedToId>
+		<doneRatio>0</doneRatio>
+		<estimatedHours>0</estimatedHours>
+		<availableStatus>1 2 3</availableStatus>
+		<customValues>
+			<customValue customFieldId="1">ff</customValue>
+			<customValue customFieldId="2">23</customValue>
+		</customValues>
+		<journals>
+			<journal id="1" >
+				<author>anonymous</author>
+				<createdOn unixtime="1111111111">0001-01-01T00:00:00</createdOn>
+				<notes>short comment</notes>
+				<editableByUser>false</editableByUser>
+			</journal>
+		</journals>
+		<attachments>
+			<attachment id="1" >
+				<author>anonymous</author>
+				<createdOn unixtime="1111111111">0001-01-01T00:00:00</createdOn>
+				<filename>text.txt</filename>
+				<filesize>234</filesize>
+				<digest>123455</digest>
+				<contentType>text/plain</contentType>
+				<description>descr</description>
+			</attachment>
+		</attachments>
+		<issueRelations>
+			<issueRelation id="5">
+				<issueFromId>2</issueFromId>
+				<issueToId>3</issueToId>
+				<type>blocks</type>
+				<delay>0</delay>
+			</issueRelation>
+		</issueRelations>
+	</issue>
+	<issue id="5">
+		<subject>a new bug</subject><!-- leer == fehler -->
+		<description>short description</description>
+		<author>anonymous</author>
+		<createdOn unixtime="1211376720">2008-05-21T15:32:00</createdOn>
+		<updatedOn unixtime="1243116000">2009-05-24T00:00:00</updatedOn>
+		<projectId>1</projectId>projectId><!-- leer == fehler -->
+		<trackerId>2</trackerId><!-- leer == fehler -->
+		<priorityId>3</priorityId>
+		<statusId>1</statusId><!-- leer == fehler -->
+		<categoryId>2</categoryId>
+		<fixedVersionId>1</fixedVersionId>
+		<assignedToId>1</assignedToId>
+		<doneRatio>20</doneRatio>
+		<estimatedHours>5</estimatedHours>
+		<availableStatus>1 3</availableStatus>
+		<customValues>
+			<customValue customFieldId="1">ff</customValue>
+			<customValue customFieldId="2">23</customValue>
+		</customValues>
+		<journals>
+			<journal id="1" >
+				<author>anonymous</author>
+				<createdOn unixtime="1243116000">2009-05-24T00:00:00</createdOn>
+				<notes>short comment</notes>
+				<editableByUser>false</editableByUser>
+			</journal>
+			<journal id="4" >
+				<author>sven k</author>
+				<createdOn unixtime="1243116000">2009-05-24T00:00:00</createdOn>
+				<notes>long comment</notes>
+				<editableByUser>true</editableByUser>
+			</journal>
+		</journals>
+		<attachments>
+			<attachment id="1" >
+				<author>anonymous</author>
+				<createdOn unixtime="1243116000">2009-05-24T00:00:00</createdOn>
+				<filename>text.txt</filename>
+				<filesize>234</filesize>
+				<digest>123455</digest>
+				<contentType>text/plain</contentType>
+				<description>descr</description>
+			</attachment>
+			<attachment id="2" >
+				<author>anonymous</author>
+				<createdOn unixtime="1243116000">2009-05-24T00:00:00</createdOn>
+				<filename>text.txt</filename>
+				<filesize>234</filesize>
+				<digest>123455</digest>
+				<contentType>text/plain</contentType>
+				<description>descr</description>
+			</attachment>
+		</attachments>
+		<issueRelations>
+			<issueRelation id="5">
+				<issueFromId>2</issueFromId>
+				<issueToId>3</issueToId>
+				<type>blocks</type>
+				<delay>0</delay>
+			</issueRelation>
+		</issueRelations>
+	</issue>
+	<issue id="8">
+		<subject>a new bug</subject><!-- leer == fehler -->
+		<description>short description</description>
+		<author>anonymous</author>
+		<createdOn unixtime="1111111111">0001-01-01T00:00:00</createdOn>
+		<updatedOn unixtime="1111111111">0001-01-01T00:00:00</updatedOn>
+		<projectId>1</projectId> <!-- leer == fehler -->
+		<trackerId>1</trackerId><!-- leer == fehler -->
+		<priorityId>1</priorityId>
+		<statusId>1</statusId><!-- leer == fehler -->
+		<categoryId>1</categoryId>
+		<fixedVersionId>1</fixedVersionId>
+		<assignedToId>1</assignedToId>
+		<doneRatio>0</doneRatio>
+		<estimatedHours>0</estimatedHours>
+		<availableStatus>1</availableStatus>
+		<customValues>
+			<customValue customFieldId="1">ff</customValue>
+			<customValue customFieldId="2">23</customValue>
+		</customValues>
+		<journals>
+			<journal id="1" >
+				<author>anonymous</author>
+				<createdOn unixtime="1111111111">0001-01-01T00:00:00</createdOn>
+				<notes>short comment</notes>
+				<editableByUser>false</editableByUser>
+			</journal>
+		</journals>
+		<attachments>
+			<attachment id="1" >
+				<author>anonymous</author>
+				<createdOn unixtime="1111111111">0001-01-01T00:00:00</createdOn>
+				<filename>text.txt</filename>
+				<filesize>234</filesize>
+				<digest>123455</digest>
+				<contentType>text/plain</contentType>
+				<description>descr</description>
+			</attachment>
+		</attachments>
+		<issueRelations>
+			<issueRelation id="5">
+				<issueFromId>2</issueFromId>
+				<issueToId>3</issueToId>
+				<type>blocks</type>
+				<delay>0</delay>
+			</issueRelation>
+		</issueRelations>
+	</issue>
+</issues>
