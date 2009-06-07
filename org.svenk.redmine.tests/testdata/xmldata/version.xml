@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<version xmlns="http://redmin-mylyncon.sf.net/schemas/WS-API-2.5">
+  <plugin minor="5" major="2" tiny="0">2.5.0.trunk.235</plugin>
+  <redmine>0.8.3.stable.2671</redmine>
+  <rails>2.1.2</rails>
+</version>

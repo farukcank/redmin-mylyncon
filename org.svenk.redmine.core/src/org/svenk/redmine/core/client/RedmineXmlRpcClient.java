@@ -18,7 +18,7 @@
  * Contributors:
  *     Sven Krzyzak - adapted Trac implementation for Redmine
  *******************************************************************************/
-package org.svenk.redmine.core;
+package org.svenk.redmine.core.client;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
+import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
 import org.svenk.redmine.core.model.RedmineAttachment;

@@ -28,8 +28,8 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.RedmineAttribute;
-import org.svenk.redmine.core.RedmineProjectData;
 import org.svenk.redmine.core.RedmineTaskDataHandler;
+import org.svenk.redmine.core.client.RedmineProjectData;
 import org.svenk.redmine.core.model.RedmineCustomTicketField;
 import org.svenk.redmine.core.model.RedmineTicket;
 

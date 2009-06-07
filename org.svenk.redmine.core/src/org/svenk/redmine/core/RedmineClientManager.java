@@ -37,6 +37,7 @@ import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.tasks.core.IRepositoryListener;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.TaskRepositoryLocationFactory;
+import org.svenk.redmine.core.client.RedmineClientData;
 
 public class RedmineClientManager implements IRepositoryListener {
 

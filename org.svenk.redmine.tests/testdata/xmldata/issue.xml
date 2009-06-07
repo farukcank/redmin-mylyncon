@@ -55,8 +55,14 @@
 	</attachments>
 	<issueRelations>
 		<issueRelation id="5">
-			<issueFromId>2</issueFromId>
-			<issueToId>3</issueToId>
+			<issueFromId>5</issueFromId>
+			<issueToId>6</issueToId>
+			<type>blocks</type>
+			<delay>0</delay>
+		</issueRelation>
+		<issueRelation id="7">
+			<issueFromId>4</issueFromId>
+			<issueToId>5</issueToId>
 			<type>blocks</type>
 			<delay>0</delay>
 		</issueRelation>

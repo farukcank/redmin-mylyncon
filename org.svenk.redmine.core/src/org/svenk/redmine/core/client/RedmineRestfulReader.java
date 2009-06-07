@@ -32,12 +32,12 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 
-import org.svenk.redmine.core.RedmineProjectData;
 import org.svenk.redmine.core.client.container.Priorities;
 import org.svenk.redmine.core.client.container.ProjectsData;
 import org.svenk.redmine.core.client.container.TicketStatuses;
 import org.svenk.redmine.core.client.container.Tickets;
 import org.svenk.redmine.core.client.container.UpdatedSince;
+import org.svenk.redmine.core.client.container.Version;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.RedminePriority;
 import org.svenk.redmine.core.model.RedmineTicket;
@@ -112,9 +112,18 @@ public class RedmineRestfulReader {
 		}
 	}
 
+	public Version readVersion(InputStream in) throws RedmineException {
+		try {
+			Source source = new SAXSource(newReader(), new InputSource(in));
+			return (Version)newUnmarshallerContext().unmarshal(source);
+		} catch (Exception e) {
+			throw new RedmineException(e.getMessage(), e);
+		}
+	}
+	
 	protected Unmarshaller newUnmarshallerContext() throws JAXBException {
 		if (ctx==null) {
-			ctx = JAXBContext.newInstance(RedmineTicket.class, Tickets.class, UpdatedSince.class, TicketStatuses.class, Priorities.class, ProjectsData.class);
+			ctx = JAXBContext.newInstance(RedmineTicket.class, Tickets.class, UpdatedSince.class, TicketStatuses.class, Priorities.class, ProjectsData.class, Version.class);
 		}
 		return ctx.createUnmarshaller();
 	}

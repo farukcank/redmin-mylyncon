@@ -19,7 +19,7 @@
  *     Sven Krzyzak - adapted Trac implementation for Redmine
  *******************************************************************************/
 
-package org.svenk.redmine.core;
+package org.svenk.redmine.core.client;
 
 import java.io.Serializable;
 import java.util.ArrayList;

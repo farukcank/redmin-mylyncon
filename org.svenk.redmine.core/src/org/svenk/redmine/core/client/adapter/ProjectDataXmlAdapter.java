@@ -24,12 +24,12 @@ import java.lang.reflect.Field;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-import org.svenk.redmine.core.RedmineProjectData;
+import org.svenk.redmine.core.client.RedmineProjectData;
 import org.svenk.redmine.core.client.container.ProjectDataWrapper;
 import org.svenk.redmine.core.model.RedmineProject;
 
 public class ProjectDataXmlAdapter extends
-		XmlAdapter<ProjectDataWrapper, org.svenk.redmine.core.RedmineProjectData> {
+		XmlAdapter<ProjectDataWrapper, org.svenk.redmine.core.client.RedmineProjectData> {
 
 	@Override
 	public ProjectDataWrapper marshal(RedmineProjectData v) throws Exception {

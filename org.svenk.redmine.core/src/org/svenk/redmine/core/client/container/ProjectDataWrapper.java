@@ -23,7 +23,7 @@ package org.svenk.redmine.core.client.container;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
-import org.svenk.redmine.core.RedmineProjectData;
+import org.svenk.redmine.core.client.RedmineProjectData;
 
 @SuppressWarnings("serial")
 public class ProjectDataWrapper extends RedmineProjectData {

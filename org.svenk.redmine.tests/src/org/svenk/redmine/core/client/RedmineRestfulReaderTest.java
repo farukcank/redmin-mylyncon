@@ -27,7 +27,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.svenk.redmine.core.RedmineProjectData;
+import org.svenk.redmine.core.client.container.Version;
 import org.svenk.redmine.core.model.RedmineAttachment;
 import org.svenk.redmine.core.model.RedmineCustomTicketField;
 import org.svenk.redmine.core.model.RedmineIssueCategory;
@@ -37,11 +37,13 @@ import org.svenk.redmine.core.model.RedmineProject;
 import org.svenk.redmine.core.model.RedmineStoredQuery;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicketJournal;
+import org.svenk.redmine.core.model.RedmineTicketRelation;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
 import org.svenk.redmine.core.model.RedmineTracker;
 import org.svenk.redmine.core.model.RedmineVersion;
 import org.svenk.redmine.core.model.RedmineCustomTicketField.FieldType;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
+import org.svenk.redmine.core.model.RedmineTicketRelation.RelationType;
 
 public class RedmineRestfulReaderTest extends TestCase {
 
@@ -67,6 +69,7 @@ public class RedmineRestfulReaderTest extends TestCase {
 		assertNotNull(ticket);
 		validateTicket(ticket);
 		
+		in.close();
 	}
 	
 	public void testReadTickets() throws Exception  {
@@ -79,6 +82,8 @@ public class RedmineRestfulReaderTest extends TestCase {
 		validateTicket(tickets.get(1));
 		assertEquals(7, tickets.get(0).getId());
 		assertEquals(8, tickets.get(2).getId());
+		
+		in.close();
 	}
 	
 	public void testReadUpdatedTickets() throws Exception  {
@@ -90,6 +95,8 @@ public class RedmineRestfulReaderTest extends TestCase {
 		assertEquals(2, list.size());
 		assertEquals(1, list.get(0).intValue());
 		assertEquals(7, list.get(1).intValue());
+		
+		in.close();
 	}
 	
 	public void testReadTicketStatuses() throws Exception  {
@@ -105,6 +112,8 @@ public class RedmineRestfulReaderTest extends TestCase {
 		assertEquals("drei", status.getName());
 		assertEquals(false, status.isDefaultStatus());
 		assertEquals(true, status.isClosed());
+		
+		in.close();
 	}
 
 	public void testReadPriorities() throws Exception  {
@@ -119,8 +128,26 @@ public class RedmineRestfulReaderTest extends TestCase {
 		assertEquals(4, priority.getValue());
 		assertEquals("vier", priority.getName());
 		assertEquals(true, priority.isDefaultPriority());
+		
+		in.close();
 	}
 	
+	public void testVersion() throws Exception {
+		InputStream in = getClass().getResourceAsStream("/xmldata/version.xml");
+
+		Version version = testee.readVersion(in);
+		assertNotNull(version);
+		
+		assertNotNull(version.redmine);
+		assertEquals(0, version.redmine.major);
+		assertEquals(8, version.redmine.minor);
+		
+		assertNotNull(version.plugin);
+		assertEquals(2, version.plugin.major);
+		assertEquals(5, version.plugin.minor);
+		
+		in.close();
+	}
 	public void testReadProjects() throws Exception  {
 		InputStream in = getClass().getResourceAsStream("/xmldata/projects.xml");
 		
@@ -244,6 +271,15 @@ public class RedmineRestfulReaderTest extends TestCase {
 		assertEquals(234, attachments[0].getFilesize());
 		assertEquals("123455", attachments[0].getDigest());
 		assertEquals("descr", attachments[0].getDescription());
+		
+		List<RedmineTicketRelation> relations = ticket.getRelations();
+		assertNotNull(relations);
+		assertEquals(2, relations.size());
+		assertEquals(5, relations.get(0).getValue());
+		assertEquals(5, relations.get(0).getFromTicket());
+		assertEquals(6, relations.get(0).getToTicket());
+		assertEquals(RelationType.BLOCKS, relations.get(0).getType());
+		assertEquals("5;6;BLOCKS", relations.get(0).getName());
 	}
 
 }

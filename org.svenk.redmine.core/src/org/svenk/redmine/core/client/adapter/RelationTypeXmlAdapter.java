@@ -18,21 +18,23 @@
  * Contributors:
  *     Sven Krzyzak - adapted Trac implementation for Redmine
  *******************************************************************************/
-package org.svenk.redmine.ui.wizard;
+package org.svenk.redmine.core.client.adapter;
 
-import org.eclipse.jface.viewers.LabelProvider;
-import org.svenk.redmine.core.client.RedmineProjectData;
-import org.svenk.redmine.core.model.RedmineTicketAttribute;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-public class RedmineLabelProvider extends LabelProvider {
+import org.svenk.redmine.core.model.RedmineTicketRelation.RelationType;
+
+public class RelationTypeXmlAdapter extends XmlAdapter<String, RelationType> {
+
 	@Override
-	public String getText(Object element) {
-		if (element instanceof RedmineProjectData) {
-			return ((RedmineProjectData)element).getProject().getName();
-		} else if (element instanceof RedmineTicketAttribute) {
-			return ((RedmineTicketAttribute)element).getName();
-		}
-		return super.getText(element);
+	public String marshal(RelationType v) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public RelationType unmarshal(String v) throws Exception {
+		return RelationType.fromString(v);
 	}
 
 }

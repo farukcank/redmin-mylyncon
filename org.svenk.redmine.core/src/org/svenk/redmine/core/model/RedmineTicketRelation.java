@@ -23,10 +23,21 @@ package org.svenk.redmine.core.model;
 
 import java.util.StringTokenizer;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import org.svenk.redmine.core.client.adapter.RelationTypeXmlAdapter;
+
+@XmlRootElement(name="issueRelation")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class RedmineTicketRelation extends RedmineTicketAttribute {
 
-	private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 3L;
 	
+	@XmlJavaTypeAdapter(RelationTypeXmlAdapter.class)
 	public enum RelationType {
 		BLOCKS, PRECEDES, DUPLICATES, RELATES;
 		
@@ -40,11 +51,16 @@ public class RedmineTicketRelation extends RedmineTicketAttribute {
 		}
 	} 
 
+	@XmlElement(name="issueFromId")
 	private int fromTicket;
 
+	@XmlElement(name="issueToId")
 	private int toTicket;
 	
+	@XmlElement
 	private RelationType type;
+
+	private RedmineTicketRelation(){} // required for JAXB
 
 	public RedmineTicketRelation(int id, int fromTicket, int toTicket, String type) {
 		super(buildAttributeName(fromTicket, toTicket, type), id);
@@ -99,5 +115,11 @@ public class RedmineTicketRelation extends RedmineTicketAttribute {
 
 	public RelationType getType() {
 		return type;
-	} 
+	}
+	
+	@Override
+	public String getName() {
+		return buildAttributeName(fromTicket, toTicket, type.name());
+	}
+	
 }

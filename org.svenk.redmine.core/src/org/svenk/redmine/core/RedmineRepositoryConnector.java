@@ -51,6 +51,8 @@ import org.eclipse.mylyn.tasks.core.data.TaskDataCollector;
 import org.eclipse.mylyn.tasks.core.data.TaskMapper;
 import org.eclipse.mylyn.tasks.core.data.TaskRelation;
 import org.eclipse.mylyn.tasks.core.sync.ISynchronizationSession;
+import org.svenk.redmine.core.client.RedmineClientData;
+import org.svenk.redmine.core.client.RedmineProjectData;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.RedmineSearch;
 import org.svenk.redmine.core.model.RedmineTicket;
@@ -67,7 +69,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 	
 	private RedmineTaskDataHandler taskDataHandler;
 
-	private final static String CLIENT_LABEL = "Redmine (supports redmine 0.7 and 0.8 with mylyn plugin)";
+	private final static String CLIENT_LABEL = "Redmine (supports redmine 0.7, 0.8 and 0.9 with mylyn plugin)";
 	
 	private final static Pattern TASK_ID_FROM_TASK_URL = Pattern.compile(IRedmineClient.TICKET_URL + "(\\d+)");
 

@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.svenk.redmine.core.RedmineProjectData;
+import org.svenk.redmine.core.client.RedmineProjectData;
 
 @XmlRootElement(name="projects")
 public class ProjectsData {

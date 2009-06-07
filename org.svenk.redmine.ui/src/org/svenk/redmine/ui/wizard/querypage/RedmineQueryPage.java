@@ -62,10 +62,10 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
 import org.svenk.redmine.core.IRedmineClient;
-import org.svenk.redmine.core.RedmineClientData;
 import org.svenk.redmine.core.RedmineCorePlugin;
-import org.svenk.redmine.core.RedmineProjectData;
 import org.svenk.redmine.core.RedmineRepositoryConnector;
+import org.svenk.redmine.core.client.RedmineClientData;
+import org.svenk.redmine.core.client.RedmineProjectData;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.IRedmineQueryField;
 import org.svenk.redmine.core.model.RedmineCustomTicketField;
@@ -180,17 +180,20 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		settingsFolder = new TabFolder(pageComposite, SWT.NONE);
 		settingsFolder.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		final TabItem mainItem = new TabItem(settingsFolder, SWT.NONE);
-		final TabItem customItem = new TabItem(settingsFolder, SWT.NONE);
 		mainItem.setText(TAB_STANDARD);
-		customItem.setText(TAB_CUSTOM);
 		
 		final Composite commonComposite = new Composite(settingsFolder, SWT.NONE);
 		commonComposite.setLayout(layout);
 		mainItem.setControl(commonComposite);
 		
-		customComposite = new Composite(settingsFolder, SWT.NONE);
-		customComposite.setLayout(layout);
-		customItem.setControl(customComposite);
+		if (client.supportServersideStoredQueries()) {
+			final TabItem customItem = new TabItem(settingsFolder, SWT.NONE);
+			customItem.setText(TAB_CUSTOM);
+
+			customComposite = new Composite(settingsFolder, SWT.NONE);
+			customComposite.setLayout(layout);
+			customItem.setControl(customComposite);
+		}
 
 		createListGroup(commonComposite);
 		createTextGroup(commonComposite);
@@ -323,8 +326,10 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 						restoreQuery(query);
 					} else {
 						projectViewer.setSelection(new StructuredSelection(PROJECT_SELECT_TITLE));
-						storedQueryViewer.setInput(new String[]{QUERY_SELECT_TITLE});
-						storedQueryViewer.setSelection(new StructuredSelection(QUERY_SELECT_TITLE));
+						if (client.supportServersideStoredQueries()) {
+							storedQueryViewer.setInput(new String[]{QUERY_SELECT_TITLE});
+							storedQueryViewer.setSelection(new StructuredSelection(QUERY_SELECT_TITLE));
+						}
 					}
 				}
 			});

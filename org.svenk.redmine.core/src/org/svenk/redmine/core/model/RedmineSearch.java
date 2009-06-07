@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.svenk.redmine.core.IRedmineClient;
-import org.svenk.redmine.core.RedmineProjectData;
+import org.svenk.redmine.core.client.RedmineProjectData;
 import org.svenk.redmine.core.model.RedmineSearchFilter.CompareOperator;
 import org.svenk.redmine.core.model.RedmineSearchFilter.SearchField;
 

@@ -39,9 +39,9 @@ import org.eclipse.swt.widgets.List;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.IProgressService;
 import org.svenk.redmine.core.IRedmineClient;
-import org.svenk.redmine.core.RedmineClientData;
 import org.svenk.redmine.core.RedmineCorePlugin;
-import org.svenk.redmine.core.RedmineProjectData;
+import org.svenk.redmine.core.client.RedmineClientData;
+import org.svenk.redmine.core.client.RedmineProjectData;
 import org.svenk.redmine.core.exception.RedmineException;
 
 public class RedmineProjectPage extends WizardPage {

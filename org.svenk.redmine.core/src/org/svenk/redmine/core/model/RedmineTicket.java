@@ -42,8 +42,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.svenk.redmine.core.RedmineAttribute;
-import org.svenk.redmine.core.RedmineClientData;
-import org.svenk.redmine.core.RedmineProjectData;
+import org.svenk.redmine.core.client.RedmineClientData;
+import org.svenk.redmine.core.client.RedmineProjectData;
 import org.svenk.redmine.core.client.adapter.CustomValueXmlAdapter;
 import org.svenk.redmine.core.model.RedmineCustomTicketField.FieldType;
 import org.svenk.redmine.core.util.RedmineUtil;
@@ -155,7 +155,8 @@ public class RedmineTicket {
 	@XmlElement
 	private List<Integer> availableStatus;
 
-	@XmlTransient
+	@XmlElementWrapper(name="issueRelations")
+	@XmlElement(name="issueRelation")
 	private List<RedmineTicketRelation> relations;
 	
 
@@ -278,18 +279,13 @@ public class RedmineTicket {
 		this.statuses = statuses;
 	}
 	
-	//TODO nach Entfernung des XmlRpc Clients den Status überarbeiten 
-	public void completeAvailableStatus(RedmineClientData clientData) {
-		statuses.clear();
-		if (availableStatus != null) {
-			for (Integer intval : availableStatus) {
-				statuses.add(clientData.getStatus(intval));
-			}
-		}
-	}
-	
 	public List<RedmineTicketRelation> getRelations() {
 		return relations==null ? null : Collections.unmodifiableList(relations);
+	}
+	
+	//TODO nach Entfernung des XmlRpc Clients den Status überarbeiten 
+	public List<Integer> getAvailableStatusList() {
+		return availableStatus;
 	}
 	
 	public static RedmineTicket fromTaskData(TaskData taskData, RedmineClientData clientData) {

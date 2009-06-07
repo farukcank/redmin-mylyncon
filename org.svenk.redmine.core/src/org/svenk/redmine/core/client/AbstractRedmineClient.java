@@ -18,7 +18,7 @@
  * Contributors:
  *     Sven Krzyzak - adapted Trac implementation for Redmine
  *******************************************************************************/
-package org.svenk.redmine.core;
+package org.svenk.redmine.core.client;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +39,7 @@ import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
+import org.apache.xmlrpc.XmlRpcException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
@@ -47,6 +48,8 @@ import org.eclipse.mylyn.commons.net.UnsupportedRequestException;
 import org.eclipse.mylyn.commons.net.WebUtil;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentSource;
+import org.svenk.redmine.core.IRedmineClient;
+import org.svenk.redmine.core.exception.RedmineAuthenticationException;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
@@ -73,6 +76,8 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	protected double redmineVersion = 0D;
 
 	protected RedmineTicket.Key attributeKeys[] = new RedmineTicket.Key[]{Key.ASSIGNED_TO, Key.PRIORITY, Key.VERSION, Key.CATEGORY, Key.STATUS, Key.TRACKER};
+	
+	protected final static String MSG_AUTHENTICATION_REQUIRED = "Authentication required";
 
 	public AbstractRedmineClient(AbstractWebLocation location, RedmineClientData clientData, TaskRepository repository) {
 		this.location = location;
@@ -231,6 +236,34 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		method.setRequestBody(credentials);
 		
 		performExecuteMethod(method, hostConfiguration, monitor);
+
+		AuthenticationType authenticationType = null;
+		switch (method.getStatusCode()) {
+			case HttpStatus.SC_OK :
+				authenticationType = AuthenticationType.REPOSITORY;
+				authenticated = false;
+				break;
+			case HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED :
+				authenticationType = AuthenticationType.PROXY;
+				authenticated = false;
+				break;
+			default :
+				authenticated = true;
+		}
+		
+		if (!authenticated) {
+			try {
+				location.requestCredentials(authenticationType, MSG_AUTHENTICATION_REQUIRED, monitor);
+				if (!monitor.isCanceled()) {
+					performLogin(hostConfiguration, monitor);
+					return;
+				}
+			} catch (UnsupportedRequestException e1) {;
+			} catch (OperationCanceledException e1) {;
+				throw new RedmineAuthenticationException(method.getStatusCode(),MSG_AUTHENTICATION_REQUIRED);
+			}
+		}
+
 	}
 	
 	protected int performExecuteMethod(HttpMethod method, HostConfiguration hostConfiguration, IProgressMonitor monitor) throws RedmineException {
