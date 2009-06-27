@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.svenk.redmine"
+      id="org.svenk.redmine_feature"
       label="Mylyn Connector: Redmine"
       version="3.1.0.qualifier">
 
@@ -142,6 +142,20 @@ Java and all Java-based trademarks are trademarks of Sun Microsystems, Inc. in t
 
    <plugin
          id="javax.xml.bind"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="javax.xml"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="javax.xml.stream"
          download-size="0"
          install-size="0"
          version="0.0.0"
