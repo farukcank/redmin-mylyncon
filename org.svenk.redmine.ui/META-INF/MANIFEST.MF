@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: org.svenk.redmine.ui
+Bundle-Name: Redmine-Mylyn-Connector UI
 Bundle-SymbolicName: org.svenk.redmine.ui;singleton:=true
 Bundle-Version: 3.1.0.qualifier
 Bundle-Vendor: SVENK

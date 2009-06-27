@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.svenk.redmine_feature"
+      id="org.svenk.redmine"
       label="Mylyn Connector: Redmine"
       version="3.1.0.qualifier">
 
@@ -82,7 +82,6 @@ Java and all Java-based trademarks are trademarks of Sun Microsystems, Inc. in t
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="javax.xml"/>
       <import plugin="org.eclipse.osgi"/>
-      <import plugin="org.apache.commons.logging"/>
    </requires>
 
    <plugin
@@ -136,6 +135,13 @@ Java and all Java-based trademarks are trademarks of Sun Microsystems, Inc. in t
 
    <plugin
          id="org.apache.commons.logging"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="javax.xml.bind"
          download-size="0"
          install-size="0"
          version="0.0.0"

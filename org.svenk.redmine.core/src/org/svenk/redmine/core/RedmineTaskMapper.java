@@ -37,6 +37,7 @@ public class RedmineTaskMapper extends TaskMapper implements IRedmineTaskMapping
 	public PriorityLevel getPriorityLevel() {
 		PriorityLevel level =  super.getPriorityLevel();
 		if (client != null) {
+			//TODO catch Nullpointer and refresh repositoryAttributes
 			int priority = client.getClientData().getPriority(getPriority()).getPosition();
 			level = PriorityLevel.fromLevel(priority>5 ? 1 : 6-priority);
 		}

@@ -107,5 +107,7 @@ public class RedmineClientData implements Serializable {
 		return null;
 	}
 	
-	
+	public boolean needsUpdate() {
+		return priorities.size()==0 || statuses.size()==0 || projects.size()==0;
+	}
 }

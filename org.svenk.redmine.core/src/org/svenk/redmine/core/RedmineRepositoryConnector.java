@@ -173,12 +173,28 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 		return true;
 	}
 
+	@Override
+	public boolean isRepositoryConfigurationStale(TaskRepository repository, IProgressMonitor monitor) throws CoreException {
+		boolean isStale = super.isRepositoryConfigurationStale(repository, monitor);
+		
+		if (!isStale) {
+			IRedmineClient client = clientManager.getRedmineClient(repository);
+			isStale = client.getClientData().needsUpdate();
+		}
+		
+		return isStale;
+	}
 
 	@Override
-	public void updateRepositoryConfiguration(TaskRepository repository,
-			IProgressMonitor monitor) throws CoreException {
-		// TODO Auto-generated method stub
-		
+	public void updateRepositoryConfiguration(TaskRepository repository, IProgressMonitor monitor) throws CoreException {
+		IRedmineClient client = clientManager.getRedmineClient(repository);
+		try {
+			client.updateAttributes(true, monitor);
+		} catch (RedmineException e) {
+			IStatus status = RedmineCorePlugin.toStatus(e, repository);
+			RedmineCorePlugin.getDefault().logException(status, e);
+			throw new CoreException(status);
+		}
 	}
 
 	@Override
@@ -332,7 +348,6 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 	public IStatus performQuery(TaskRepository repository,
 			IRepositoryQuery query, TaskDataCollector resultCollector,
 			ISynchronizationSession event, IProgressMonitor monitor) {
-		// TODO Auto-generated method stub
 
 		final List<RedmineTicket> tickets = new ArrayList<RedmineTicket>();
 		
