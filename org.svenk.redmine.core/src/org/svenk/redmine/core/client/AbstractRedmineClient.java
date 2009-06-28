@@ -90,6 +90,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	}
 
 	public void refreshRepositorySettings(TaskRepository repository) {
+		if (!this.characterEncoding.equals(repository.getCharacterEncoding())) {
+			this.characterEncoding = repository.getCharacterEncoding();
+			this.httpClient.getParams().setContentCharset(characterEncoding);
+		}
 		if (!repository.getVersion().equals(TaskRepository.NO_VERSION_SPECIFIED)) {
 			redmineVersion = getRedmineVersion(repository.getVersion());
 		}

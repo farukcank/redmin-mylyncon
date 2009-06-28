@@ -105,6 +105,9 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	}
 
 	public void refreshRepositorySettings(TaskRepository repository) {
+		if (!this.characterEncoding.equals(repository.getCharacterEncoding())) {
+			this.client = null;
+		}
 		super.refreshRepositorySettings(repository);
 		if (!repository.getVersion().equals(TaskRepository.NO_VERSION_SPECIFIED)) {
 			wsVersion = getWsVersion(repository.getVersion());
@@ -114,6 +117,7 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	private XmlRpcClient getClient() throws RedmineException {
 		if (client == null) {
 			config = new XmlRpcClientConfigImpl();
+			config.setEncoding(characterEncoding);
 
 			client = new XmlRpcClient();
 			client.setConfig(config);

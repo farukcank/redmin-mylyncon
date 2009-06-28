@@ -28,6 +28,7 @@ import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.XmlRpcRequest;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -79,6 +80,9 @@ public class RedmineTransportFactory extends XmlRpcCommonsTransportFactory {
 			this.monitor = new NullProgressMonitor();
 			
 			WebUtil.configureHttpClient(client, getUserAgent());
+			
+			XmlRpcClientConfigImpl config = (XmlRpcClientConfigImpl)pClient.getConfig();
+			client.getParams().setContentCharset(config.getEncoding());
 		}
 
 		@Override

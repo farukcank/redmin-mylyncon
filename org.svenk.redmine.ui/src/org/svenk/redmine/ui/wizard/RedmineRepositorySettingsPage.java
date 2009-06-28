@@ -57,17 +57,21 @@ public class RedmineRepositorySettingsPage extends
 		super(TITLE, DESCRIPTION, taskRepository);
 
 		setNeedsAnonymousLogin(false);
-		setNeedsEncoding(false);
+		setNeedsEncoding(true);
 		setNeedsTimeZone(false);
 		setNeedsAdvanced(false);
 		setNeedsValidation(true);
-		
 	}
 	
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		checkedUrl = getRepositoryUrl();
+
+		//Set Default Encoding
+		if (getRepository()==null) {
+			setEncoding("UTF-8");
+		}
 	}
 	
 	@Override
