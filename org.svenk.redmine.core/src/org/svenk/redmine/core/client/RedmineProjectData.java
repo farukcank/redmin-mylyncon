@@ -31,7 +31,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import org.svenk.redmine.core.client.adapter.ProjectDataXmlAdapter;
 import org.svenk.redmine.core.model.RedmineCustomTicketField;
 import org.svenk.redmine.core.model.RedmineIssueCategory;
 import org.svenk.redmine.core.model.RedmineMember;

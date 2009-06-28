@@ -23,20 +23,23 @@ package org.svenk.redmine.core;
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.svenk.redmine.core.client.RedmineClientData;
-import org.svenk.redmine.core.client.RedmineRestfulClient;
 import org.svenk.redmine.core.client.RedmineXmlRpcClient;
-import org.svenk.redmine.core.exception.RedmineException;
 
 public class RedmineClientFactory {
 
 	public static IRedmineClient createClient(AbstractWebLocation location, RedmineClientData clientData, TaskRepository repository) {
-		IRedmineClient client =  new RedmineRestfulClient(location, clientData, repository);
-		try {
-			client.checkClientConnection();
-		} catch (RedmineException e) {
+//		IRedmineClient client =  new RedmineRestfulClient(location, clientData, repository);
+//		try {
+//			client.checkClientConnection();
+//		} catch (RedmineException e) {
+//			if (e.getCause() instanceof JAXBException && ((JAXBException)e.getCause()).getLinkedException() instanceof ClassNotFoundException) {
+//				Throwable t = ((JAXBException)e.getCause()).getLinkedException();
+//				StatusHandler.log(new Status(IStatus.WARNING, RedmineCorePlugin.PLUGIN_ID,
+//						"RedmineRestfulClient not usable: " + t.getMessage(), t));
+//			}
 			return new RedmineXmlRpcClient(location, clientData, repository);
-		}
-		return client;
+//		}
+//		return client;
 	}
 
 }

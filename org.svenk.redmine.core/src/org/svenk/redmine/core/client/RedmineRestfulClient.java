@@ -22,7 +22,6 @@ package org.svenk.redmine.core.client;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -37,7 +36,6 @@ import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.svenk.redmine.core.client.container.Version;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
-import org.svenk.redmine.core.model.RedmineProject;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
 
