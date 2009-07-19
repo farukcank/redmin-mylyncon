@@ -24,8 +24,6 @@ public class RedmineVersion extends RedmineTicketAttribute {
 
 	private static final long serialVersionUID = 2L;
 
-	private RedmineVersion(){} //required for JAXB
-
 	public RedmineVersion(String name, int value) {
 		super(name, value);
 		// TODO Auto-generated constructor stub

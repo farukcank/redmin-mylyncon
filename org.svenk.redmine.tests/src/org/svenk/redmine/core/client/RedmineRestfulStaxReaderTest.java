@@ -45,16 +45,16 @@ import org.svenk.redmine.core.model.RedmineCustomTicketField.FieldType;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
 import org.svenk.redmine.core.model.RedmineTicketRelation.RelationType;
 
-public class RedmineRestfulReaderTest extends TestCase {
+public class RedmineRestfulStaxReaderTest extends TestCase {
 
-	private RedmineRestfulReader testee;
+	private RedmineRestfulStaxReader testee;
 	
-	public RedmineRestfulReaderTest() {
+	public RedmineRestfulStaxReaderTest() {
 	}
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		testee = new RedmineRestfulReader();
+		testee = new RedmineRestfulStaxReader();
 	}
 
 	protected void tearDown() throws Exception {

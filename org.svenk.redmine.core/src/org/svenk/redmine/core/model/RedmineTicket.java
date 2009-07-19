@@ -21,35 +21,20 @@
 package org.svenk.redmine.core.model;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlList;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.client.RedmineClientData;
 import org.svenk.redmine.core.client.RedmineProjectData;
-import org.svenk.redmine.core.client.adapter.CustomValueXmlAdapter;
 import org.svenk.redmine.core.model.RedmineCustomTicketField.FieldType;
 import org.svenk.redmine.core.util.RedmineUtil;
 
-@XmlRootElement(name="issue")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class RedmineTicket {
 
 	public enum Key {
@@ -120,43 +105,38 @@ public class RedmineTicket {
 			}
 			return null;
 		}
+		
+		public static Key fromTagName(String tagName) {
+			String string = null;
+			if (tagName.equals("author")) {
+				string = "autor";
+			} else if(tagName.equals("fixedVersionId")) {
+				string = "version";
+			} else {
+				string = tagName.replaceFirst("Id$", "").replaceAll("([A-Z])", "_$1").toLowerCase();
+			}
+			return fromString(string);
+		}
 	}
 
-	
-	@XmlAttribute(required=true)
 	private int id;
 	
-	@XmlElement(name="createdOn")
-	@XmlSchemaType(name="dateTime")
 	private Date created;
 
-	@XmlElement(name="updatedOn")
-	@XmlSchemaType(name="dateTime")
 	private Date lastChanged;
 	
 	private Map<Key, String> valueByKey = new HashMap<Key, String>();
 
-	@XmlElement(name="customValues")
-	@XmlJavaTypeAdapter(CustomValueXmlAdapter.class)
 	private HashMap<Integer, String> valueByCustomFieldId = new HashMap<Integer, String>();
 	
-	@XmlElementWrapper(name="journals")
-	@XmlElement(name="journal")
 	private List<RedmineTicketJournal> journals;
 
-	@XmlElementWrapper(name="attachments")
-	@XmlElement(name="attachment")
 	private List<RedmineAttachment> attachments;
 	
-	@XmlTransient
 	private List<RedmineTicketStatus> statuses;
 	
-	@XmlList
-	@XmlElement
 	private List<Integer> availableStatus;
 
-	@XmlElementWrapper(name="issueRelations")
-	@XmlElement(name="issueRelation")
 	private List<RedmineTicketRelation> relations;
 	
 
@@ -285,6 +265,9 @@ public class RedmineTicket {
 	
 	//TODO nach Entfernung des XmlRpc Clients den Status überarbeiten 
 	public List<Integer> getAvailableStatusList() {
+		if (availableStatus==null) {
+			availableStatus =  new ArrayList<Integer>();
+		}
 		return availableStatus;
 	}
 	
@@ -343,66 +326,4 @@ public class RedmineTicket {
 		this.lastChanged = lastChanged;
 	}
 
-	/* Setter methods for XML binding */
-	
-	@XmlElement
-	public void setSubject(String value) {
-		putBuiltinValue(Key.SUBJECT, value);
-	}
-
-	@XmlElement
-	public void setDescription(String value) {
-		putBuiltinValue(Key.DESCRIPTION, value);
-	}
-
-	@XmlElement
-	public void setAuthor(String value) {
-		putBuiltinValue(Key.AUTHOR, value);
-	}
-
-	@XmlElement
-	public void setProjectId(int value){
-		putBuiltinValue(Key.PROJECT, value);
-	}
-	
-	@XmlElement
-	public void setTrackerId(int value){
-		putBuiltinValue(Key.TRACKER, value);
-	}
-	
-	@XmlElement
-	public void setPriorityId(int value){
-		putBuiltinValue(Key.PRIORITY, value);
-	}
-	
-	@XmlElement
-	public void setStatusId(int value){
-		putBuiltinValue(Key.STATUS, value);
-	}
-	
-	@XmlElement
-	public void setCategoryId(int value){
-		putBuiltinValue(Key.CATEGORY, value);
-	}
-	
-	@XmlElement
-	public void setFixedVersionId(int value){
-		putBuiltinValue(Key.VERSION, value);
-	}
-	
-	@XmlElement
-	public void setAssignedToId(int value){
-		putBuiltinValue(Key.ASSIGNED_TO, value);
-	}
-
-	@XmlElement
-	public void setDoneRatio(int value){
-		putBuiltinValue(Key.DONE_RATIO, value);
-	}
-
-	@XmlElement
-	public void setEstimatedHours(int value){
-		putBuiltinValue(Key.ESTIMATED_HOURS, value);
-	}
-		
 }

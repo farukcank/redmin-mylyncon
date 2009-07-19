@@ -55,7 +55,7 @@
 		<author>anonymous</author>
 		<createdOn unixtime="1211376720">2008-05-21T15:32:00</createdOn>
 		<updatedOn unixtime="1243116000">2009-05-24T00:00:00</updatedOn>
-		<projectId>1</projectId>projectId><!-- leer == fehler -->
+		<projectId>1</projectId><!-- leer == fehler -->
 		<trackerId>2</trackerId><!-- leer == fehler -->
 		<priorityId>3</priorityId>
 		<statusId>1</statusId><!-- leer == fehler -->

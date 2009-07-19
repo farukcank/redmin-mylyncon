@@ -63,7 +63,7 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 
 	private final static double PLUGIN_VERSION_2_5 = 2.5;
 
-	private final RedmineRestfulReader reader;
+	private final RedmineRestfulStaxReader reader;
 	
 	private double wsVersion = 0D;
 
@@ -71,7 +71,7 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 		super(location, clientData, repository);
 		refreshRepositorySettings(repository);
 		
-		reader = new RedmineRestfulReader();
+		reader = new RedmineRestfulStaxReader();
 	}
 
 	public void refreshRepositorySettings(TaskRepository repository) {

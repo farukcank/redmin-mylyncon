@@ -24,8 +24,6 @@ public class RedmineIssueCategory extends RedmineTicketAttribute {
 
 	private static final long serialVersionUID = 2L;
 
-	private RedmineIssueCategory() {} //required for JAXB
-	
 	public RedmineIssueCategory(String name, int value) {
 		super(name, value);
 		// TODO Auto-generated constructor stub

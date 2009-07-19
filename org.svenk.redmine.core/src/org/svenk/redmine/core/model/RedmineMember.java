@@ -20,20 +20,13 @@
  *******************************************************************************/
 package org.svenk.redmine.core.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 
-@XmlAccessorType(XmlAccessType.FIELD)
 public class RedmineMember extends RedmineTicketAttribute {
 
 	private static final long serialVersionUID = 2L;
 
-	@XmlElement
 	private boolean assignable;
 
-	private RedmineMember() {} //required for JAXB
-	
 	public RedmineMember(String name, int value, boolean assignable) {
 		super(name, value);
 		this.assignable = assignable;

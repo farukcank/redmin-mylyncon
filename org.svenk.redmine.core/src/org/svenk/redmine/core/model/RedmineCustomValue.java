@@ -21,20 +21,11 @@
 
 package org.svenk.redmine.core.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlValue;
 
-@XmlRootElement(name="customValue")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class RedmineCustomValue {
 
-	@XmlAttribute
 	private int customFieldId;
 	
-	@XmlValue
 	private String value;
 	
 	public int getCustomFieldId() {

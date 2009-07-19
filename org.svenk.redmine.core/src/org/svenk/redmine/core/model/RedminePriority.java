@@ -20,22 +20,14 @@
  *******************************************************************************/
 package org.svenk.redmine.core.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 
-@XmlAccessorType(XmlAccessType.FIELD)
 public class RedminePriority extends RedmineTicketAttribute {
 
 	private static final long serialVersionUID = 2L;
 
-	@XmlElement
 	private int position;
 	
-	@XmlElement(name="default")
 	private boolean defaultPriority;
-
-	private RedminePriority(){} // required for JAXB
 
 	public RedminePriority(String name, int value, int position) {
 		super(name, value);

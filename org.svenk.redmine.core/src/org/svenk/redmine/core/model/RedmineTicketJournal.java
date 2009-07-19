@@ -22,36 +22,19 @@ package org.svenk.redmine.core.model;
 
 import java.util.Date;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlTransient;
-
-@XmlRootElement(name="journal")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class RedmineTicketJournal {
 
-	@XmlAttribute
 	private int id;
 	
-	@XmlElement
 	private String notes;
 	
-	@XmlElement(name="createdOn")
-	@XmlSchemaType(name="dateTime")
 	private Date created;
 
 	//TODO Nach XmlRpc Umbau entfernen
-	@XmlTransient
 	private int authorId;
 	
-	@XmlElement(name="author")
 	private String authorName;
 	
-	@XmlElement(name="editableByUser")
 	private boolean editable;
 
 	public int getId() {
