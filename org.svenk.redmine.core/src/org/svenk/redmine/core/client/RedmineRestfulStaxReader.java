@@ -63,8 +63,8 @@ public class RedmineRestfulStaxReader {
 	private XMLInputFactory inputFactory;
 	
 	public RedmineRestfulStaxReader() {
-		inputFactory = XMLInputFactory.newInstance();
-//		inputFactory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, Boolean.FALSE);
+//		inputFactory = org.codehaus.stax2.XMLInputFactory2.newInstance("com.ctc.wstx.osgi.InputFactoryProviderImpl", this.getClass().getClassLoader());
+		inputFactory = new com.ctc.wstx.osgi.InputFactoryProviderImpl().createInputFactory();
 	}
 	
 	public RedmineTicket readTicket(InputStream in) throws RedmineException {

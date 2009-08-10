@@ -53,15 +53,11 @@ public class RedmineClientManager implements IRepositoryListener {
 		this.cacheFile = cacheFile;
 		readCache();
 	}
-
-	public void getAvailableClientImplementationsDescription() {
-		
-	}
 	
 	public synchronized IRedmineClient getRedmineClient(TaskRepository taskRepository){
 		String repositoryUrl = taskRepository.getRepositoryUrl();
-		IRedmineClient repository = clientByUrl.get(repositoryUrl);
-		if (repository == null) {
+		IRedmineClient client = clientByUrl.get(repositoryUrl);
+		if (client == null || !client.getClass().getName().equals(taskRepository.getProperty(RedmineClientFactory.CLIENT_IMPLEMENTATION_CLASS))) {
 			AbstractWebLocation location = taskRepositoryLocationFactory.createWebLocation(taskRepository);
 			
 			RedmineClientData data = dataByUrl.get(repositoryUrl);
@@ -70,10 +66,10 @@ public class RedmineClientManager implements IRepositoryListener {
 				dataByUrl.put(repositoryUrl, data);
 			}
 			
-			repository = RedmineClientFactory.createClient(location, data, taskRepository);
-			clientByUrl.put(taskRepository.getRepositoryUrl(), repository);
+			client = RedmineClientFactory.createClient(location, data, taskRepository);
+			clientByUrl.put(taskRepository.getRepositoryUrl(), client);
 		}
-		return repository;
+		return client;
 	}
 	
 	public TaskRepositoryLocationFactory getTaskRepositoryLocationFactory() {

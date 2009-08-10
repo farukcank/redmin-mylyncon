@@ -20,6 +20,9 @@ Export-Package: org.svenk.redmine.core,
  org.svenk.redmine.core.exception,
  org.svenk.redmine.core.model,
  org.svenk.redmine.core.util
-Bundle-ClassPath: .
+Bundle-ClassPath: .,
+ lib/stax2-api-3.0.1.jar,
+ lib/woodstox-core-asl-4.0.5.jar
 Import-Package: javax.xml.bind;version="2.0.0",
- javax.xml.stream
+ javax.xml.stream,
+ javax.xml.stream.util

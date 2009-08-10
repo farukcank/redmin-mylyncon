@@ -81,7 +81,7 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 		}
 	}
 
-	//TODO VersionsSTring gegen Model austauchen !!!
+	//TODO VersionsString gegen Model austauchen !!!
 	private double getWsVersion(String version) {
 		double v = 0D;
 		int pos = version.lastIndexOf('v');
@@ -179,15 +179,11 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 		return true;
 	}
 
-	public void updateAttributes(boolean force, IProgressMonitor monitor) throws RedmineException {
+	public synchronized void updateAttributes(boolean force, IProgressMonitor monitor) throws RedmineException {
 		if (!force && hasAttributes()) {
 			return;
 		}
 
-		data.projects.clear();
-		data.priorities.clear();
-		data.statuses.clear();
-		
 		InputStream in;
 		GetMethod method;
 
@@ -196,7 +192,8 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 			method = new GetMethod(PATH_GET_PROJECTS);
 			executeMethod(method, monitor);
 			in = method.getResponseBodyAsStream();
-			data.projects = reader.readProjects(in);
+			data.projects.clear();
+			data.projects.addAll(reader.readProjects(in));
 			monitor.worked(1);
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
@@ -205,7 +202,8 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 			method = new GetMethod(PATH_GET_PRIORITIES);
 			executeMethod(method, monitor);
 			in = method.getResponseBodyAsStream();
-			data.priorities = reader.readPriorities(in);
+			data.priorities.clear();
+			data.priorities.addAll(reader.readPriorities(in));
 			monitor.worked(1);
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
@@ -214,7 +212,8 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 			method = new GetMethod(PATH_GET_ISSUE_STATUS);
 			executeMethod(method, monitor);
 			in = method.getResponseBodyAsStream();
-			data.statuses = reader.readTicketStatuses(in);
+			data.statuses.clear();
+			data.statuses.addAll(reader.readTicketStatuses(in));
 			monitor.worked(1);
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
@@ -231,6 +230,7 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 		List<Integer> idList = ticket.getAvailableStatusList();
 		List<RedmineTicketStatus> statuses = new ArrayList<RedmineTicketStatus>(idList==null ? 0 : idList.size()); 
 		for (Integer intval : idList) {
+			//TODO wenn status nicht verfügbar, clientdata aktualisieren
 			statuses.add(clientData.getStatus(intval));
 		}
 		ticket.setStatuses(statuses);

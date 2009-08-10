@@ -20,26 +20,31 @@
  *******************************************************************************/
 package org.svenk.redmine.core;
 
+import java.lang.reflect.Constructor;
+
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.svenk.redmine.core.client.RedmineClientData;
-import org.svenk.redmine.core.client.RedmineXmlRpcClient;
 
 public class RedmineClientFactory {
 
+	public final static String CLIENT_IMPLEMENTATION_CLASS = "clientImplClass";
+	
 	public static IRedmineClient createClient(AbstractWebLocation location, RedmineClientData clientData, TaskRepository repository) {
-//		IRedmineClient client =  new RedmineRestfulClient(location, clientData, repository);
-//		try {
-//			client.checkClientConnection();
-//		} catch (RedmineException e) {
-//			if (e.getCause() instanceof JAXBException && ((JAXBException)e.getCause()).getLinkedException() instanceof ClassNotFoundException) {
-//				Throwable t = ((JAXBException)e.getCause()).getLinkedException();
-//				StatusHandler.log(new Status(IStatus.WARNING, RedmineCorePlugin.PLUGIN_ID,
-//						"RedmineRestfulClient not usable: " + t.getMessage(), t));
-//			}
-			return new RedmineXmlRpcClient(location, clientData, repository);
-//		}
-//		return client;
+		try {
+			Class<?> clazz = Class.forName(repository.getProperty(CLIENT_IMPLEMENTATION_CLASS));
+			Constructor<?> constr = clazz.getConstructor(AbstractWebLocation.class, RedmineClientData.class, TaskRepository.class);
+			IRedmineClient client = (IRedmineClient) constr.newInstance(location, clientData, repository);
+			return client;
+		} catch (ClassNotFoundException e) {
+			//TODO Feedback4User: Falsche/veraltete config Class.forName
+			RedmineCorePlugin.getDefault().logUnexpectedException(e);
+		} catch (Exception e) {
+			RedmineCorePlugin.getDefault().logUnexpectedException(e);
+		}
+
+		
+		return null;
 	}
 
 }

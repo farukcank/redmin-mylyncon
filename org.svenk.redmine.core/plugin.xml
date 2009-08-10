@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="org.svenk.redmine.core.clientInterface" name="Redmine Client Interface" schema="schema/org.svenk.redmine.core.clientInterface.exsd"/>
+   <extension
+         name="RESTful (since Redmine 0.8)"
+         point="org.svenk.redmine.core.clientInterface">
+      <clientImplementation
+            class="org.svenk.redmine.core.client.RedmineRestfulClient">
+      </clientImplementation>
+   </extension>
+   <extension
+         name="XML-RPC (Redmine 0.7 &amp; 0.8, requires ActionWebService)"
+         point="org.svenk.redmine.core.clientInterface">
+      <clientImplementation
+            class="org.svenk.redmine.core.client.RedmineXmlRpcClient">
+      </clientImplementation>
+   </extension>
+
+</plugin>
