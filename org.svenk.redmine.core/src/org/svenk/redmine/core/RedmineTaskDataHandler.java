@@ -222,6 +222,8 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 				ticket.putBuiltinValue(RedmineTicket.Key.TRACKER, taskData.getRoot().getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue());
 				
 				int taskId = client.createTicket(ticket, monitor);
+				assert taskId>0;
+
 				return new RepositoryResponse(ResponseKind.TASK_CREATED, "" + taskId);
 				
 			} else {

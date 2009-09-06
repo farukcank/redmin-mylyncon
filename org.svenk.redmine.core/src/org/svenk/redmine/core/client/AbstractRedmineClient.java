@@ -145,7 +145,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		method.setRequestBody(values.toArray(new NameValuePair[values.size()]));
 
 		executeMethod(method, monitor);
-		
+
 		Header respHeader = method.getResponseHeader("location");
 		if (respHeader != null) {
 			String location = respHeader.getValue();
@@ -158,11 +158,12 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 					throw new RedmineException("Invalid Response: TicketId must be an Integer");
 				}
 			}
+			else {
+				throw new RedmineException("Invalid Response: Login failed/missing");
+			}
 		} else {
 			throw new RedmineException("Invalid Response: unhandled input error");
 		}
-		
-		return -1;
 		
 	}
 	
@@ -213,7 +214,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		}
 		
 		Header respHeader = method.getResponseHeader("location");
-		if (respHeader != null && respHeader.getValue().endsWith(LOGIN_URL)) {
+		if (respHeader != null && (respHeader.getValue().endsWith(LOGIN_URL) || respHeader.getValue().indexOf(LOGIN_URL+"?back_url=")>=0)) {
 			if (authenticated) {
 				hostConfiguration = refreshCredentials(AuthenticationType.REPOSITORY, method, monitor);
 			}
@@ -237,7 +238,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		};
 		PostMethod method = new PostMethod(LOGIN_URL);
 		method.setRequestBody(credentials);
-		
+
 		performExecuteMethod(method, hostConfiguration, monitor);
 
 		AuthenticationType authenticationType = null;
@@ -269,7 +270,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 
 	}
 	
-	protected int performExecuteMethod(HttpMethod method, HostConfiguration hostConfiguration, IProgressMonitor monitor) throws RedmineException {
+	synchronized protected int performExecuteMethod(HttpMethod method, HostConfiguration hostConfiguration, IProgressMonitor monitor) throws RedmineException {
 		try {
 			String baseUrl = new URL(location.getUrl()).getPath();
 			if (!method.getPath().startsWith(baseUrl)) {
@@ -280,7 +281,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 			if (e instanceof OperationCanceledException) {
 				monitor.setCanceled(true);
 			}
-			throw new RedmineException(e.getMessage(), e.getCause());
+			throw new RedmineException(e.getMessage(), e);
 		}
 	}
 	

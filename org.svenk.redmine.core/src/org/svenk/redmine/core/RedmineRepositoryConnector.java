@@ -326,7 +326,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 			
 		} catch (RedmineException e) {
 			throw new CoreException(new Status(IStatus.ERROR, RedmineCorePlugin.PLUGIN_ID,
-					"Task ID must be an integer", e));
+					e.getMessage(), e));
 		} finally {
 			monitor.done();
 		}

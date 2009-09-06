@@ -130,7 +130,7 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 	public RedmineTicket getTicket(int id, IProgressMonitor monitor) throws RedmineException {
 		GetMethod method = new GetMethod(PATH_GET_TICKET.replace(PLACEHOLDER, ""+id));
 
-		executeMethod(method, null);
+		executeMethod(method, monitor);
 		InputStream in;
 		try {
 			in = method.getResponseBodyAsStream();
@@ -157,7 +157,7 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 			method.setQueryString(new NameValuePair[]{new NameValuePair(PATH_SEARCH_TICKETS_QUERY_ID, storedQueryId)});
 		}
 
-		executeMethod(method, null);
+		executeMethod(method, monitor);
 		InputStream in;
 		try {
 			in = method.getResponseBodyAsStream();
@@ -184,12 +184,11 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 			return;
 		}
 
+		GetMethod method = new GetMethod(PATH_GET_PROJECTS);
 		InputStream in;
-		GetMethod method;
 
 		monitor.beginTask("Updating attributes", 3);
 		try {
-			method = new GetMethod(PATH_GET_PROJECTS);
 			executeMethod(method, monitor);
 			in = method.getResponseBodyAsStream();
 			data.projects.clear();
