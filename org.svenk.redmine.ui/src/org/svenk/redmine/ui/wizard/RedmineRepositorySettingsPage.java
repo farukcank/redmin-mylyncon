@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -86,7 +85,9 @@ public class RedmineRepositorySettingsPage extends
 		setNeedsAdvanced(false);
 		setNeedsValidation(true);
 		
-		clientImplClassName = taskRepository.getProperty(RedmineClientFactory.CLIENT_IMPLEMENTATION_CLASS);
+		if (taskRepository != null && taskRepository.hasProperty(RedmineClientFactory.CLIENT_IMPLEMENTATION_CLASS)) {
+			clientImplClassName = taskRepository.getProperty(RedmineClientFactory.CLIENT_IMPLEMENTATION_CLASS);
+		}
 	}
 	
 	@Override

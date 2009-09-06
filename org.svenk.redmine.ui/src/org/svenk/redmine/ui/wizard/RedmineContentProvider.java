@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Display;
 public class RedmineContentProvider implements IStructuredContentProvider {
 
 	public Object[] getElements(Object inputElement) {
-		if (inputElement instanceof Collection) {
+		if (inputElement instanceof Collection<?>) {
 			Collection<?> collection = (Collection<?>)inputElement;
 			return collection.toArray(new Object[collection.size()]);
 		}
