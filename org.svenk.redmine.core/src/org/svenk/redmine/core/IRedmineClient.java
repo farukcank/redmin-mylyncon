@@ -49,24 +49,8 @@ public interface IRedmineClient {
 	public static final String TICKET_NEW_URL = "/issues/new";
 
 	public static final String TICKET_EDIT_URL = "/issues/edit/";
-//
-//	public static final String CUSTOM_QUERY_URL = "/query";
-//
-//	public static final String DEFAULT_USERNAME = "anonymous";
-//
-//	public static final String WIKI_URL = "/wiki/";
-//
-//	public static final String REPORT_URL = "/report/";
-//
-//	public static final String CHANGESET_URL = "/changeset/";
-//
-//	public static final String REVISION_LOG_URL = "/log/";
 
 	public static final String REVISION_URL = "/repositories/revision/";
-//
-//	public static final String MILESTONE_URL = "/milestone/";
-//
-//	public static final String BROWSER_URL = "/browser/";
 
 	public static final String ATTACHMENT_URL = "/attachments/download/";
 

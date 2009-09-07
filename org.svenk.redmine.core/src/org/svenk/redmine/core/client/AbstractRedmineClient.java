@@ -26,6 +26,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
@@ -149,17 +151,16 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		Header respHeader = method.getResponseHeader("location");
 		if (respHeader != null) {
 			String location = respHeader.getValue();
-			int pos=location.indexOf(TICKET_URL);
-			if (pos>-1) {
-				location = location.substring(TICKET_URL.length()+pos);
+
+			Matcher m = Pattern.compile("(\\d+)$").matcher(location);
+			if (m.find()) {
 				try {
-					return Integer.parseInt(location);
+					return Integer.parseInt(m.group(1));
 				} catch (NumberFormatException e) {
 					throw new RedmineException("Invalid Response: TicketId must be an Integer");
 				}
-			}
-			else {
-				throw new RedmineException("Invalid Response: Login failed/missing");
+			} else {
+				throw new RedmineException("Can't find ID of ticket in response header");
 			}
 		} else {
 			throw new RedmineException("Invalid Response: unhandled input error");
