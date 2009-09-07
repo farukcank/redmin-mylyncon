@@ -3,15 +3,6 @@
 
 	<import file="../common.xml" />
 
-	<taskdef classname="net.sourceforge.ant.FileRelease" name="maven-sf">
-		<classpath>
-			<fileset dir="${ant.file.publish.dir}/lib" >
-				<include name="*.jar" />
-			</fileset>
-		</classpath>
-	</taskdef>
-
-
 	<target name="publish.sf" depends="-publish.sf.checkAccount, -publish.sf" >
 	</target>
 
@@ -48,10 +39,7 @@
 		<zip destfile="${buildDirectory}/archive/redmine-mylyn_${forceContextQualifier}.zip" basedir="${buildDirectory}/archive" compress="true" update="false" />
 		<delete dir="${buildDirectory}/archive/updatesite" />
 
-		<scp todir="${sf.username}@frs.sf.net:/home/users/s/sv/sven-k/uploads/" password="${sf.password}" verbose="true" trust="true" file="${buildDirectory}/archive/redmine-mylyn_${forceContextQualifier}.zip" />
-		<!--
-		<maven-sf project="${sf.project.unixname}" package="Archived Update-Site" release="nightly" user="${sf.username}" password="${sf.password}" srcdir="${buildDirectory}/archive" groupId="${sf.project.groupId}" />
-		-->
+		<scp todir="${sf.username},${sf.project.unixname}@frs.sf.net:/home/frs/project/r/re/redmin-mylyncon/Update-Site-Archive/nightly/" password="${sf.password}" verbose="true" trust="true" file="${buildDirectory}/archive/redmine-mylyn_${forceContextQualifier}.zip" />
 
 	</target>
 
@@ -65,8 +53,11 @@
 	</target>
 
 	<target name="-publish.sf.frs">
-		<scp remoteTodir="${sf.username}@valetta.condero.net:/srv/www/condero.com/redmine-mylyn/updatesite/" password="${sf.password}" verbose="true" trust="true" >
-			<fileset dir="${updatesite}" />
+		<scp todir="${sf.username},${sf.project.unixname}@frs.sf.net:/home/frs/project/r/re/redmin-mylyncon/Update-Site/nightly/" password="${sf.password}" verbose="true" trust="true" >
+			<fileset dir="${updatesite}">
+				<include name="**/*.jar"/>
+				<exclude name="**/*.xml"/>
+			</fileset>
 		</scp>
 	</target>
 	
