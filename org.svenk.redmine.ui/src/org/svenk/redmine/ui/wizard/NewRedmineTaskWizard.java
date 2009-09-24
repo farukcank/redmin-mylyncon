@@ -30,6 +30,7 @@ import org.svenk.redmine.core.AbstractRedmineTaskMapping;
 import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.RedmineRepositoryConnector;
+import org.svenk.redmine.core.exception.RedmineException;
 
 public class NewRedmineTaskWizard extends NewTaskWizard implements INewWizard {
 
@@ -49,12 +50,17 @@ public class NewRedmineTaskWizard extends NewTaskWizard implements INewWizard {
 	@Override
 	public void addPages() {
 		RedmineRepositoryConnector connector = (RedmineRepositoryConnector) TasksUi.getRepositoryManager().getRepositoryConnector(RedmineCorePlugin.REPOSITORY_KIND);
-		final IRedmineClient client = connector.getClientManager().getRedmineClient(getTaskRepository());
+		
+		try {
+			final IRedmineClient client = connector.getClientManager().getRedmineClient(getTaskRepository());
+			assert client!=null;
+			
+			projectPage = new RedmineProjectPage(client, getTaskRepository());
+			trackerPage = new RedmineTrackerPage(client);
+			addPage(projectPage);
+			addPage(trackerPage);
+		} catch (RedmineException e) {}
 
-		projectPage = new RedmineProjectPage(client, getTaskRepository());
-		trackerPage = new RedmineTrackerPage(client);
-		addPage(projectPage);
-		addPage(trackerPage);
 	}
 
 	@Override

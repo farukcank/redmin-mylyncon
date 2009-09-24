@@ -38,6 +38,7 @@ import org.eclipse.mylyn.tasks.core.IRepositoryListener;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.TaskRepositoryLocationFactory;
 import org.svenk.redmine.core.client.RedmineClientData;
+import org.svenk.redmine.core.exception.RedmineException;
 
 public class RedmineClientManager implements IRepositoryListener {
 
@@ -54,7 +55,7 @@ public class RedmineClientManager implements IRepositoryListener {
 		readCache();
 	}
 	
-	public synchronized IRedmineClient getRedmineClient(TaskRepository taskRepository){
+	public synchronized IRedmineClient getRedmineClient(TaskRepository taskRepository) throws RedmineException {
 		String repositoryUrl = taskRepository.getRepositoryUrl();
 		IRedmineClient client = clientByUrl.get(repositoryUrl);
 		if (client == null || !client.getClass().getName().equals(taskRepository.getProperty(RedmineClientFactory.CLIENT_IMPLEMENTATION_CLASS))) {
@@ -70,6 +71,10 @@ public class RedmineClientManager implements IRepositoryListener {
 			clientByUrl.put(taskRepository.getRepositoryUrl(), client);
 		}
 		return client;
+	}
+	
+	public RedmineClientData getClientData(TaskRepository taskRepository) {
+		return dataByUrl.get(taskRepository.getRepositoryUrl());
 	}
 	
 	public TaskRepositoryLocationFactory getTaskRepositoryLocationFactory() {

@@ -85,9 +85,10 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 	protected TaskData downloadTaskData(TaskRepository repository,
 			int id, IProgressMonitor monitor) throws CoreException {
 
-		IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
 		RedmineTicket ticket;
+		IRedmineClient client;
 		try {
+			client = connector.getClientManager().getRedmineClient(repository);
 			client.updateAttributes(false, monitor);
 			ticket = client.getTicket(id, monitor);
 		} catch (OperationCanceledException e) {
@@ -209,9 +210,9 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 			TaskData taskData, Set<TaskAttribute> oldAttributes,
 			IProgressMonitor monitor) throws CoreException {
 		
-		IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
 		
 		try {
+			IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
 			RedmineTicket ticket = RedmineTicket.fromTaskData(taskData, client.getClientData());
 			
 			if (taskData.isNew() || taskData.getTaskId().equals("")) {

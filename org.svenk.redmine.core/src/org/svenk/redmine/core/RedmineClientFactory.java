@@ -25,12 +25,15 @@ import java.lang.reflect.Constructor;
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.svenk.redmine.core.client.RedmineClientData;
+import org.svenk.redmine.core.exception.RedmineException;
 
 public class RedmineClientFactory {
 
 	public final static String CLIENT_IMPLEMENTATION_CLASS = "clientImplClass";
 	
-	public static IRedmineClient createClient(AbstractWebLocation location, RedmineClientData clientData, TaskRepository repository) {
+	public final static String CONFIGURATION_MISMATCH = "Configuration mismatch - update your Repository-Settings";
+	
+	public static IRedmineClient createClient(AbstractWebLocation location, RedmineClientData clientData, TaskRepository repository) throws RedmineException {
 		try {
 			Class<?> clazz = Class.forName(repository.getProperty(CLIENT_IMPLEMENTATION_CLASS));
 			Constructor<?> constr = clazz.getConstructor(AbstractWebLocation.class, RedmineClientData.class, TaskRepository.class);
@@ -39,12 +42,11 @@ public class RedmineClientFactory {
 		} catch (ClassNotFoundException e) {
 			//TODO Feedback4User: Falsche/veraltete config Class.forName
 			RedmineCorePlugin.getDefault().logUnexpectedException(e);
+			throw new RedmineException(CONFIGURATION_MISMATCH, e);
 		} catch (Exception e) {
 			RedmineCorePlugin.getDefault().logUnexpectedException(e);
+			throw new RedmineException(CONFIGURATION_MISMATCH, e);
 		}
-
-		
-		return null;
 	}
 
 }

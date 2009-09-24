@@ -132,7 +132,10 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		this.query=query;
 		
 		RedmineRepositoryConnector connector = (RedmineRepositoryConnector) TasksUi.getRepositoryManager().getRepositoryConnector(RedmineCorePlugin.REPOSITORY_KIND);
-		client = connector.getClientManager().getRedmineClient(getTaskRepository());
+		try {
+			client = connector.getClientManager().getRedmineClient(getTaskRepository());
+		} catch (RedmineException e) {}
+		assert client!=null;
 
 		setTitle(TITLE);
 		setDescription(DESCRIPTION);

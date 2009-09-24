@@ -77,7 +77,11 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 
 	@Override
 	public boolean canQuery(TaskRepository repository) {
-		return true;
+		try {
+			return clientManager.getRedmineClient(repository)!=null;
+		} catch (RedmineException e) {
+			return false;
+		}
 	}
 
 	@Override
@@ -95,7 +99,11 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 	
 	@Override
 	public boolean canCreateNewTask(TaskRepository repository) {
-		return repository.getConnectorKind().equals(getConnectorKind());
+		try {
+			return clientManager.getRedmineClient(repository)!=null;
+		} catch (RedmineException e) {
+			return false;
+		}
 	}
 
 	@Override
@@ -130,8 +138,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 	}
 	
 	public RedmineTaskDataValidator createNewTaskDataValidator(TaskRepository repository) {
-		IRedmineClient client = clientManager.getRedmineClient(repository);
-		return new RedmineTaskDataValidator(client.getClientData());
+		return new RedmineTaskDataValidator(clientManager.getClientData(repository));
 	}
 
 	@Override
@@ -178,7 +185,12 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 		boolean isStale = super.isRepositoryConfigurationStale(repository, monitor);
 		
 		if (!isStale) {
-			IRedmineClient client = clientManager.getRedmineClient(repository);
+			IRedmineClient client;
+			try {
+				client = clientManager.getRedmineClient(repository);
+			} catch (RedmineException e) {
+				throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
+			}
 			isStale = client.getClientData().needsUpdate();
 		}
 		
@@ -187,8 +199,8 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 
 	@Override
 	public void updateRepositoryConfiguration(TaskRepository repository, IProgressMonitor monitor) throws CoreException {
-		IRedmineClient client = clientManager.getRedmineClient(repository);
 		try {
+			IRedmineClient client = clientManager.getRedmineClient(repository);
 			client.updateAttributes(true, monitor);
 		} catch (RedmineException e) {
 			IStatus status = RedmineCorePlugin.toStatus(e, repository);
@@ -206,7 +218,8 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 
 		task.setUrl(getTaskUrl(repository.getUrl(), task.getTaskId()));
 		
-		RedmineClientData clientData = getClientManager().getRedmineClient(repository).getClientData();
+		RedmineClientData clientData = getClientManager().getClientData(repository);
+		assert clientData != null;
 
 		//Set CompletionDate, if Closed-Status
 		TaskAttribute attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.STATUS.getRedmineKey());
@@ -371,8 +384,8 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 	@Override
 	public RedmineTaskMapper getTaskMapping(TaskData taskData) {
 		TaskRepository taskRepository = taskData.getAttributeMapper().getTaskRepository();
-		IRedmineClient client = (taskRepository != null) ? getClientManager().getRedmineClient(taskRepository) : null;
-		return new RedmineTaskMapper(taskData, client);
+		RedmineClientData clientData = (taskRepository != null) ? getClientManager().getClientData(taskRepository) : null;
+		return new RedmineTaskMapper(taskData, clientData);
 	}
 
 	public synchronized RedmineClientManager getClientManager() {

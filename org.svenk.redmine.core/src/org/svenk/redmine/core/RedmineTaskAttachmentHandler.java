@@ -55,8 +55,8 @@ public class RedmineTaskAttachmentHandler extends AbstractTaskAttachmentHandler 
 			TaskAttribute attachmentAttribute, IProgressMonitor monitor)
 			throws CoreException {
 		
-		IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
 		try {
+			IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
 			TaskAttachmentMapper attachment = TaskAttachmentMapper.createFrom(attachmentAttribute);
 			return client.getAttachmentContent(Integer.parseInt(attachment.getAttachmentId()), monitor);
 		} catch (RedmineException e) {
@@ -82,8 +82,8 @@ public class RedmineTaskAttachmentHandler extends AbstractTaskAttachmentHandler 
 			}
 		}
 		
-		IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
 		try {
+			IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
 			client.uploadAttachment(Integer.parseInt(task.getTaskId()), fileName, comment, description, source, monitor);
 //		} catch (NumberFormatException e) {
 //			// TODO Auto-generated catch block

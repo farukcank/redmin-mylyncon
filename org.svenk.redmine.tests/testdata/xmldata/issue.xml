@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issue xmlns="http://redmin-mylyncon.sf.net/schemas/WS-API-2.5" id="5">
+<issue xmlns="http://redmin-mylyncon.sf.net/schemas/WS-API-2.6" id="5">
 	<subject>a new bug</subject><!-- leer == fehler -->
 	<description>short description</description>
 	<author>anonymous</author>
@@ -14,6 +14,7 @@
 	<assignedToId>1</assignedToId>
 	<doneRatio>20</doneRatio>
 	<estimatedHours>5</estimatedHours>
+	<dueDate>2009-09-24</dueDate>
 	<availableStatus>1 3</availableStatus>
 	<customValues>
 		<customValue customFieldId="1">ff</customValue>

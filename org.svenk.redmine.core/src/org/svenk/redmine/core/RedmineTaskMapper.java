@@ -23,24 +23,27 @@ package org.svenk.redmine.core;
 import org.eclipse.mylyn.tasks.core.ITask.PriorityLevel;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.eclipse.mylyn.tasks.core.data.TaskMapper;
+import org.svenk.redmine.core.client.RedmineClientData;
 
 public class RedmineTaskMapper extends TaskMapper implements IRedmineTaskMapping {
 
-	private final IRedmineClient client;
+	private final RedmineClientData clientData;
 	
-	public RedmineTaskMapper(TaskData taskData, IRedmineClient client) {
+	public RedmineTaskMapper(TaskData taskData, RedmineClientData clientData) {
 		super(taskData);
-		this.client = client;
+		this.clientData = clientData;
 	}
 	
 	@Override
 	public PriorityLevel getPriorityLevel() {
 		PriorityLevel level =  super.getPriorityLevel();
-		if (client != null) {
-			//TODO catch Nullpointer and refresh repositoryAttributes
-			int priority = client.getClientData().getPriority(getPriority()).getPosition();
+
+		//TODO null handling + catch refresh repositoryAttributes
+		if (clientData!=null) {
+			int priority = clientData.getPriority(getPriority()).getPosition();
 			level = PriorityLevel.fromLevel(priority>5 ? 1 : 6-priority);
 		}
+
 		return level;
 	}
 

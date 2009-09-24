@@ -362,7 +362,10 @@ public class RedmineRestfulStaxReader {
 								ticket.addRelation(relation);
 							}
 						}
-					} 
+					} else {
+						//catch unknown Tags
+						reader.getElementText();
+					}
 				} else {
 					switch (key) {
 					case CREATED_ON : {
