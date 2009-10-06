@@ -307,6 +307,9 @@ public class RedmineRestfulStaxReader {
 							data.storedQueries.add(query);
 						}
 					}
+				} else {
+					//catch unknown Tags
+					reader.getElementText();
 				}
 			}
 		} finally {

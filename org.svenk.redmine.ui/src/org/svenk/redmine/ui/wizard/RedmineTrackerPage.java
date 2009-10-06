@@ -25,8 +25,11 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -69,6 +72,23 @@ public class RedmineTrackerPage extends WizardPage {
 				RedmineTrackerPage.this.setPageComplete(RedmineTrackerPage.this.isPageComplete());
 			}
 		});
+
+		trackerList.getList().addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {
+				if(isPageComplete()) {
+					if(getNextPage()==null) {
+						if(getWizard().canFinish() && getWizard().performFinish()) {
+							((WizardDialog)getContainer()).close();
+						}
+					} else {
+						getContainer().showPage(getNextPage());
+					}
+				}
+			}
+		});
+		
+		
 		setControl(control);
 	}
 

@@ -317,7 +317,10 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 				try {
 					projectId = Integer.parseInt(task.getAttribute(TaskAttribute.PRODUCT));
 				} catch (NumberFormatException e) {
-					//nothing to do
+					RedmineException exc = new RedmineException("Bug: Task without ProductId", e);
+					IStatus status = RedmineCorePlugin.toStatus(exc, repository);
+					RedmineCorePlugin.getDefault().logException(status, exc);
+					throw new CoreException(status);
 				}
 				RedmineProjectData projectData = client.getClientData().getProjectFromId(projectId);
 				//projectData kann Null sein, wenn zuvor noch keine Aktion ausgeführt wurde

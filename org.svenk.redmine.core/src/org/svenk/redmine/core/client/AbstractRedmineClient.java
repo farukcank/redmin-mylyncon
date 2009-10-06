@@ -52,6 +52,7 @@ import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentSource;
 import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.exception.RedmineAuthenticationException;
 import org.svenk.redmine.core.exception.RedmineException;
+import org.svenk.redmine.core.exception.RedmineRemoteException;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
 import org.svenk.redmine.core.util.internal.RedminePartSource;
@@ -208,6 +209,14 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 
 		int statusCode = performExecuteMethod(method, hostConfiguration, monitor);
 
+		if (statusCode==HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+			Header statusHeader = method.getResponseHeader("status");
+			String msg = "Server Error";
+			if (statusHeader != null) {
+				msg += " : " + statusHeader.getValue().replace(""+HttpStatus.SC_INTERNAL_SERVER_ERROR, "").trim();
+			}
+			throw new RedmineRemoteException(msg);
+		}
 		
 		if (statusCode==HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED) {
 			hostConfiguration = refreshCredentials(AuthenticationType.PROXY, method, monitor);

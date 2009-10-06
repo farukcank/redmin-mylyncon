@@ -25,9 +25,12 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -86,6 +89,21 @@ public class RedmineProjectPage extends WizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				RedmineProjectPage.this.setPageComplete(RedmineProjectPage.this.isPageComplete());
+			}
+		});
+		
+		projectList.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDoubleClick(MouseEvent e) {
+				if(isPageComplete()) {
+					if(getNextPage()==null) {
+						if(getWizard().canFinish() && getWizard().performFinish()) {
+							((WizardDialog)getContainer()).close();
+						}
+					} else {
+						getContainer().showPage(getNextPage());
+					}
+				}
 			}
 		});
 		
