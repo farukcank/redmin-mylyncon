@@ -308,8 +308,8 @@ public class RedmineRestfulStaxReader {
 						}
 					}
 				} else {
-					//catch unknown Tags
-					reader.getElementText();
+					//catch/skip unknown Tags
+					skipToEndTag(reader.getLocalName(), reader);
 				}
 			}
 		} finally {
@@ -366,8 +366,8 @@ public class RedmineRestfulStaxReader {
 							}
 						}
 					} else {
-						//catch unknown Tags
-						reader.getElementText();
+						//catch/skip unknown Tags
+						skipToEndTag(reader.getLocalName(), reader);
 					}
 				} else {
 					switch (key) {
