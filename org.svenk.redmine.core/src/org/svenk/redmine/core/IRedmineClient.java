@@ -74,7 +74,7 @@ public interface IRedmineClient {
 
 	public void uploadAttachment(int ticketId, String fileName, String comment, String description, AbstractTaskAttachmentSource source, IProgressMonitor monitor) throws RedmineException;
 	
-	public String checkClientConnection() throws RedmineException;
+	public String checkClientConnection(IProgressMonitor monitor) throws RedmineException;
 	
 	public void refreshRepositorySettings(TaskRepository repository);
 	

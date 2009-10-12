@@ -133,7 +133,7 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	}
 
 	@Override
-	protected String checkClientVersion() throws RedmineException {
+	protected String checkClientVersion(IProgressMonitor monitor) throws RedmineException {
 		Object response = execute(RPC_GET_VERSION_INFORMATION);
 		if (response instanceof Object[]) {
 			Object[] object = (Object[])response;

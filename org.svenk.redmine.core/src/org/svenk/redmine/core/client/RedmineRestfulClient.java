@@ -92,10 +92,10 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 	} 
 
 	@Override
-	protected String checkClientVersion() throws RedmineException {
+	protected String checkClientVersion(IProgressMonitor monitor) throws RedmineException {
 		GetMethod method = new GetMethod(PATH_GET_VERSION);
 		
-		executeMethod(method, null);
+		executeMethod(method, monitor);
 		InputStream in;
 		try {
 			in = method.getResponseBodyAsStream();

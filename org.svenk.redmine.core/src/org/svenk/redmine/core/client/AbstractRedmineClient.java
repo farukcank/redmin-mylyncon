@@ -42,6 +42,7 @@ import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.commons.net.AuthenticationType;
@@ -50,6 +51,7 @@ import org.eclipse.mylyn.commons.net.WebUtil;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentSource;
 import org.svenk.redmine.core.IRedmineClient;
+import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.exception.RedmineAuthenticationException;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
@@ -102,15 +104,15 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		}
 	}
 	
-	public String checkClientConnection() throws RedmineException {
-		String version = checkClientVersion();
+	public String checkClientConnection(IProgressMonitor monitor) throws RedmineException {
+		String version = checkClientVersion(monitor);
 		if (!(version.startsWith(""+REDMINE_VERSION_7) || version.startsWith(""+REDMINE_VERSION_8))) {
 			throw new RedmineException("This connector requires Redmine version 0.7.X or 0.8.X");
 		}
 		return version;
 	}
 	
-	abstract protected String checkClientVersion() throws RedmineException;
+	abstract protected String checkClientVersion(IProgressMonitor monitor) throws RedmineException;
 	
 	private double getRedmineVersion(String version) {
 		int pos = version.indexOf('.', version.indexOf('.')+1);
@@ -186,6 +188,12 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	 * @throws RedmineException
 	 */
 	protected int executeMethod(HttpMethod method, IProgressMonitor monitor) throws RedmineException {
+		//TODO reimplement with aspectj
+		if(monitor==null) {
+			RedmineCorePlugin.getDefault().logUnexpectedException(new NullPointerException("monitor is null (AbstractRedmineClient.executeMethod)"));
+			monitor = new NullProgressMonitor();
+		}
+		
 		method.setFollowRedirects(false);
 		HostConfiguration hostConfiguration = WebUtil.createHostConfiguration(httpClient, location, monitor);
 		return executeMethod(method, hostConfiguration, monitor, false);
