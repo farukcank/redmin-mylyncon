@@ -180,7 +180,7 @@ public class RedmineRepositorySettingsPage extends
 				RedmineRepositoryConnector connector = (RedmineRepositoryConnector)TasksUi.getRepositoryManager().getRepositoryConnector(RedmineCorePlugin.REPOSITORY_KIND);
 				try {
 					IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
-					RedmineRepositorySettingsPage.this.version = client.checkClientConnection();
+					RedmineRepositorySettingsPage.this.version = client.checkClientConnection(monitor);
 					repository.setVersion(RedmineRepositorySettingsPage.this.version);
 				} catch (RedmineException e) {
 					throw new CoreException(RedmineCorePlugin.toStatus(e, repository));

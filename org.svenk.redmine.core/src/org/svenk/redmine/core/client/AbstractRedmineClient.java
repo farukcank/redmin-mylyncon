@@ -188,12 +188,6 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	 * @throws RedmineException
 	 */
 	protected int executeMethod(HttpMethod method, IProgressMonitor monitor) throws RedmineException {
-		//TODO reimplement with aspectj
-		if(monitor==null) {
-			RedmineCorePlugin.getDefault().logUnexpectedException(new NullPointerException("monitor is null (AbstractRedmineClient.executeMethod)"));
-			monitor = new NullProgressMonitor();
-		}
-		
 		method.setFollowRedirects(false);
 		HostConfiguration hostConfiguration = WebUtil.createHostConfiguration(httpClient, location, monitor);
 		return executeMethod(method, hostConfiguration, monitor, false);

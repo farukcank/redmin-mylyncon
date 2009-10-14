@@ -110,7 +110,10 @@ public class RedmineRestfulStaxReader {
 			reader.nextTag();//updatedIssues
 			String[] values = reader.getElementText().split(" ");
 			for (String val : values) {
-				list.add(Integer.valueOf(val));
+				val = val.trim();
+				if (val.length()>0) {
+					list.add(Integer.valueOf(val));
+				}
 			}
 			
 		} catch (XMLStreamException e) {
@@ -331,7 +334,10 @@ public class RedmineRestfulStaxReader {
 					if (reader.getLocalName().equals("availableStatus")) {
 						List<Integer> idList = ticket.getAvailableStatusList();
 						for (String id : reader.getElementText().split("\\s")) {
-							idList.add(Integer.valueOf(id));
+							id = id.trim();
+							if (id.length()>0) {
+								idList.add(Integer.valueOf(id));
+							}
 						}
 					} else if (reader.getLocalName().equals("customValues")) {
 						while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
