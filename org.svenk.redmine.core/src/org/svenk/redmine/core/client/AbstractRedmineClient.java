@@ -42,7 +42,6 @@ import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.commons.net.AuthenticationType;
@@ -51,7 +50,6 @@ import org.eclipse.mylyn.commons.net.WebUtil;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentSource;
 import org.svenk.redmine.core.IRedmineClient;
-import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.exception.RedmineAuthenticationException;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
@@ -327,6 +325,8 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		nameValuePair.add(new NameValuePair("issue[description]", values.get(Key.DESCRIPTION.getKey())));
 		nameValuePair.add(new NameValuePair("issue[done_ratio]", values.get(Key.DONE_RATIO.getKey())));
 		nameValuePair.add(new NameValuePair("issue[estimated_hours]", values.get(Key.ESTIMATED_HOURS.getKey())));
+		nameValuePair.add(new NameValuePair("issue[start_date]", values.get(Key.START_DATE.getKey())));
+		nameValuePair.add(new NameValuePair("issue[due_date]", values.get(Key.DUE_DATE.getKey())));
 		
 		//Handle RedmineTicketAttributes / ProjectAttributes
 		String xmlRpcKey;

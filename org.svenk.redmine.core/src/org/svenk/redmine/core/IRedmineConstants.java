@@ -18,28 +18,9 @@
  * Contributors:
  *     Sven Krzyzak - adapted Trac implementation for Redmine
  *******************************************************************************/
-package org.svenk.redmine.ui;
-import org.eclipse.mylyn.tasks.ui.TaskRepositoryLocationUiFactory;
-import org.eclipse.mylyn.tasks.ui.TasksUi;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.osgi.framework.BundleContext;
-import org.svenk.redmine.core.RedmineCorePlugin;
+package org.svenk.redmine.core;
 
+public interface IRedmineConstants {
 
-public class RedmineUiPlugin extends AbstractUIPlugin {
-
-	public static final String PLUGIN_ID = "org.svenk.redmine.ui";
-
-	public RedmineUiPlugin() {
-		// TODO Auto-generated constructor stub
-	}
-
-	@Override
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		RedmineCorePlugin corePlugin = RedmineCorePlugin.getDefault();
-		
-		corePlugin.getConnector().setTaskRepositoryLocationFactory(new TaskRepositoryLocationUiFactory());
-		TasksUi.getRepositoryManager().addListener(corePlugin.getConnector().getClientManager());
-	}
+	public final static String EDITOR_TYPE_ESTIMATED = "estimated";
 }

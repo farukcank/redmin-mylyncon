@@ -133,17 +133,14 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		for (String key : valueByKey.keySet()) {
 			TaskAttribute taskAttribute = data.getRoot().getAttribute(key);
 			
-			if (Key.PROJECT.getKey().equals(key)) {
-				taskAttribute.setValue(projectData.getProject().getName());
-			}else if (Key.ASSIGNED_TO.getKey().equals(key)) {
-				try {
-					int memberId = Integer.parseInt(valueByKey.get(key));
-//					RedmineMember member = projectData.getMember(memberId);
-					taskAttribute.setValue(String.valueOf(memberId));
-				} catch (NumberFormatException e) {
-				}
-			} else {
-				taskAttribute.setValue(valueByKey.get(key));
+			switch(RedmineAttribute.fromRedmineKey(key)) {
+				case PROJECT : taskAttribute.setValue(projectData.getProject().getName()); break;
+				case ASSIGNED_TO:
+					try {
+						taskAttribute.setValue(String.valueOf(Integer.parseInt(valueByKey.get(key))));
+					} catch (NumberFormatException e) {}
+					break;
+				default : taskAttribute.setValue(valueByKey.get(key));
 			}
 			
 			changedAttributes.add(taskAttribute);
@@ -310,6 +307,8 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		createAttribute(data, RedmineAttribute.DESCRIPTION);
 		createAttribute(data, RedmineAttribute.PROJECT);
 		createAttribute(data, RedmineAttribute.ESTIMATED);
+		createAttribute(data, RedmineAttribute.DATE_DUE);
+		createAttribute(data, RedmineAttribute.DATE_START);
 
 		if (existingTask) {
 			createAttribute(data, RedmineAttribute.REPORTER);

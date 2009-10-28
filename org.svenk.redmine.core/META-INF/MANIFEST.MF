@@ -2,14 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Redmine-Mylyn-Connector Core
 Bundle-SymbolicName: org.svenk.redmine.core;singleton:=true
-Bundle-Version: 3.1.0.qualifier
+Bundle-Version: 3.2.0.qualifier
 Bundle-Vendor: SVENK
 Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.mylyn.tasks.core;bundle-version="[3.1.0,4.0.0)",
- org.eclipse.mylyn.commons.net;bundle-version="[3.1.0,4.0.0)",
+ org.eclipse.mylyn.tasks.core;bundle-version="[3.2.0,4.0.0)",
+ org.eclipse.mylyn.commons.net;bundle-version="[3.2.0,4.0.0)",
  org.apache.xmlrpc;bundle-version="[3.0.0,3.1.0]",
- org.eclipse.mylyn.commons.core;bundle-version="[3.1.0,4.0.0)",
- org.svenk.redmine.dependency;bundle-version="3.1.0",
+ org.eclipse.mylyn.commons.core;bundle-version="[3.2.0,4.0.0)",
+ org.svenk.redmine.dependency;bundle-version="3.2.0",
  javax.xml.stream;bundle-version="1.0.1"
 Bundle-Activator: org.svenk.redmine.core.RedmineCorePlugin
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

@@ -237,6 +237,10 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 			task.setCompletionDate(null);
 		}
 		
+		attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.DATE_DUE.getRedmineKey());
+		if(attribute!=null) {
+			task.setDueDate(RedmineUtil.parseDate(attribute.getValue()));
+		}
 		
 //			Date date = task.getModificationDate();
 //			task.setAttribute(TASK_KEY_UPDATE_DATE, (date != null) ? TracUtil.toTracTime(date) + "" : null);

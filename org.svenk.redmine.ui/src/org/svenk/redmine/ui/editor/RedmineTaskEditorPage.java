@@ -19,6 +19,8 @@
  *     Sven Krzyzak - adapted Trac implementation for Redmine
  *******************************************************************************/
 package org.svenk.redmine.ui.editor;
+import java.util.Set;
+
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.mylyn.tasks.core.AbstractRepositoryConnector;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
@@ -26,13 +28,17 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskDataModelEvent;
 import org.eclipse.mylyn.tasks.core.data.TaskDataModelListener;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
+import org.eclipse.mylyn.tasks.ui.editors.AbstractAttributeEditor;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPage;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
+import org.eclipse.mylyn.tasks.ui.editors.AttributeEditorFactory;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
+import org.eclipse.mylyn.tasks.ui.editors.TaskEditorPartDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormEditor;
+import org.svenk.redmine.core.IRedmineConstants;
 import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.RedmineRepositoryConnector;
@@ -45,10 +51,14 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 	private final static String REQUIRED_MESSAGE_SUMMARY = "Please enter a subject before  submitting";
 	private final static String REQUIRED_MESSAGE_DESCRIPTION = "Please enter a description before submitting";
 	
+//	private final Map<TaskAttribute, AbstractAttributeEditor> attributeEditorMap;
+
 	private RedmineTaskDataValidator validator;
 	
 	public RedmineTaskEditorPage(TaskEditor editor) {
 		super(editor, RedmineCorePlugin.REPOSITORY_KIND);
+
+//		this.attributeEditorMap = new HashMap<TaskAttribute, AbstractAttributeEditor>();
 	}
 
 	@Override
@@ -73,7 +83,21 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 			});
 		}
 	}
-	
+
+	@Override
+	protected Set<TaskEditorPartDescriptor> createPartDescriptors() {
+		Set<TaskEditorPartDescriptor> descriptors = super.createPartDescriptors();
+
+		descriptors.add(new TaskEditorPartDescriptor("ID-CHANGE-ME") {
+			@Override
+			public AbstractTaskEditorPart createPart() {
+				return new RedminePlanningEditorPart();
+			}
+		}.setPath(PATH_ATTRIBUTES));
+
+		return descriptors;
+	}
+
 	//WORKARAOUND Zugriff auf nicht initialisierte Page
 	//TODO Ticket erstellen
 	@Override
@@ -88,7 +112,57 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 		}
 		return form;
 	}
-	
+
+	@Override
+	protected AttributeEditorFactory createAttributeEditorFactory() {
+		AttributeEditorFactory factory = new AttributeEditorFactory(getModel(), getTaskRepository(), getEditorSite()) {
+			@Override
+			public AbstractAttributeEditor createEditor(String type, final TaskAttribute taskAttribute) {
+				AbstractAttributeEditor editor;
+				if (IRedmineConstants.EDITOR_TYPE_ESTIMATED.equals(type)) {
+					editor = new RedmineEstimatedEditor(getModel(), taskAttribute);
+				} else {
+					editor = super.createEditor(type, taskAttribute);
+					if (TaskAttribute.TYPE_BOOLEAN.equals(type)) {
+						editor.setDecorationEnabled(false);
+					}
+				}
+
+//				RedmineTaskEditorPage.this.addToAttributeEditorMap(taskAttribute, editor);
+				return editor;
+			}
+		};
+		return factory;
+	}
+
+//	@Override
+//	protected void createParts() {
+//		attributeEditorMap.clear();
+//		super.createParts();
+//	}
+//
+//	private void addToAttributeEditorMap(TaskAttribute attribute, AbstractAttributeEditor editor) {
+//		if (attributeEditorMap.containsKey(attribute)) {
+//			attributeEditorMap.remove(attribute);
+//		}
+//		attributeEditorMap.put(attribute, editor);
+//	}
+//
+//	private AbstractAttributeEditor getEditorForAttribute(TaskAttribute attribute) {
+//		return attributeEditorMap.get(attribute);
+//	}
+//
+//	private void refresh(TaskAttribute attributeComponent) {
+//		AbstractAttributeEditor editor = getEditorForAttribute(attributeComponent);
+//		if (editor != null) {
+//			try {
+//				editor.refresh();
+//			} catch (UnsupportedOperationException e) {
+//				// ignore
+//			}
+//		}
+//	}
+
 	@Override
 	public void doSubmit() {
 		TaskAttribute attribute = getModel().getTaskData().getRoot().getMappedAttribute(RedmineAttribute.SUMMARY.getRedmineKey());

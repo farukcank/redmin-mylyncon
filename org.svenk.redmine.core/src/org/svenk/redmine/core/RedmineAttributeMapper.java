@@ -40,9 +40,13 @@ public class RedmineAttributeMapper extends TaskAttributeMapper {
 
 	@Override
 	public Date getDateValue(TaskAttribute attribute) {
-		return RedmineUtil.parseDate(attribute.getValue());
+		String val = attribute.getValue();
+		if(val !=null && !val.equals("")) {
+			return RedmineUtil.parseDate(attribute.getValue());
+		}
+		return null;
 	}
-
+	
 	@Override
 	public String mapToRepositoryKey(TaskAttribute parent, String key) {
 		RedmineAttribute attribute = RedmineAttribute.getByTaskKey(key);

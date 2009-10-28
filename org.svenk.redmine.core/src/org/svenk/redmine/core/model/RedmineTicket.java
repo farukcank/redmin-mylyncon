@@ -46,6 +46,8 @@ public class RedmineTicket {
 		DESCRIPTION("description"), 
 		ESTIMATED_HOURS("estimated_hours"), 
 		UPDATED_ON("updated_on", true), 
+		DUE_DATE("due_date"), 
+		START_DATE("start_date"), 
 		PRIORITY("priority"),
 		PROJECT("project", true), 
 //		PROJECTION("projection"),
@@ -286,7 +288,15 @@ public class RedmineTicket {
 			
 			TaskAttribute taskAttribute = attributeValues.get(redmineAttribute.getRedmineKey());
 			if (taskAttribute != null) {
-				ticket.putBuiltinValue(redmineAttribute.getTicketKey(), taskAttribute.getValue());
+				
+				String attributeValue = taskAttribute.getValue();
+				String type = taskAttribute.getMetaData().getType();
+
+				if (type.equals(TaskAttribute.TYPE_DATE) && !attributeValue.equals("")) {
+					attributeValue = RedmineUtil.toFormatedRedmineDate(RedmineUtil.parseDate(attributeValue));
+				}
+
+				ticket.putBuiltinValue(redmineAttribute.getTicketKey(), attributeValue);
 			}
 		}
 	

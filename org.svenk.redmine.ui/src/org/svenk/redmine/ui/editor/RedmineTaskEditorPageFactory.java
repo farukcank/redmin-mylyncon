@@ -20,6 +20,7 @@
  *******************************************************************************/
 package org.svenk.redmine.ui.editor;
 
+import org.eclipse.mylyn.tasks.ui.ITasksUiConstants;
 import org.eclipse.mylyn.tasks.ui.TasksUiUtil;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPageFactory;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
@@ -47,6 +48,11 @@ public class RedmineTaskEditorPageFactory extends AbstractTaskEditorPageFactory 
 	@Override
 	public IFormPage createPage(TaskEditor parentEditor) {
 		return new RedmineTaskEditorPage(parentEditor);
+	}
+
+	@Override
+	public String[] getConflictingIds(TaskEditorInput input) {
+		return new String[] { ITasksUiConstants.ID_PAGE_PLANNING };
 	}
 
 	@Override
