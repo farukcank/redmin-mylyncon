@@ -117,6 +117,15 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 	}
 
 	@Override
+	public boolean hasRepositoryDueDate(TaskRepository taskRepository, ITask task, TaskData taskData) {
+		try {
+			return getClientManager().getRedmineClient(taskRepository).supportStartDueDate();
+		} catch (RedmineException e) {
+			return false;
+		}
+	}
+	
+	@Override
 	public String getLabel() {
 		return CLIENT_LABEL;
 	}
@@ -237,10 +246,10 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 			task.setCompletionDate(null);
 		}
 		
-		attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.DATE_DUE.getRedmineKey());
-		if(attribute!=null) {
-			task.setDueDate(RedmineUtil.parseDate(attribute.getValue()));
-		}
+//		attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.DATE_DUE.getRedmineKey());
+//		if(attribute!=null) {
+//			task.setDueDate(RedmineUtil.parseDate(attribute.getValue()));
+//		}
 		
 //			Date date = task.getModificationDate();
 //			task.setAttribute(TASK_KEY_UPDATE_DATE, (date != null) ? TracUtil.toTracTime(date) + "" : null);

@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
+import org.svenk.redmine.core.IRedmineConstants;
 import org.svenk.redmine.core.client.container.Version;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
@@ -60,8 +61,6 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 
 	protected final static String PATH_GET_CHANGED_TICKETS = "/mylyn/" + PLACEHOLDER + "/updatedsince";
 	protected final static String PATH_GET_CHANGED_TICKETS_PARAM = "unixtime";
-
-	private final static double PLUGIN_VERSION_2_5 = 2.5;
 
 	private final RedmineRestfulStaxReader reader;
 	
@@ -179,6 +178,10 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 		return true;
 	}
 
+	@Override
+	public boolean supportStartDueDate() {
+		return wsVersion >= IRedmineConstants.PLUGIN_VERSION_2_6;
+	}
 	public synchronized void updateAttributes(boolean force, IProgressMonitor monitor) throws RedmineException {
 		if (!force && hasAttributes()) {
 			return;

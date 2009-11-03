@@ -81,4 +81,6 @@ public interface IRedmineClient {
 	public boolean supportServersideStoredQueries();
 
 	public boolean supportTaskRelations();
+	
+	public boolean supportStartDueDate();
 }

@@ -59,6 +59,9 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 		super(editor, RedmineCorePlugin.REPOSITORY_KIND);
 
 //		this.attributeEditorMap = new HashMap<TaskAttribute, AbstractAttributeEditor>();
+		
+		setNeedsPrivateSection(true);
+		setNeedsSubmitButton(true);
 	}
 
 	@Override

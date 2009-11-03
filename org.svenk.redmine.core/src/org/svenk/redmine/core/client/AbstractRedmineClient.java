@@ -24,11 +24,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
@@ -73,7 +75,9 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	
 	protected String characterEncoding;
 	
-	protected boolean authenticated;
+	private String sessionCookie;
+	
+	private Date sessionExpiry;
 	
 	protected double redmineVersion = 0D;
 
@@ -115,6 +119,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	private double getRedmineVersion(String version) {
 		int pos = version.indexOf('.', version.indexOf('.')+1);
 		return Double.parseDouble(version.substring(0, pos));
+	}
+	
+	public boolean supportStartDueDate() {
+		return false;
 	}
 	
 	public InputStream getAttachmentContent(int attachmentId, IProgressMonitor monitor) throws RedmineException {
@@ -202,9 +210,9 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	 * @throws RedmineException
 	 */
 	protected int executeMethod(HttpMethod method, HostConfiguration hostConfiguration, IProgressMonitor monitor, boolean authenticated) throws RedmineException {
-		if (!this.authenticated) {
+		if (!isAuthenticated(hostConfiguration)) {
 			performLogin(hostConfiguration, monitor);
-			this.authenticated = authenticated = true;
+			authenticated = true;
 		}
 
 		int statusCode = performExecuteMethod(method, hostConfiguration, monitor);
@@ -251,6 +259,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 
 		performExecuteMethod(method, hostConfiguration, monitor);
 
+		boolean authenticated = false;
 		AuthenticationType authenticationType = null;
 		switch (method.getStatusCode()) {
 			case HttpStatus.SC_OK :
@@ -263,6 +272,18 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 				break;
 			default :
 				authenticated = true;
+
+				//Session-Cookie(s)
+				Cookie[] cookies = httpClient.getState().getCookies();
+				sessionCookie = "";
+				sessionExpiry = null;
+				for (Cookie cookie : cookies) {
+					sessionCookie += cookie.getName() + "=" + cookie.getValue() + ";";
+					Date expiry = cookie.getExpiryDate();
+					if (expiry!=null && (sessionExpiry==null || expiry.getTime()<sessionExpiry.getTime())) {
+						sessionExpiry = expiry; 
+					}
+				}
 		}
 		
 		if (!authenticated) {
@@ -280,7 +301,24 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 
 	}
 	
+	private boolean isAuthenticated(HostConfiguration hostConfiguration) {
+		//missing cookie
+		if (sessionCookie==null || sessionCookie.length()<1) {
+			return false;
+		}
+		
+		//cookie without expiration date
+		if (sessionExpiry==null) {
+			return true;
+		}
+		
+		long timeout = (long)WebUtil.getConnectionTimeout();
+		return new Date().getTime()<sessionExpiry.getTime()-timeout;
+	}
+	
 	synchronized protected int performExecuteMethod(HttpMethod method, HostConfiguration hostConfiguration, IProgressMonitor monitor) throws RedmineException {
+		method.setRequestHeader("Cookie", sessionCookie);
+
 		try {
 			String baseUrl = new URL(location.getUrl()).getPath();
 			if (!method.getPath().startsWith(baseUrl)) {

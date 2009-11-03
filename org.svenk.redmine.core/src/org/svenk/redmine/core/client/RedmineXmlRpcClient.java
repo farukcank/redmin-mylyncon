@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.svenk.redmine.core.IRedmineClient;
+import org.svenk.redmine.core.IRedmineConstants;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
 import org.svenk.redmine.core.model.RedmineAttachment;
@@ -53,10 +54,6 @@ import org.svenk.redmine.core.util.RedmineTransportFactory;
 
 public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmineClient {
 
-	private final static double PLUGIN_VERSION_2_2 = 2.2;
-	private final static double PLUGIN_VERSION_2_3 = 2.3;
-	private final static double PLUGIN_VERSION_2_5 = 2.5;
-	
 	private final static String URL_ENDPOINT = "/eclipse_mylyn_connector/api";
 
 	private final static String RPC_TICKET_BY_ID = "Ticket.FindTicketById";
@@ -140,8 +137,8 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			if (object.length==3) {
 				String v = object[0].toString() + object[2].toString();
 				double wsV = getWsVersion(v);
-				if (wsV<PLUGIN_VERSION_2_2) {
-					throw new RedmineException("This connector requires Plugin version v" + PLUGIN_VERSION_2_2 + " (" + wsV + ")");
+				if (wsV<IRedmineConstants.PLUGIN_VERSION_2_2) {
+					throw new RedmineException("This connector requires Plugin version v" + IRedmineConstants.PLUGIN_VERSION_2_2 + " (" + wsV + ")");
 				}
 				return v;
 			}
@@ -711,14 +708,14 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 	}
 
 	public boolean supportServersideStoredQueries() {
-		return wsVersion >= PLUGIN_VERSION_2_3;
+		return wsVersion >= IRedmineConstants.PLUGIN_VERSION_2_3;
 	}
 	
 	public boolean supportTaskRelations() {
-		return wsVersion >= PLUGIN_VERSION_2_3;
+		return wsVersion >= IRedmineConstants.PLUGIN_VERSION_2_3;
 	}
 	
 	public boolean supportOptimizedCommunicatinProtocol() {
-		return wsVersion >= PLUGIN_VERSION_2_5;
+		return wsVersion >= IRedmineConstants.PLUGIN_VERSION_2_5;
 	}
 }

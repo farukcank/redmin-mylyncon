@@ -132,8 +132,9 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		Map<String, String> valueByKey = ticket.getValues();
 		for (String key : valueByKey.keySet()) {
 			TaskAttribute taskAttribute = data.getRoot().getAttribute(key);
-			
-			switch(RedmineAttribute.fromRedmineKey(key)) {
+
+			if(taskAttribute!=null) {
+				switch(RedmineAttribute.fromRedmineKey(key)) {
 				case PROJECT : taskAttribute.setValue(projectData.getProject().getName()); break;
 				case ASSIGNED_TO:
 					try {
@@ -141,9 +142,11 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 					} catch (NumberFormatException e) {}
 					break;
 				default : taskAttribute.setValue(valueByKey.get(key));
+				}
+				
+				changedAttributes.add(taskAttribute);
 			}
 			
-			changedAttributes.add(taskAttribute);
 		}
 
 
@@ -307,8 +310,11 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		createAttribute(data, RedmineAttribute.DESCRIPTION);
 		createAttribute(data, RedmineAttribute.PROJECT);
 		createAttribute(data, RedmineAttribute.ESTIMATED);
-		createAttribute(data, RedmineAttribute.DATE_DUE);
-		createAttribute(data, RedmineAttribute.DATE_START);
+		
+		if(client.supportStartDueDate()) {
+			createAttribute(data, RedmineAttribute.DATE_DUE);
+			createAttribute(data, RedmineAttribute.DATE_START);
+		}
 
 		if (existingTask) {
 			createAttribute(data, RedmineAttribute.REPORTER);

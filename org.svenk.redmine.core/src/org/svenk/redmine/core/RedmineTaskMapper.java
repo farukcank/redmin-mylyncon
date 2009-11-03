@@ -24,6 +24,7 @@ import org.eclipse.mylyn.tasks.core.ITask.PriorityLevel;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.eclipse.mylyn.tasks.core.data.TaskMapper;
 import org.svenk.redmine.core.client.RedmineClientData;
+import org.svenk.redmine.core.model.RedminePriority;
 
 public class RedmineTaskMapper extends TaskMapper implements IRedmineTaskMapping {
 
@@ -40,8 +41,20 @@ public class RedmineTaskMapper extends TaskMapper implements IRedmineTaskMapping
 
 		//TODO null handling + catch refresh repositoryAttributes
 		if (clientData!=null) {
-			int priority = clientData.getPriority(getPriority()).getPosition();
-			level = PriorityLevel.fromLevel(priority>5 ? 1 : 6-priority);
+			RedminePriority priority = clientData.getPriority(getPriority());
+			
+			//some tickets references a non existing priority ?!
+			if (priority==null) {
+				//TODO use default priority
+				priority = clientData.getPriorities().get(0);
+			}
+			
+			if (priority==null) {
+				PriorityLevel.fromLevel(1);
+			} else {
+				int pos = priority.getPosition();
+				level = PriorityLevel.fromLevel(pos>5 ? 1 : 6-pos);
+			}
 		}
 
 		return level;

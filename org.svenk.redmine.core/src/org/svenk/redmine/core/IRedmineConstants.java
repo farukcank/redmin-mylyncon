@@ -22,5 +22,10 @@ package org.svenk.redmine.core;
 
 public interface IRedmineConstants {
 
+	public final static double PLUGIN_VERSION_2_2 = 2.2;
+	public final static double PLUGIN_VERSION_2_3 = 2.3;
+	public final static double PLUGIN_VERSION_2_5 = 2.5;
+	public final static double PLUGIN_VERSION_2_6 = 2.6;
+
 	public final static String EDITOR_TYPE_ESTIMATED = "estimated";
 }
