@@ -1,3 +1,8 @@
+#feature@org.svenk.redmine_feature= COPY, /home/sven/Workspaces/rcp, org.svenk.redmine-feature
+#plugin@org.svenk.redmine.dependency= COPY, /home/sven/Workspaces/rcp, org.svenk.redmine.dependency
+#plugin@org.svenk.redmine.core= COPY, /home/sven/Workspaces/rcp, org.svenk.redmine.core
+#plugin@org.svenk.redmine.ui= COPY, /home/sven/Workspaces/rcp, org.svenk.redmine.ui
+
 feature@org.svenk.redmine_feature= COPY, ${buildHome}/svnfetch, org.svenk.redmine-feature
 plugin@org.svenk.redmine.dependency= COPY, ${buildHome}/svnfetch, org.svenk.redmine.dependency
 plugin@org.svenk.redmine.core= COPY, ${buildHome}/svnfetch, org.svenk.redmine.core
