@@ -67,7 +67,7 @@ public class RedmineTaskAttachmentHandler extends AbstractTaskAttachmentHandler 
 	@Override
 	public void postContent(TaskRepository repository, ITask task, AbstractTaskAttachmentSource source, String comment, TaskAttribute attachmentAttribute, IProgressMonitor monitor) throws CoreException {
 		String fileName = source.getName();
-		String description = "";
+		String description = source.getDescription();
 		
 		if (attachmentAttribute!=null) {
 			TaskAttachmentMapper mapper = TaskAttachmentMapper.createFrom(attachmentAttribute);
@@ -80,7 +80,7 @@ public class RedmineTaskAttachmentHandler extends AbstractTaskAttachmentHandler 
 			if (mapper.getDescription() != null) {
 				description = mapper.getDescription();
 			}
-		}
+		} 
 		
 		try {
 			IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
