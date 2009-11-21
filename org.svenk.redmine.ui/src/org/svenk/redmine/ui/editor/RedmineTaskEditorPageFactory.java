@@ -65,4 +65,9 @@ public class RedmineTaskEditorPageFactory extends AbstractTaskEditorPageFactory 
 		return "Redmine";
 	}
 
+	@Override
+	public int getPriority() {
+		return PRIORITY_TASK;
+	}
+	
 }
