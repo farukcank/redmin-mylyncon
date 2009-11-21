@@ -42,6 +42,7 @@ public class RedmineClientData implements Serializable {
 	long lastupdate=0;
 
 	public List<RedminePriority> getPriorities() {
+		Collections.sort(priorities);
 		return Collections.unmodifiableList(priorities);
 	}
 

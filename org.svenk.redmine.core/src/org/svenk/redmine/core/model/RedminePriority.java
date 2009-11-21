@@ -21,21 +21,14 @@
 package org.svenk.redmine.core.model;
 
 
-public class RedminePriority extends RedmineTicketAttribute {
+public class RedminePriority extends RedmineOrderedTicketAttribute {
 
-	private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 3L;
 
-	private int position;
-	
 	private boolean defaultPriority;
 
 	public RedminePriority(String name, int value, int position) {
-		super(name, value);
-		this.position = position;
-	}
-
-	public int getPosition() {
-		return position;
+		super(name, value, position);
 	}
 
 	public boolean isDefaultPriority() {
