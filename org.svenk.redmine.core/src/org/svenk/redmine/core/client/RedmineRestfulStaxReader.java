@@ -35,8 +35,10 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.svenk.redmine.core.client.container.Version;
 import org.svenk.redmine.core.exception.RedmineException;
+import org.svenk.redmine.core.exception.RedmineInputParserException;
 import org.svenk.redmine.core.model.RedmineAttachment;
-import org.svenk.redmine.core.model.RedmineCustomTicketField;
+import org.svenk.redmine.core.model.RedmineCustomField;
+import org.svenk.redmine.core.model.RedmineCustomValue;
 import org.svenk.redmine.core.model.RedmineIssueCategory;
 import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.model.RedminePriority;
@@ -46,9 +48,11 @@ import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicketJournal;
 import org.svenk.redmine.core.model.RedmineTicketRelation;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
+import org.svenk.redmine.core.model.RedmineTimeEntry;
 import org.svenk.redmine.core.model.RedmineTracker;
 import org.svenk.redmine.core.model.RedmineVersion;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
+import org.svenk.redmine.core.util.RedmineUtil;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
@@ -192,6 +196,83 @@ public class RedmineRestfulStaxReader {
 		return list;
 	}
 
+	protected RedmineTimeEntry readCurrentTagAsTimeEntry(XMLStreamReader reader) throws XMLStreamException {
+		RedmineTimeEntry timeEntry = null;
+		try {
+			int id = Integer.parseInt(reader.getAttributeValue(NS_PREFIX, "id"));
+
+			reader.nextTag();
+			float hours = Float.parseFloat(reader.getElementText());
+
+			reader.nextTag();
+			int activityId = Integer.parseInt(reader.getElementText());
+
+			reader.nextTag();
+			int userId = Integer.parseInt(reader.getElementText());
+
+			timeEntry = new RedmineTimeEntry();
+			timeEntry.setId(id);
+			timeEntry.setHours(hours);
+			timeEntry.setActivityId(activityId);
+			timeEntry.setUserId(userId);
+
+			reader.nextTag();
+			timeEntry.setSpentOn(RedmineUtil.parseDate(reader.getElementText()));
+
+			reader.nextTag();
+			timeEntry.setComments(reader.getElementText());
+
+			reader.nextTag();//customValues
+			while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
+				RedmineCustomValue customValue = readCurrentTagAsCustomValue(reader);
+				if (customValue!=null) {
+					timeEntry.addCustomValue(customValue);
+				}
+			}
+			
+		} finally {
+			skipToEndTag("timeEntry", reader);
+		}
+		return timeEntry;
+	}
+
+	protected RedmineCustomValue readCurrentTagAsCustomValue(XMLStreamReader reader) throws XMLStreamException {
+		RedmineCustomValue customValue = null;
+		try {
+			int customFieldId = Integer.parseInt(reader.getAttributeValue(NS_PREFIX, "customFieldId"));
+			String value = reader.getElementText();
+			
+			customValue = new RedmineCustomValue();
+			customValue.setCustomFieldId(customFieldId);
+			customValue.setValue(value);
+		} finally {
+//			skipToEndTag("customValue", reader);
+		}
+		return customValue;
+	}
+
+
+	public List<RedmineCustomField> readCustomFields(InputStream in) throws RedmineException {
+		List<RedmineCustomField> list = new ArrayList<RedmineCustomField>();
+		
+		try {
+			XMLStreamReader reader = inputFactory.createXMLStreamReader(in);
+			
+			reader.nextTag();//customFields
+			while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
+				RedmineCustomField field = readCurrentTagAsCustomField(reader);
+				if (field!=null) {
+					list.add(field);
+				}
+			}
+			
+		} catch (XMLStreamException e) {
+			throw new RedmineException(e.getMessage(), e);
+		}
+
+		return list;
+	}
+
 	public List<RedmineProjectData> readProjects(InputStream in) throws RedmineException {
 		List<RedmineProjectData> projects = new ArrayList<RedmineProjectData>();
 		try {
@@ -250,7 +331,7 @@ public class RedmineRestfulStaxReader {
 		return parserFactory.newSAXParser().getXMLReader();
 	}
 
-	protected RedmineProjectData readCurrentTagAsProject(XMLStreamReader reader) throws XMLStreamException {
+	protected RedmineProjectData readCurrentTagAsProject(XMLStreamReader reader) throws RedmineInputParserException, XMLStreamException {
 		RedmineProjectData data = null;
 		try {
 			int id = Integer.parseInt(reader.getAttributeValue(NS_PREFIX, "id"));
@@ -298,7 +379,7 @@ public class RedmineRestfulStaxReader {
 					}
 				} else if (reader.getLocalName().equals("issueCustomFields")) {
 					while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
-						RedmineCustomTicketField field = readCurrentTagAsCustomField(reader);
+						RedmineCustomField field = readCurrentTagAsCustomField(reader);
 						if (field!=null) {
 							data.customTicketFields.add(field);
 						}
@@ -369,6 +450,17 @@ public class RedmineRestfulStaxReader {
 							RedmineTicketRelation relation = readCurrentTagAsRelation(reader);
 							if (relation!=null) {
 								ticket.addRelation(relation);
+							}
+						}
+					} else if (reader.getLocalName().equals("timeEntries")) {
+						//TODO AccessControl
+						//TODO sum
+						reader.nextTag();//sum
+						reader.getElementText();
+						while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
+							RedmineTimeEntry timeEntry = readCurrentTagAsTimeEntry(reader);
+							if (timeEntry!=null) {
+								ticket.addTimeEntry(timeEntry);
 							}
 						}
 					} else {
@@ -555,58 +647,92 @@ public class RedmineRestfulStaxReader {
 		return query;
 	}
 
-	protected RedmineCustomTicketField readCurrentTagAsCustomField(XMLStreamReader reader) throws XMLStreamException {
-		RedmineCustomTicketField field = null;
+	protected void skipToEndTag(String tagname, XMLStreamReader reader) throws XMLStreamException {
+		while(!(reader.isEndElement() && reader.getLocalName().equals(tagname))) {
+			if(reader.isStartElement() && reader.hasText()) {
+				reader.getElementText();
+			}
+			reader.next();
+		}
+	}
+
+	private enum CustomFieldTag {name, type, fieldFormat, minLength, maxLength, regexp, possibleValues, defaultValue, required, filter, trackers;
+		private static CustomFieldTag fromTagName(String tagName) {
+			for (CustomFieldTag tag : CustomFieldTag.values()) {
+				if (tag.name().equals(tagName)) {
+					return tag;
+				}
+			}
+			return null;
+		}
+	};
+
+		
+	private RedmineCustomField readCurrentTagAsCustomField(XMLStreamReader reader) throws XMLStreamException, RedmineInputParserException{
+		String tagName = reader.getLocalName();
+		RedmineCustomField field = null;
+		
 		try {
 			int id = Integer.parseInt(reader.getAttributeValue(NS_PREFIX, "id"));
-			reader.nextTag();
-			String name = reader.getElementText();
-			reader.nextTag();
-			field = new RedmineCustomTicketField(id, reader.getElementText());
-			field.setName(name);
-			
-			reader.nextTag();
-			field.setMin(Integer.parseInt(reader.getElementText()));
+			String name = null;
+			RedmineCustomField.CustomType customType = null;
+			while(!(reader.nextTag()==XMLStreamConstants.END_ELEMENT && reader.getLocalName().equals(tagName))) {
+				CustomFieldTag tag = CustomFieldTag.fromTagName(reader.getLocalName());
+				if (tag==null) {
+					throw new RedmineInputParserException("Fehler beim Lesen eines CustomField, unbekanntes Tag : " + reader.getLocalName());
+				}
 
-			reader.nextTag();
-			field.setMax(Integer.parseInt(reader.getElementText()));
-
-			reader.nextTag();
-			field.setValidationRegex(reader.getElementText());
-
-			reader.nextTag();
-			List<String> possibleValues = new ArrayList<String>();
-			while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
-				possibleValues.add(reader.getElementText());
+				switch(tag) {
+					case name : name = reader.getElementText().trim(); break;
+					case type : 
+						customType = RedmineCustomField.CustomType.fromString(reader.getElementText().trim());
+						if (customType==null) {
+							//unsed CustomType
+							skipToEndTag(tagName, reader);
+							return null;
+						}
+						break;
+					case fieldFormat : 
+						field = customType==null
+							? new RedmineCustomField(id, reader.getElementText().trim())
+							: new RedmineCustomField(id, reader.getElementText().trim(), customType);
+						field.setName(name);
+						break;
+					case minLength : field.setMin(Integer.parseInt(reader.getElementText().trim())); break;
+					case maxLength : field.setMax(Integer.parseInt(reader.getElementText().trim())); break;
+					case regexp : field.setValidationRegex(reader.getElementText().trim()); break;
+					case defaultValue : field.setDefaultValue(reader.getElementText().trim()); break;
+					case required : field.setRequired(Boolean.parseBoolean(reader.getElementText().trim())); break;
+					case filter : field.setSupportFilter(Boolean.parseBoolean(reader.getElementText().trim()));break;
+					case possibleValues :
+						List<String> possibleValues = new ArrayList<String>();
+						while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
+							possibleValues.add(reader.getElementText());
+						}
+						field.setListValues(possibleValues.toArray(new String[possibleValues.size()]));
+						break;
+					case trackers : 
+						String[] trackerIdVals = reader.getElementText().trim().split("\\s");
+						int[] trackerIds = new int[trackerIdVals.length];
+						for (int i=trackerIdVals.length-1; i>=0; i--) {
+							trackerIds[i] = Integer.parseInt(trackerIdVals[i]);
+						}
+						field.setTrackerId(trackerIds);
+						break;
+					default :
+				}
 			}
-			field.setListValues(possibleValues.toArray(new String[possibleValues.size()]));
 			
-			reader.nextTag();
-			String[] trackerIdVals = reader.getElementText().split("\\s");
-			int[] trackerIds = new int[trackerIdVals.length];
-			for (int i=trackerIdVals.length-1; i>=0; i--) {
-				trackerIds[i] = Integer.parseInt(trackerIdVals[i]);
-			}
-			field.setTrackerId(trackerIds);
-
-			reader.nextTag();
-			field.setDefaultValue(reader.getElementText());
-			
-			reader.nextTag();
-			field.setRequired(Boolean.parseBoolean(reader.getElementText()));
-
-			reader.nextTag();
-			field.setSupportFilter(Boolean.parseBoolean(reader.getElementText()));
 		} catch (NumberFormatException e) {
 			field = null;
+			throw new RedmineInputParserException("Parsing of Customfield failed", e);
+		} catch (XMLStreamException e) {
+			field = null;
+			throw new RedmineInputParserException("Parsing of Customfield failed", e);
 		} finally {
-			skipToEndTag("issueCustomField", reader);
-		}
+			skipToEndTag(tagName, reader);
+		} 
+		
 		return field;
 	}
-
-	protected void skipToEndTag(String tagname, XMLStreamReader reader) throws XMLStreamException {
-		while(!(reader.next()==XMLStreamConstants.END_ELEMENT && reader.getLocalName().equals(tagname)));
-	}
-
 }

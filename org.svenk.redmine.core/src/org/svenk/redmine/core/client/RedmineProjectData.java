@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.svenk.redmine.core.model.RedmineCustomTicketField;
+import org.svenk.redmine.core.model.RedmineCustomField;
 import org.svenk.redmine.core.model.RedmineIssueCategory;
 import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.model.RedmineProject;
@@ -47,7 +47,7 @@ public class RedmineProjectData implements Serializable {
 	
 	List<RedmineMember> members = new ArrayList<RedmineMember>();
 	
-	List<RedmineCustomTicketField> customTicketFields = new ArrayList<RedmineCustomTicketField>();
+	List<RedmineCustomField> customTicketFields = new ArrayList<RedmineCustomField>();
 
 	List<RedmineStoredQuery> storedQueries = new ArrayList<RedmineStoredQuery>();
 	
@@ -85,9 +85,9 @@ public class RedmineProjectData implements Serializable {
 		return list;
 	}
 	
-	public List<RedmineCustomTicketField> getCustomTicketFields(int trackerId) {
-		ArrayList<RedmineCustomTicketField> customTicketValues = new ArrayList<RedmineCustomTicketField>();
-		for (RedmineCustomTicketField v : this.customTicketFields) {
+	public List<RedmineCustomField> getCustomTicketFields(int trackerId) {
+		ArrayList<RedmineCustomField> customTicketValues = new ArrayList<RedmineCustomField>();
+		for (RedmineCustomField v : this.customTicketFields) {
 			if (v.usableForTracker(trackerId)) {
 				customTicketValues.add(v);
 			}
@@ -95,8 +95,8 @@ public class RedmineProjectData implements Serializable {
 		return Collections.unmodifiableList(customTicketValues);
 	}
 
-	public RedmineCustomTicketField getCustomTicketField(int id) {
-		for (RedmineCustomTicketField customField : customTicketFields) {
+	public RedmineCustomField getCustomTicketField(int id) {
+		for (RedmineCustomField customField : customTicketFields) {
 			if (customField.getId()==id) {
 				return customField;
 			}
@@ -104,7 +104,7 @@ public class RedmineProjectData implements Serializable {
 		return null;
 	}
 	
-	public List<RedmineCustomTicketField> getCustomTicketFields() {
+	public List<RedmineCustomField> getCustomTicketFields() {
 		return Collections.unmodifiableList(this.customTicketFields);
 	}
 	

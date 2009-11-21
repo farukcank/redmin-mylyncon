@@ -40,7 +40,7 @@ public class RedmineSearch {
 	public final static String STORED_QUERY_ID = "QUERY_ID";
 	
 	private Map<SearchField, RedmineSearchFilter> filterBySearchField = new HashMap<SearchField, RedmineSearchFilter>();
-	private Map<RedmineCustomTicketField, RedmineSearchFilter> filterByCustomField = new HashMap<RedmineCustomTicketField, RedmineSearchFilter>();
+	private Map<RedmineCustomField, RedmineSearchFilter> filterByCustomField = new HashMap<RedmineCustomField, RedmineSearchFilter>();
 
 	private RedmineProject project;
 	
@@ -55,14 +55,14 @@ public class RedmineSearch {
 	}
 
 	public void addFilter(IRedmineQueryField queryField, CompareOperator operator, String value) {
-		if (queryField instanceof RedmineCustomTicketField) {
-			addFilter((RedmineCustomTicketField)queryField, operator, value);
+		if (queryField instanceof RedmineCustomField) {
+			addFilter((RedmineCustomField)queryField, operator, value);
 		} else if (queryField instanceof SearchField) {
 			addFilter((SearchField)queryField, operator, value);
 		}
 	}
 	
-	private void addFilter(RedmineCustomTicketField customField, CompareOperator operator, String value) {
+	private void addFilter(RedmineCustomField customField, CompareOperator operator, String value) {
 		RedmineSearchFilter filter = filterByCustomField.get(customField);
 		if (filter == null) {
 			filter = new RedmineSearchFilter(customField);
@@ -89,7 +89,7 @@ public class RedmineSearch {
 	}
 	
 	public RedmineSearchFilter getFilter(IRedmineQueryField queryField) {
-		if (queryField instanceof RedmineCustomTicketField) {
+		if (queryField instanceof RedmineCustomField) {
 			return filterByCustomField.get(queryField);
 		} else if (queryField instanceof SearchField) {
 			return filterBySearchField.get(queryField);
@@ -131,7 +131,7 @@ public class RedmineSearch {
 		
 		List<SearchField> searchFields = 
 			RedmineSearchFilter.findSearchFieldsFromSearchQueryParam(param);
-		List<RedmineCustomTicketField> customFields = 
+		List<RedmineCustomField> customFields = 
 			RedmineSearchFilter.findCustomTicketFieldsFromSearchQueryParam(projectData, param);
 		
 		CompareOperator operator;
@@ -147,7 +147,7 @@ public class RedmineSearch {
 				}
 			}
 		}
-		for (RedmineCustomTicketField customField : customFields) {
+		for (RedmineCustomField customField : customFields) {
 			operator = RedmineSearchFilter.findOperatorFromQueryFieldParam(param, customField);
 			values = RedmineSearchFilter.findValuesFromQueryFieldParam(param, customField);
 			if (values.size()==0) {

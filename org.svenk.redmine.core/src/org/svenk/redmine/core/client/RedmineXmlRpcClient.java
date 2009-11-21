@@ -37,7 +37,7 @@ import org.svenk.redmine.core.IRedmineConstants;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
 import org.svenk.redmine.core.model.RedmineAttachment;
-import org.svenk.redmine.core.model.RedmineCustomTicketField;
+import org.svenk.redmine.core.model.RedmineCustomField;
 import org.svenk.redmine.core.model.RedmineIssueCategory;
 import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.model.RedminePriority;
@@ -500,9 +500,9 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 		return tracker;
 	}
 
-	private RedmineCustomTicketField parseResponse2CustomFields(Object response)
+	private RedmineCustomField parseResponse2CustomFields(Object response)
 	throws RedmineException {
-		RedmineCustomTicketField customValue = null;
+		RedmineCustomField customValue = null;
 		HashMap<String, Object> map = parseResponse2HashMap(response);
 		int id = ((Integer)map.get("id")).intValue();
 		String type = map.get("type").toString();
@@ -530,7 +530,7 @@ public class RedmineXmlRpcClient extends AbstractRedmineClient implements IRedmi
 			}
 		}
 
-		customValue = new RedmineCustomTicketField(id, type);
+		customValue = new RedmineCustomField(id, type);
 //		customValue.setDefaultValue(map.get("default_value").toString());
 		customValue.setMax(((Integer)map.get("max")).intValue());
 		customValue.setMin(((Integer)map.get("min")).intValue());

@@ -28,4 +28,13 @@ public interface IRedmineConstants {
 	public final static double PLUGIN_VERSION_2_6 = 2.6;
 
 	public final static String EDITOR_TYPE_ESTIMATED = "estimated";
+	
+	public final static String TASK_ATTRIBUTE_TIMEENTRY = "task.redmine.timeentry";
+	public final static String TASK_ATTRIBUTE_TIMEENTRY_AUTHOR = "task.redmine.timeentry.author";
+	public final static String TASK_ATTRIBUTE_TIMEENTRY_ACTIVITY = "task.redmine.timeentry.activity";
+	public final static String TASK_ATTRIBUTE_TIMEENTRY_HOURS = "task.redmine.timeentry.hours";
+	public final static String TASK_ATTRIBUTE_TIMEENTRY_SPENTON = "task.redmine.timeentry.spenton";
+	public final static String TASK_ATTRIBUTE_TIMEENTRY_COMMENTS = "task.redmine.timeentry.comments";
+	public final static String TASK_ATTRIBUTE_TIMEENTRY_CUSTOMVALUE = "task.redmine.timeentry.customvalue.";
+	public final static String TASK_ATTRIBUTE_TIMEENTRY_CUSTOMVALUES = "task.redmine.timeentry.customvalues";
 }

@@ -742,8 +742,8 @@ public class RedmineSearchFilterTest {
 		String operator;
 		
 		int idVal = 4;
-		RedmineCustomTicketField customField = 
-			new RedmineCustomTicketField(idVal, RedmineCustomTicketField.FieldType.LIST.name());
+		RedmineCustomField customField = 
+			new RedmineCustomField(idVal, RedmineCustomField.FieldType.LIST.name());
 		String id = customField.getQueryValue();
 		
 		RedmineSearchFilter filter = new RedmineSearchFilter(customField);
@@ -793,8 +793,8 @@ public class RedmineSearchFilterTest {
 		String operator;
 		
 		int idVal = 4;
-		RedmineCustomTicketField customField = 
-			new RedmineCustomTicketField(idVal, RedmineCustomTicketField.FieldType.TEXT.name());
+		RedmineCustomField customField = 
+			new RedmineCustomField(idVal, RedmineCustomField.FieldType.TEXT.name());
 		String id = customField.getQueryValue();
 		
 		RedmineSearchFilter filter = new RedmineSearchFilter(customField);
@@ -845,8 +845,8 @@ public class RedmineSearchFilterTest {
 		String operator;
 
 		int idVal = 4;
-		RedmineCustomTicketField customField = 
-			new RedmineCustomTicketField(idVal, RedmineCustomTicketField.FieldType.DATE.name());
+		RedmineCustomField customField = 
+			new RedmineCustomField(idVal, RedmineCustomField.FieldType.DATE.name());
 		String id = customField.getQueryValue();
 		
 		RedmineSearchFilter filter = new RedmineSearchFilter(customField);
@@ -918,8 +918,8 @@ public class RedmineSearchFilterTest {
 		String operator;
 		
 		int idVal = 4;
-		RedmineCustomTicketField customField = 
-			new RedmineCustomTicketField(idVal, RedmineCustomTicketField.FieldType.BOOL.name());
+		RedmineCustomField customField = 
+			new RedmineCustomField(idVal, RedmineCustomField.FieldType.BOOL.name());
 		String id = customField.getQueryValue();
 		
 		RedmineSearchFilter filter = new RedmineSearchFilter(customField);

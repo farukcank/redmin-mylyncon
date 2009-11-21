@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<activities xmlns="http://redmin-mylyncon.sf.net/schemas/WS-API-2.6">
+  <activity id="9">
+    <name>Design</name>
+    <position>1</position>
+    <default>false</default>
+  </activity>
+  <activity id="10">
+
+    <name>Development</name>
+    <position>1</position>
+    <default>true</default>
+  </activity>
+  <activity id="11">
+    <name>QA</name>
+    <position>1</position>
+
+    <default>false</default>
+  </activity>
+</activities>

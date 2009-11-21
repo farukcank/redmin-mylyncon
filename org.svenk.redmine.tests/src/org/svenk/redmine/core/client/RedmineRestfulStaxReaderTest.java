@@ -29,7 +29,7 @@ import junit.framework.TestCase;
 
 import org.svenk.redmine.core.client.container.Version;
 import org.svenk.redmine.core.model.RedmineAttachment;
-import org.svenk.redmine.core.model.RedmineCustomTicketField;
+import org.svenk.redmine.core.model.RedmineCustomField;
 import org.svenk.redmine.core.model.RedmineIssueCategory;
 import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.model.RedminePriority;
@@ -41,7 +41,7 @@ import org.svenk.redmine.core.model.RedmineTicketRelation;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
 import org.svenk.redmine.core.model.RedmineTracker;
 import org.svenk.redmine.core.model.RedmineVersion;
-import org.svenk.redmine.core.model.RedmineCustomTicketField.FieldType;
+import org.svenk.redmine.core.model.RedmineCustomField.FieldType;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
 import org.svenk.redmine.core.model.RedmineTicketRelation.RelationType;
 
@@ -187,7 +187,7 @@ public class RedmineRestfulStaxReaderTest extends TestCase {
 		assertEquals(1, categories.get(0).getValue());
 		assertEquals("category 1", categories.get(0).getName());
 		
-		List<RedmineCustomTicketField> fields = data.getCustomTicketFields();
+		List<RedmineCustomField> fields = data.getCustomTicketFields();
 		assertEquals(3, fields.size());
 		assertEquals(1, fields.get(0).getId());
 		assertSame(FieldType.STRING, fields.get(0).getType());

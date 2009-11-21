@@ -2,8 +2,8 @@ package org.svenk.redmine.core.util;
 
 import java.lang.reflect.Constructor;
 
-import org.svenk.redmine.core.model.RedmineCustomTicketField;
-import org.svenk.redmine.core.model.RedmineCustomTicketField.FieldType;
+import org.svenk.redmine.core.model.RedmineCustomField;
+import org.svenk.redmine.core.model.RedmineCustomField.FieldType;
 import org.svenk.redmine.core.util.RedmineTaskDataValidator.RedmineTaskDataValidatorResult;
 
 import junit.framework.TestCase;
@@ -12,7 +12,7 @@ public class RedmineTaskDataValidatorTest extends TestCase {
 
 	private RedmineTaskDataValidator validator;
 	private RedmineTaskDataValidatorResult result;
-	private RedmineCustomTicketField stringField, intField, floatField;
+	private RedmineCustomField stringField, intField, floatField;
 	
 	protected void setUp() throws Exception {
 		validator = new RedmineTaskDataValidator(null);
@@ -21,17 +21,17 @@ public class RedmineTaskDataValidatorTest extends TestCase {
 		constr.setAccessible(true);
 		result = constr.newInstance(validator);
 		
-		stringField = new RedmineCustomTicketField(1, FieldType.STRING.name());
+		stringField = new RedmineCustomField(1, FieldType.STRING.name());
 		stringField.setName("stringField");
 		stringField.setMin(2);
 		stringField.setMax(2);
 		stringField.setValidationRegex("^[A-Z]\\w+$");
 		stringField.setRequired(true);
 		
-		intField = new RedmineCustomTicketField(1, FieldType.INT.name());
+		intField = new RedmineCustomField(1, FieldType.INT.name());
 		intField.setName("intField");
 
-		floatField = new RedmineCustomTicketField(1, FieldType.FLOAT.name());
+		floatField = new RedmineCustomField(1, FieldType.FLOAT.name());
 		floatField.setName("floatField");
 	}
 

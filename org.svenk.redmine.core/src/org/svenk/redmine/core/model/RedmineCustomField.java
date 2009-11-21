@@ -24,11 +24,27 @@ import java.io.Serializable;
 
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 
-public class RedmineCustomTicketField implements Serializable, IRedmineQueryField {
+public class RedmineCustomField implements Serializable, IRedmineQueryField {
 
-	private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 3L;
 
 	public final static String TASK_KEY_PREFIX = "task.redmine.custom.";
+
+	
+	public enum CustomType {
+		IssueCustomField,
+		TimeEntryCustomField;
+
+		public static CustomType fromString(String name) {
+			for (CustomType type : CustomType.values()) {
+				if (type.name().equalsIgnoreCase(name)) {
+					return type;
+				}
+			}
+			return null;
+		}
+
+	}
 
 	public enum FieldType implements Serializable {
 		STRING(TaskAttribute.TYPE_SHORT_TEXT),
@@ -63,7 +79,9 @@ public class RedmineCustomTicketField implements Serializable, IRedmineQueryFiel
 	
 	private int id;
 	
-	private FieldType type;
+	private FieldType fieldType;
+	
+	private CustomType customType;
 	
 	private String name;
 	
@@ -83,9 +101,14 @@ public class RedmineCustomTicketField implements Serializable, IRedmineQueryFiel
 	
 	private String [] listValues;
 	
-	public RedmineCustomTicketField(int id, String type) {
+	public RedmineCustomField(int id, String fieldType) {
+		this(id, fieldType, CustomType.IssueCustomField);
+	}
+
+	public RedmineCustomField(int id, String fieldType, CustomType customType) {
 		setId(id);
-		setFieldFormat(type);
+		setFieldFormat(fieldType);
+		this.customType = customType;
 	}
 
 	public  boolean usableForTracker(int trackerId) {
@@ -106,13 +129,17 @@ public class RedmineCustomTicketField implements Serializable, IRedmineQueryFiel
 	}
 
 	public FieldType getType() {
-		return type;
+		return fieldType;
 	}
 
 	private void setFieldFormat(String type) {
-		this.type = FieldType.fromString(type);
+		this.fieldType = FieldType.fromString(type);
 	}
 
+	public CustomType getCustomType() {
+		return this.customType;
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -195,8 +222,8 @@ public class RedmineCustomTicketField implements Serializable, IRedmineQueryFiel
 	@Override
 	public boolean equals(Object obj) {
 		if (obj.getClass().equals(getClass())) {
-			RedmineCustomTicketField custom = (RedmineCustomTicketField)obj;
-			return this.id==custom.id && this.type==custom.type;
+			RedmineCustomField custom = (RedmineCustomField)obj;
+			return this.id==custom.id && this.fieldType==custom.fieldType;
 		}
 		return false;
 	}
@@ -205,7 +232,7 @@ public class RedmineCustomTicketField implements Serializable, IRedmineQueryFiel
 	public int hashCode() {
 		int hash = 7;
 		hash = 31 * hash + id;
-		hash = 31 * hash + (null == type ? 0 : type.hashCode());
+		hash = 31 * hash + (null == fieldType ? 0 : fieldType.hashCode());
 		return hash;
 	}
 

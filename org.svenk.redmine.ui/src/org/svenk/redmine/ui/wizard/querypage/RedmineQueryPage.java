@@ -68,12 +68,12 @@ import org.svenk.redmine.core.client.RedmineClientData;
 import org.svenk.redmine.core.client.RedmineProjectData;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.IRedmineQueryField;
-import org.svenk.redmine.core.model.RedmineCustomTicketField;
+import org.svenk.redmine.core.model.RedmineCustomField;
 import org.svenk.redmine.core.model.RedmineSearch;
 import org.svenk.redmine.core.model.RedmineSearchFilter;
 import org.svenk.redmine.core.model.RedmineStoredQuery;
 import org.svenk.redmine.core.model.RedmineTicketAttribute;
-import org.svenk.redmine.core.model.RedmineCustomTicketField.FieldType;
+import org.svenk.redmine.core.model.RedmineCustomField.FieldType;
 import org.svenk.redmine.core.model.RedmineSearchFilter.CompareOperator;
 import org.svenk.redmine.core.model.RedmineSearchFilter.SearchField;
 import org.svenk.redmine.ui.wizard.RedmineLabelProvider;
@@ -416,7 +416,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	
 	private void updateCustomFieldFilter(RedmineProjectData projectData) {
 		LabelProvider labelProvider = new RedmineLabelProvider();
-		java.util.List<RedmineCustomTicketField> customFields = projectData.getCustomTicketFields();
+		java.util.List<RedmineCustomField> customFields = projectData.getCustomTicketFields();
 		
 
 		java.util.List<IRedmineQueryField> lstKeys 
@@ -431,7 +431,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			}
 		}
 
-		for (RedmineCustomTicketField customField : customFields) {
+		for (RedmineCustomField customField : customFields) {
 			if (!customField.isSupportFilter()) {
 				continue;
 			}
@@ -530,6 +530,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	private void restoreQuery(IRepositoryQuery query) {
 		titleText.setText(query.getSummary());
 
+		//TODO handle NPE
 		projectData = data.getProjectFromName(query.getAttribute(RedmineSearch.PROJECT_NAME));
 		projectViewer.setSelection(new StructuredSelection(projectData));
 
@@ -634,7 +635,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	}
 	
 	private Object attributeValue2Attribute(RedmineProjectData projectData, IRedmineQueryField field, String txtValue) {
-		if (field instanceof RedmineCustomTicketField) {
+		if (field instanceof RedmineCustomField) {
 			return txtValue;
 		} else if (field instanceof SearchField) {
 			SearchField searchField = (SearchField)field;
@@ -754,8 +755,8 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			IStructuredSelection selection = (IStructuredSelection)opCombo.getSelection();
 			if (selection.getFirstElement() instanceof CompareOperator) {
 				CompareOperator operator = (CompareOperator)selection.getFirstElement();
-				if (queryField instanceof RedmineCustomTicketField 
-						&& ((RedmineCustomTicketField)queryField).getType()==FieldType.BOOL) {
+				if (queryField instanceof RedmineCustomField 
+						&& ((RedmineCustomField)queryField).getType()==FieldType.BOOL) {
 					search.addFilter(queryField, operator, "1");
 				} else {
 					search.addFilter(queryField, operator, text.getText().trim());

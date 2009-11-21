@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issue xmlns="http://redmin-mylyncon.sf.net/schemas/WS-API-2.6" id="3">
+  <subject>Error 281 when updating a recipe</subject>
+  <description>Error 281 is encountered when saving a recipe</description>
+  <author>John Smith</author>
+  <createdOn unixtime="1153336047">2006-07-19T21:07:27+02:00</createdOn>
+  <updatedOn unixtime="1153336047">2006-07-19T21:07:27+02:00</updatedOn>
+
+  <projectId>1</projectId>
+  <trackerId>1</trackerId>
+  <priorityId>4</priorityId>
+  <statusId>1</statusId>
+  <assignedToId>3</assignedToId>
+  <doneRatio>0</doneRatio>
+
+  <startDate>2009-11-04</startDate>
+  <dueDate>2009-09-24</dueDate>
+  <availableStatus>2 3 4 5 6 1</availableStatus>
+  <watched>false</watched>
+  <watchers></watchers>
+  <customValues>
+    <customValue customFieldId="2">125</customValue>
+    <customValue customFieldId="1">MySQL</customValue>
+  </customValues>
+  <journals>
+  </journals>
+  <attachments>
+    <attachment id="1">
+      <author>John Smith</author>
+
+      <createdOn unixtime="1153336047">2006-07-19T21:07:27+02:00</createdOn>
+      <filename>error281.txt</filename>
+      <filesize>28</filesize>
+      <digest>b91e08d0cf966d5c6ff411bd8c4cc3a2</digest>
+      <contentType>text/plain</contentType>
+      <description></description>
+
+    </attachment>
+    <attachment id="4">
+      <author>John Smith</author>
+      <createdOn unixtime="1153336047">2006-07-19T21:07:27+02:00</createdOn>
+      <filename>source.rb</filename>
+      <filesize>153</filesize>
+      <digest>b91e08d0cf966d5c6ff411bd8c4cc3a2</digest>
+
+      <contentType>application/x-ruby</contentType>
+      <description>This is a Ruby source file</description>
+    </attachment>
+    <attachment id="5">
+      <author>John Smith</author>
+      <createdOn unixtime="1153336047">2006-07-19T21:07:27+02:00</createdOn>
+      <filename>changeset.diff</filename>
+
+      <filesize>687</filesize>
+      <digest>b91e08d0cf966d5c6ff411bd8c4cc3a2</digest>
+      <contentType>text/x-diff</contentType>
+      <description></description>
+    </attachment>
+    <attachment id="6">
+      <author>John Smith</author>
+
+      <createdOn unixtime="1153336047">2006-07-19T21:07:27+02:00</createdOn>
+      <filename>archive.zip</filename>
+      <filesize>157</filesize>
+      <digest>b91e08d0cf966d5c6ff411bd8c4cc3a2</digest>
+      <contentType>application/octet-stream</contentType>
+      <description></description>
+
+    </attachment>
+  </attachments>
+  <issueRelations>
+  </issueRelations>
+  <timeEntries viewAllowed="true" newAllowed="true">
+    <sum>1.0</sum>
+    <timeEntry editAllowed="true" id="3">
+      <hours>1.0</hours>
+
+      <activityId>9</activityId>
+      <userId>1</userId>
+      <spentOn>2007-04-21</spentOn>
+      <comments></comments>
+      <customValues>
+        <customValue customFieldId="2">125</customValue>
+        <customValue customFieldId="1">MySQL</customValue>
+      </customValues>
+    </timeEntry>
+
+  </timeEntries>
+</issue>

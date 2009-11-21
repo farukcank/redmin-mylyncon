@@ -32,7 +32,7 @@ import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.client.RedmineClientData;
 import org.svenk.redmine.core.client.RedmineProjectData;
-import org.svenk.redmine.core.model.RedmineCustomTicketField.FieldType;
+import org.svenk.redmine.core.model.RedmineCustomField.FieldType;
 import org.svenk.redmine.core.util.RedmineUtil;
 
 public class RedmineTicket {
@@ -63,6 +63,11 @@ public class RedmineTicket {
 		VERSION("version"), 
 		COMMENT("notes"), 
 //		VIEW_STATE("view_state"), 
+		
+		TIME_ENTRY_HOURS("time_entry[hours]"),
+		TIME_ENTRY_COMMENTS("time_entry[comments]"),
+		TIME_ENTRY_ACTIVITY("time_entry[activity_id]")
+		
 		;
 
 //		public static Key fromKey(String name) {
@@ -136,6 +141,8 @@ public class RedmineTicket {
 	private List<RedmineAttachment> attachments;
 	
 	private List<RedmineTicketStatus> statuses;
+
+	private List<RedmineTimeEntry> timeEntries;
 	
 	private List<Integer> availableStatus;
 
@@ -253,6 +260,17 @@ public class RedmineTicket {
 		return attachments==null ? null : attachments.toArray(new RedmineAttachment[0]);
 	}
 
+	public RedmineTimeEntry[] getTimeEntries() {
+		return timeEntries==null ? null : timeEntries.toArray(new RedmineTimeEntry[0]);
+	}
+
+	public void addTimeEntry(RedmineTimeEntry timeEntry) {
+		if (timeEntries==null) {
+			timeEntries = new ArrayList<RedmineTimeEntry>();
+		}
+		timeEntries.add(timeEntry);
+	}
+
 	public List<RedmineTicketStatus> getStatuses() {
 		return statuses==null ? null : Collections.unmodifiableList(statuses);
 	}
@@ -313,10 +331,10 @@ public class RedmineTicket {
 
 		String attributeValue = null;
 		int trackerId = Integer.parseInt(rootAttribute.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue());
-		List<RedmineCustomTicketField> ticketFields = projectData.getCustomTicketFields(trackerId); 
-		for (RedmineCustomTicketField customField :ticketFields) {
+		List<RedmineCustomField> ticketFields = projectData.getCustomTicketFields(trackerId); 
+		for (RedmineCustomField customField :ticketFields) {
 			//AttributeValue
-			TaskAttribute taskAttribute = rootAttribute.getMappedAttribute(RedmineCustomTicketField.TASK_KEY_PREFIX + customField.getId());
+			TaskAttribute taskAttribute = rootAttribute.getMappedAttribute(RedmineCustomField.TASK_KEY_PREFIX + customField.getId());
 			attributeValue = (taskAttribute==null) ? "" : taskAttribute.getValue().trim();
 			
 			if (customField.getType()==FieldType.DATE && attributeValue.length()>0) {

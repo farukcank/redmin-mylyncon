@@ -236,7 +236,7 @@ public class RedmineSearchFilter {
 			}
 		}
 		
-		public static SearchField fromCustomTicketField(RedmineCustomTicketField field) {
+		public static SearchField fromCustomTicketField(RedmineCustomField field) {
 			switch (field.getType()) {
 				case LIST: return LIST_BASED;
 				case DATE: return DATE_BASED;
@@ -294,7 +294,7 @@ public class RedmineSearchFilter {
 		this.queryField = field;
 	}
 
-	public RedmineSearchFilter(RedmineCustomTicketField field) {
+	public RedmineSearchFilter(RedmineCustomField field) {
 		this.queryField = field;
 		this.searchField = SearchField.fromCustomTicketField(field);
 	}
@@ -309,9 +309,9 @@ public class RedmineSearchFilter {
 		return operator;
 	}
 
-	public RedmineCustomTicketField getCustomTicketField() {
-		return (queryField instanceof RedmineCustomTicketField) ? 
-				(RedmineCustomTicketField)queryField : null;
+	public RedmineCustomField getCustomTicketField() {
+		return (queryField instanceof RedmineCustomField) ? 
+				(RedmineCustomField)queryField : null;
 	}
 	
 	public IRedmineQueryField getQueryField() {
@@ -454,13 +454,13 @@ public class RedmineSearchFilter {
 		return fields;
 	}
 	
-	public static List<RedmineCustomTicketField> findCustomTicketFieldsFromSearchQueryParam(RedmineProjectData projectData, String param) {
-		List<RedmineCustomTicketField> fields = new ArrayList<RedmineCustomTicketField>();
+	public static List<RedmineCustomField> findCustomTicketFieldsFromSearchQueryParam(RedmineProjectData projectData, String param) {
+		List<RedmineCustomField> fields = new ArrayList<RedmineCustomField>();
 		Matcher matcher = Pattern.compile("&fields\\[\\]=cf_(\\d+)").matcher(param);
 		while (matcher.find()) {
 			try {
 				int id = Integer.parseInt(matcher.group(1));
-				RedmineCustomTicketField customField = 
+				RedmineCustomField customField = 
 					projectData.getCustomTicketField(id);
 				if (customField != null) {
 					fields.add(customField);

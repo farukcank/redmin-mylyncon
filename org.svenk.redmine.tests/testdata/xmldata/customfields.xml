@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<customFields xmlns="http://redmin-mylyncon.sf.net/schemas/WS-API-2.6">
+  <customField id="1">
+    <name>Database</name>
+    <type>IssueCustomField</type>
+    <fieldFormat>list</fieldFormat>
+    <minLength>0</minLength>
+    <maxLength>0</maxLength>
+
+    <regexp></regexp>
+    <possibleValues>
+      <possibleValue>MySQL</possibleValue>
+      <possibleValue>PostgreSQL</possibleValue>
+      <possibleValue>Oracle</possibleValue>
+    </possibleValues>
+    <defaultValue></defaultValue>
+
+    <required>false</required>
+    <filter>true</filter>
+  </customField>
+  <customField id="2">
+    <name>Searchable field</name>
+    <type>IssueCustomField</type>
+    <fieldFormat>string</fieldFormat>
+
+    <minLength>1</minLength>
+    <maxLength>100</maxLength>
+    <regexp></regexp>
+    <possibleValues/>
+    <defaultValue>Default string</defaultValue>
+    <required>false</required>
+    <filter>false</filter>
+
+  </customField>
+  <customField id="3">
+    <name>Development status</name>
+    <type>ProjectCustomField</type>
+    <fieldFormat>list</fieldFormat>
+    <minLength>0</minLength>
+    <maxLength>0</maxLength>
+
+    <regexp></regexp>
+    <possibleValues>
+      <possibleValue>Stable</possibleValue>
+      <possibleValue>Beta</possibleValue>
+      <possibleValue>Alpha</possibleValue>
+      <possibleValue>Planning</possibleValue>
+    </possibleValues>
+
+    <defaultValue></defaultValue>
+    <required>true</required>
+    <filter>true</filter>
+  </customField>
+  <customField id="4">
+    <name>Phone number</name>
+    <type>UserCustomField</type>
+
+    <fieldFormat>string</fieldFormat>
+    <minLength>0</minLength>
+    <maxLength>0</maxLength>
+    <regexp></regexp>
+    <possibleValues/>
+    <defaultValue></defaultValue>
+    <required>false</required>
+
+    <filter>false</filter>
+  </customField>
+  <customField id="5">
+    <name>Money</name>
+    <type>UserCustomField</type>
+    <fieldFormat>float</fieldFormat>
+    <minLength>0</minLength>
+
+    <maxLength>0</maxLength>
+    <regexp></regexp>
+    <possibleValues/>
+    <defaultValue></defaultValue>
+    <required>false</required>
+    <filter>false</filter>
+  </customField>
+
+  <customField id="6">
+    <name>spentbrowser</name>
+    <type>TimeEntryCustomField</type>
+    <fieldFormat>list</fieldFormat>
+    <minLength>0</minLength>
+    <maxLength>0</maxLength>
+
+    <regexp></regexp>
+    <possibleValues>
+      <possibleValue>IE</possibleValue>
+      <possibleValue>FF</possibleValue>
+    </possibleValues>
+    <defaultValue>FF</defaultValue>
+    <required>true</required>
+
+    <filter>false</filter>
+  </customField>
+</customFields>

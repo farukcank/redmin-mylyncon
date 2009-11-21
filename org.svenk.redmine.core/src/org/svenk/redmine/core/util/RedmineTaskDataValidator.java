@@ -30,7 +30,7 @@ import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.client.RedmineClientData;
 import org.svenk.redmine.core.client.RedmineProjectData;
-import org.svenk.redmine.core.model.RedmineCustomTicketField;
+import org.svenk.redmine.core.model.RedmineCustomField;
 
 public class RedmineTaskDataValidator {
 
@@ -50,16 +50,16 @@ public class RedmineTaskDataValidator {
 	public RedmineTaskDataValidatorResult validateTaskAttribute(TaskData taskData, TaskAttribute attribute) {
 		RedmineTaskDataValidatorResult result = new RedmineTaskDataValidatorResult();
 
-		if (attribute.getId().startsWith(RedmineCustomTicketField.TASK_KEY_PREFIX)) {
+		if (attribute.getId().startsWith(RedmineCustomField.TASK_KEY_PREFIX)) {
 			TaskAttribute rootAttr = taskData.getRoot();
 			TaskAttribute projAttr = rootAttr.getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey());
 			RedmineProjectData projectData = clientData.getProjectFromName(projAttr.getValue());
 
 			int trackerId = Integer.parseInt(rootAttr.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue());
-			List<RedmineCustomTicketField> ticketFields = projectData.getCustomTicketFields(trackerId);
+			List<RedmineCustomField> ticketFields = projectData.getCustomTicketFields(trackerId);
 			
-			int fieldId = Integer.parseInt(attribute.getId().substring(RedmineCustomTicketField.TASK_KEY_PREFIX.length()));
-			for (RedmineCustomTicketField customField : ticketFields) {
+			int fieldId = Integer.parseInt(attribute.getId().substring(RedmineCustomField.TASK_KEY_PREFIX.length()));
+			for (RedmineCustomField customField : ticketFields) {
 				if (customField.getId()==fieldId) {
 					validateCustomAttribute(attribute.getValue(), customField, result);
 					break;
@@ -117,19 +117,19 @@ public class RedmineTaskDataValidator {
 		RedmineProjectData projectData = clientData.getProjectFromName(projAttr.getValue());
 
 		int trackerId = Integer.parseInt(rootAttr.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue());
-		List<RedmineCustomTicketField> ticketFields = projectData.getCustomTicketFields(trackerId);
+		List<RedmineCustomField> ticketFields = projectData.getCustomTicketFields(trackerId);
 		
 		String attributeValue = null;
 		TaskAttribute taskAttribute = null;
-		for (RedmineCustomTicketField customField : ticketFields) {
-			taskAttribute = rootAttr.getMappedAttribute(RedmineCustomTicketField.TASK_KEY_PREFIX + customField.getId());
+		for (RedmineCustomField customField : ticketFields) {
+			taskAttribute = rootAttr.getMappedAttribute(RedmineCustomField.TASK_KEY_PREFIX + customField.getId());
 			attributeValue = (taskAttribute==null) ? "" : taskAttribute.getValue().trim();
 			validateCustomAttribute(attributeValue, customField, result);
 		}
 
 	}
 	
-	protected void validateCustomAttribute(String attributeValue, RedmineCustomTicketField customField, RedmineTaskDataValidatorResult result) {
+	protected void validateCustomAttribute(String attributeValue, RedmineCustomField customField, RedmineTaskDataValidatorResult result) {
 		validateRequiredCustomAttribute(attributeValue, customField, result);
 		validateCustomAttributeType(attributeValue, customField, result);
 		validateCustomAttributeMinLength(attributeValue, customField, result);
@@ -137,13 +137,13 @@ public class RedmineTaskDataValidator {
 		validateCustomAttributePattern(attributeValue, customField, result);
 	}
 	
-	protected void validateRequiredCustomAttribute(String value, RedmineCustomTicketField customField, RedmineTaskDataValidatorResult result) {
+	protected void validateRequiredCustomAttribute(String value, RedmineCustomField customField, RedmineTaskDataValidatorResult result) {
 		if (customField.isRequired() && (value==null || value.length()<1)) {
 			result.addErrorMessage(customField.getName() + " is required");
 		}
 	}
 	
-	protected void validateCustomAttributeMinLength(String value, RedmineCustomTicketField customField, RedmineTaskDataValidatorResult result) {
+	protected void validateCustomAttributeMinLength(String value, RedmineCustomField customField, RedmineTaskDataValidatorResult result) {
 		int min = customField.getMin();
 		if (min>0 && value.length()<min) {
 			StringBuilder sb = new StringBuilder(customField.getName());
@@ -152,7 +152,7 @@ public class RedmineTaskDataValidator {
 		}
 	}
 	
-	protected void validateCustomAttributeMaxLength(String value, RedmineCustomTicketField customField, RedmineTaskDataValidatorResult result) {
+	protected void validateCustomAttributeMaxLength(String value, RedmineCustomField customField, RedmineTaskDataValidatorResult result) {
 		int max = customField.getMax();
 		if (max>0 && value.length()>max) {
 			StringBuilder sb = new StringBuilder(customField.getName());
@@ -161,7 +161,7 @@ public class RedmineTaskDataValidator {
 		}
 	}
 	
-	protected void validateCustomAttributePattern(String value, RedmineCustomTicketField customField, RedmineTaskDataValidatorResult result) {
+	protected void validateCustomAttributePattern(String value, RedmineCustomField customField, RedmineTaskDataValidatorResult result) {
 		String pattern = customField.getValidationRegex();
 		if (pattern!=null && pattern.length()>0 && !Pattern.matches(pattern, value)) {
 			StringBuilder sb = new StringBuilder(customField.getName());
@@ -170,7 +170,7 @@ public class RedmineTaskDataValidator {
 		}
 	}
 	
-	protected void validateCustomAttributeType(String value, RedmineCustomTicketField customField, RedmineTaskDataValidatorResult result) {
+	protected void validateCustomAttributeType(String value, RedmineCustomField customField, RedmineTaskDataValidatorResult result) {
 		if (value!=null && value.length()>0)  {
 			try {
 				switch (customField.getType()) {

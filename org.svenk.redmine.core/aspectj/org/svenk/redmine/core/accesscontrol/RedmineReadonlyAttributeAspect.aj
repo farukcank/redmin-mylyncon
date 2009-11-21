@@ -30,7 +30,7 @@ import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.RedmineTaskDataHandler;
 import org.svenk.redmine.core.client.RedmineProjectData;
-import org.svenk.redmine.core.model.RedmineCustomTicketField;
+import org.svenk.redmine.core.model.RedmineCustomField;
 import org.svenk.redmine.core.model.RedmineTicket;
 
 public aspect RedmineReadonlyAttributeAspect {
@@ -113,9 +113,9 @@ public aspect RedmineReadonlyAttributeAspect {
 
 	/* Custom Attributes */
 	pointcut createCustomAttribute(TaskData taskData) :
-		call(private static TaskAttribute RedmineTaskDataHandler.createAttribute(TaskData, RedmineCustomTicketField))
+		call(private static TaskAttribute RedmineTaskDataHandler.createAttribute(TaskData, RedmineCustomField))
 		&& withincode(private static void RedmineTaskDataHandler.createCustomAttributes(..))
-		&& args(taskData, RedmineCustomTicketField);
+		&& args(taskData, RedmineCustomField);
 	
 	after(TaskData taskData) returning(TaskAttribute attr) : createCustomAttribute(taskData) {
 		TaskAttribute referenceAttribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.CATEGORY.getRedmineKey());
