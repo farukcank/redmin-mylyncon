@@ -32,11 +32,13 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.mylyn.commons.core.StatusHandler;
 import org.eclipse.mylyn.commons.net.Policy;
 import org.eclipse.mylyn.tasks.core.AbstractRepositoryConnector;
 import org.eclipse.mylyn.tasks.core.IRepositoryQuery;
@@ -194,13 +196,13 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 		boolean isStale = super.isRepositoryConfigurationStale(repository, monitor);
 		
 		if (!isStale) {
-			IRedmineClient client;
 			try {
+				IRedmineClient client;
 				client = clientManager.getRedmineClient(repository);
+				isStale = client.getClientData().needsUpdate();
 			} catch (RedmineException e) {
 				throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
 			}
-			isStale = client.getClientData().needsUpdate();
 		}
 		
 		return isStale;
@@ -228,42 +230,42 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 		task.setUrl(getTaskUrl(repository.getUrl(), task.getTaskId()));
 		
 		RedmineClientData clientData = getClientManager().getClientData(repository);
-		assert clientData != null;
+		Assert.isNotNull(clientData);
 
 		//Set CompletionDate, if Closed-Status
 		TaskAttribute attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.STATUS.getRedmineKey());
-		RedmineTicketStatus status = clientData.getStatus(Integer.parseInt(attribute.getValue()));
-		if (status.isClosed()) {
-			Date date = task.getCompletionDate();
-			if (date==null) {
-				attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.DATE_UPDATED.getRedmineKey());
-				if((date=RedmineUtil.parseDate(attribute.getValue()))==null) {
-					date = new Date(0);
+		try {
+			RedmineTicketStatus status = clientData.getStatus(Integer.parseInt(attribute.getValue()));
+			if (status.isClosed()) {
+				Date date = task.getCompletionDate();
+				if (date==null) {
+					attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.DATE_UPDATED.getRedmineKey());
+					if((date=RedmineUtil.parseDate(attribute.getValue()))==null) {
+						date = new Date(0);
+					}
 				}
+				task.setCompletionDate(date);
+			} else {
+				task.setCompletionDate(null);
 			}
-			task.setCompletionDate(date);
-		} else {
-			task.setCompletionDate(null);
+		} catch (NumberFormatException e) {
+			IStatus status = RedmineCorePlugin.toStatus(e, repository, "INVALID_STATUS_ID {0}", attribute.getValue());
+			StatusHandler.fail(status);
+		} catch (NullPointerException e) {
+			//TODO refresh RepositoryConfiguration
+			IStatus status = RedmineCorePlugin.toStatus(e, repository, "INCOMPLETE_REPOSITORY_CONFIGURATION");
+			StatusHandler.log(status);
 		}
 		
-//		attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.DATE_DUE.getRedmineKey());
-//		if(attribute!=null) {
-//			task.setDueDate(RedmineUtil.parseDate(attribute.getValue()));
-//		}
-		
-//			Date date = task.getModificationDate();
-//			task.setAttribute(TASK_KEY_UPDATE_DATE, (date != null) ? TracUtil.toTracTime(date) + "" : null);
-			
-		String projectName = taskData.getRoot().getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey()).getValue();
-		int projectId = clientData.getProjectFromName(projectName).getProject().getValue();
-		task.setAttribute(TaskAttribute.PRODUCT, ""+projectId);
-
-			//			RedmineProjectData projectData = getClientManager().getRedmineClient(repository).getClientData().getProjectFromId(Integer.parseInt(projectId));
-//			boolean issueEditAllowed = projectData.getProject().isIssueEditAllowed();
-//			
-//			int allowedStatusCount = taskData.getRoot().getMappedAttribute(RedmineAttribute.STATUS.getRedmineKey()).getOptions().size();
-			
-			
+		try {
+			String projectName = taskData.getRoot().getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey()).getValue();
+			int projectId = clientData.getProjectFromName(projectName).getProject().getValue();
+			task.setAttribute(TaskAttribute.PRODUCT, ""+projectId);
+		} catch (NullPointerException e) {
+			//TODO refresh RepositoryConfiguration
+			IStatus status = RedmineCorePlugin.toStatus(e, repository, "INCOMPLETE_REPOSITORY_CONFIGURATION");
+			StatusHandler.log(status);
+		}
 
 	}
 
@@ -276,18 +278,22 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 			Collection<TaskRelation> relations = 
 				new ArrayList<TaskRelation>(options.size());
 			
-			int taskId = Integer.parseInt(taskData.getTaskId());
-			for(Entry<String, String> option : options.entrySet()) {
-				RedmineTicketRelation relation = 
-					RedmineTicketRelation.fromAttributeName(
-							Integer.parseInt(option.getKey()), option.getValue());
-				
-				if (relation!=null && relation.getType()==RelationType.BLOCKS) {
-					TaskRelation taskRelation = relation.getFromTicket()==taskId 
+			try {
+				int taskId = Integer.parseInt(taskData.getTaskId());
+				for(Entry<String, String> option : options.entrySet()) {
+					RedmineTicketRelation relation = 
+						RedmineTicketRelation.fromAttributeName(Integer.parseInt(option.getKey()), option.getValue());
+					
+					if (relation!=null && relation.getType()==RelationType.BLOCKS) {
+						TaskRelation taskRelation = relation.getFromTicket()==taskId 
 						? TaskRelation.parentTask("" + relation.getToTicket()) 
-						: TaskRelation.subtask("" + relation.getFromTicket());
-					relations.add(taskRelation);
+								: TaskRelation.subtask("" + relation.getFromTicket());
+						relations.add(taskRelation);
+					}
 				}
+			} catch (NumberFormatException e) {
+				IStatus status = RedmineCorePlugin.toStatus(e, null, "INVALID_RELATION_ID_FOR_TASK {0}", taskData.getTaskId());
+				StatusHandler.log(status);
 			}
 			return relations;
 		}
@@ -330,10 +336,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 				try {
 					projectId = Integer.parseInt(task.getAttribute(TaskAttribute.PRODUCT));
 				} catch (NumberFormatException e) {
-					RedmineException exc = new RedmineException("Bug: Task without ProductId", e);
-					IStatus status = RedmineCorePlugin.toStatus(exc, repository);
-					RedmineCorePlugin.getDefault().logException(status, exc);
-					throw new CoreException(status);
+					throw new CoreException(RedmineCorePlugin.toStatus(e, repository, "INVALID_PROJECT_ID {0}", task.getAttribute(TaskAttribute.PRODUCT)));
 				}
 				RedmineProjectData projectData = client.getClientData().getProjectFromId(projectId);
 				//projectData kann Null sein, wenn zuvor noch keine Aktion ausgeführt wurde
@@ -346,16 +349,19 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 					//Geaenderte Tickets markieren
 					List<Integer> changed = changedByProject.get(projectId);
 					if (changed != null) {
-						if (changed.contains(Integer.valueOf(task.getTaskId()))) {
-							session.markStale(task);
+						try {
+							if (changed.contains(Integer.valueOf(task.getTaskId()))) {
+								session.markStale(task);
+							}
+						} catch (NumberFormatException e) {
+							throw new CoreException(RedmineCorePlugin.toStatus(e, repository, "INVALID_TASK_ID {0}", (task.getTaskId())));
 						}
 					}
 				}
 			}
 			
 		} catch (RedmineException e) {
-			throw new CoreException(new Status(IStatus.ERROR, RedmineCorePlugin.PLUGIN_ID,
-					e.getMessage(), e));
+			throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
 		} finally {
 			monitor.done();
 		}
@@ -390,8 +396,20 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 						TaskData data = taskDataHandler.createTaskDataFromTicket(client, repository, ticket, monitor);
 						resultCollector.accept(data);
 					}
+				} catch(RedmineException e) {
+					IStatus status = RedmineCorePlugin.toStatus(e, repository);
+					StatusHandler.log(status);
+					return status;
+				} catch(RuntimeException e) {
+					IStatus status = RedmineCorePlugin.toStatus(e, repository);
+					StatusHandler.log(status);
+					return status;
+				} catch(CoreException e) {
+					return e.getStatus();
 				} catch (Throwable e) {
-					return RedmineCorePlugin.toStatus(e, repository);
+					IStatus status = RedmineCorePlugin.toStatus(e, repository);
+					StatusHandler.log(status);
+					return status;
 				}
 		
 				return Status.OK_STATUS;

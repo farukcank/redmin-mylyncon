@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.mylyn.commons.core.StatusHandler;
+import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.client.RedmineProjectData;
 
 public class RedmineSearchFilter {
@@ -413,7 +415,9 @@ public class RedmineSearchFilter {
 				}
 				}
 			}
-		} catch (UnsupportedEncodingException ex) {
+		} catch (NumberFormatException e) {
+			StatusHandler.log(RedmineCorePlugin.toStatus(e, null, "INVALID_SEARCHFIELD_VALUE"));
+		} catch (UnsupportedEncodingException e) {
 			sb.setLength(length);
 		}
 		return sb;

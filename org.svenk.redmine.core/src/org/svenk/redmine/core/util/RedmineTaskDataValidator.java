@@ -25,9 +25,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.mylyn.commons.core.StatusHandler;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.svenk.redmine.core.RedmineAttribute;
+import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.client.RedmineClientData;
 import org.svenk.redmine.core.client.RedmineProjectData;
 import org.svenk.redmine.core.model.RedmineCustomField;
@@ -55,15 +58,36 @@ public class RedmineTaskDataValidator {
 			TaskAttribute projAttr = rootAttr.getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey());
 			RedmineProjectData projectData = clientData.getProjectFromName(projAttr.getValue());
 
-			int trackerId = Integer.parseInt(rootAttr.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue());
-			List<RedmineCustomField> ticketFields = projectData.getCustomTicketFields(trackerId);
-			
-			int fieldId = Integer.parseInt(attribute.getId().substring(RedmineCustomField.TASK_KEY_PREFIX.length()));
-			for (RedmineCustomField customField : ticketFields) {
-				if (customField.getId()==fieldId) {
-					validateCustomAttribute(attribute.getValue(), customField, result);
-					break;
+			String valStr = null;
+			try {
+				valStr = rootAttr.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue();
+				List<RedmineCustomField> ticketFields = projectData.getCustomTicketFields(Integer.parseInt(valStr));
+				
+				valStr = attribute.getId().substring(RedmineCustomField.TASK_KEY_PREFIX.length());
+				
+				try {
+					int fieldId = Integer.parseInt(valStr);
+					for (RedmineCustomField customField : ticketFields) {
+						if (customField.getId()==fieldId) {
+							validateCustomAttribute(attribute.getValue(), customField, result);
+							break;
+						}
+					}
+				} catch(NumberFormatException e1) {
+					IStatus status = RedmineCorePlugin.toStatus(e1, null, "INVALID_CUSTOMFIELD_ID {0}", valStr);
+					StatusHandler.log(status);
+					result.addErrorMessage(status.getMessage());
 				}
+				
+			} catch (NumberFormatException e) {
+				IStatus status = RedmineCorePlugin.toStatus(e, null, "INVALID_TRACKER_ID {0}", valStr);
+				StatusHandler.log(status);
+				result.addErrorMessage(status.getMessage());
+			} catch (NullPointerException e) {
+				//TODO refresh RepositoryConfiguration
+				IStatus status = RedmineCorePlugin.toStatus(e, null, "INCOMPLETE_REPOSITORY_CONFIGURATION");
+				StatusHandler.log(status);
+				result.addErrorMessage(status.getMessage());
 			}
 			
 		} else {
@@ -116,15 +140,27 @@ public class RedmineTaskDataValidator {
 		TaskAttribute projAttr = rootAttr.getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey());
 		RedmineProjectData projectData = clientData.getProjectFromName(projAttr.getValue());
 
-		int trackerId = Integer.parseInt(rootAttr.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue());
-		List<RedmineCustomField> ticketFields = projectData.getCustomTicketFields(trackerId);
-		
-		String attributeValue = null;
-		TaskAttribute taskAttribute = null;
-		for (RedmineCustomField customField : ticketFields) {
-			taskAttribute = rootAttr.getMappedAttribute(RedmineCustomField.TASK_KEY_PREFIX + customField.getId());
-			attributeValue = (taskAttribute==null) ? "" : taskAttribute.getValue().trim();
-			validateCustomAttribute(attributeValue, customField, result);
+		String valStr = null;
+		try {
+			valStr = rootAttr.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue();
+			List<RedmineCustomField> ticketFields = projectData.getCustomTicketFields(Integer.parseInt(valStr));
+			
+			String attributeValue = null;
+			TaskAttribute taskAttribute = null;
+			for (RedmineCustomField customField : ticketFields) {
+				taskAttribute = rootAttr.getMappedAttribute(RedmineCustomField.TASK_KEY_PREFIX + customField.getId());
+				attributeValue = (taskAttribute==null) ? "" : taskAttribute.getValue().trim();
+				validateCustomAttribute(attributeValue, customField, result);
+			}
+		} catch (NumberFormatException e) {
+			IStatus status = RedmineCorePlugin.toStatus(e, null, "INVALID_TRACKER_ID {0}", valStr);
+			StatusHandler.log(status);
+			result.addErrorMessage(status.getMessage());
+		} catch (NullPointerException e) {
+			//TODO refresh RepositoryConfiguration
+			IStatus status = RedmineCorePlugin.toStatus(e, null, "INCOMPLETE_REPOSITORY_CONFIGURATION");
+			StatusHandler.log(status);
+			result.addErrorMessage(status.getMessage());
 		}
 
 	}

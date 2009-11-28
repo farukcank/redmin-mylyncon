@@ -20,6 +20,7 @@
  *******************************************************************************/
 package org.svenk.redmine.ui.wizard;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.mylyn.tasks.core.ITaskMapping;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
@@ -53,7 +54,7 @@ public class NewRedmineTaskWizard extends NewTaskWizard implements INewWizard {
 		
 		try {
 			final IRedmineClient client = connector.getClientManager().getRedmineClient(getTaskRepository());
-			assert client!=null;
+			Assert.isNotNull(client);
 			
 			projectPage = new RedmineProjectPage(client, getTaskRepository());
 			trackerPage = new RedmineTrackerPage(client);

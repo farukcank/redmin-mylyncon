@@ -23,6 +23,10 @@ package org.svenk.redmine.core.model;
 
 import java.util.StringTokenizer;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.mylyn.commons.core.StatusHandler;
+import org.svenk.redmine.core.RedmineCorePlugin;
+
 public class RedmineTicketRelation extends RedmineTicketAttribute {
 
 	private static final long serialVersionUID = 3L;
@@ -68,18 +72,22 @@ public class RedmineTicketRelation extends RedmineTicketAttribute {
 		int toTicket = 0;
 		String type = null;
 		StringTokenizer tok = new StringTokenizer(value, ";");
+		String nextToken = null;
 		try {
 			while(tok.hasMoreTokens()) {
+				nextToken = tok.nextToken();
 				if (fromTicket==0) {
-					fromTicket=Integer.parseInt(tok.nextToken());
+					fromTicket=Integer.parseInt(nextToken);
 				} else if (toTicket==0) {
-					toTicket=Integer.parseInt(tok.nextToken());
+					toTicket=Integer.parseInt(nextToken);
 				} else if (type==null) {
-					type=tok.nextToken();
+					type=nextToken;
 					break;
 				}
 			}
-		} catch (NumberFormatException ex) {
+		} catch (NumberFormatException e) {
+			IStatus status = RedmineCorePlugin.toStatus(e, null, "INVALID_TASK_ID {0}", nextToken);
+			StatusHandler.log(status);
 		} finally {
 			if (type!=null) {
 				relation = new RedmineTicketRelation(id, fromTicket, toTicket, type);

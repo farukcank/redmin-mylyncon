@@ -55,10 +55,12 @@ public class RedmineTaskAttachmentHandler extends AbstractTaskAttachmentHandler 
 			TaskAttribute attachmentAttribute, IProgressMonitor monitor)
 			throws CoreException {
 		
+		TaskAttachmentMapper attachment = TaskAttachmentMapper.createFrom(attachmentAttribute);
 		try {
 			IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
-			TaskAttachmentMapper attachment = TaskAttachmentMapper.createFrom(attachmentAttribute);
 			return client.getAttachmentContent(Integer.parseInt(attachment.getAttachmentId()), monitor);
+		} catch (NumberFormatException e) {
+			throw new CoreException(RedmineCorePlugin.toStatus(e, repository, "INVALID_ATTACHMENT_ID {0}", ""+attachment.getAttachmentId()));
 		} catch (RedmineException e) {
 			throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
 		}
@@ -85,9 +87,8 @@ public class RedmineTaskAttachmentHandler extends AbstractTaskAttachmentHandler 
 		try {
 			IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
 			client.uploadAttachment(Integer.parseInt(task.getTaskId()), fileName, comment, description, source, monitor);
-//		} catch (NumberFormatException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
+		} catch (NumberFormatException e) {
+			throw new CoreException(RedmineCorePlugin.toStatus(e, repository, "INVALID_TASK_ID {0}", task.getTaskId()));
 		} catch (RedmineException e) {
 			throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
 		}

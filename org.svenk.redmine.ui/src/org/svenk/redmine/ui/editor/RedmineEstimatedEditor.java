@@ -21,6 +21,8 @@
 
 package org.svenk.redmine.ui.editor;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.mylyn.commons.core.StatusHandler;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskDataModel;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractAttributeEditor;
@@ -38,6 +40,7 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ImageHyperlink;
+import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.ui.Images;
 
 public class RedmineEstimatedEditor extends AbstractAttributeEditor {
@@ -105,7 +108,8 @@ public class RedmineEstimatedEditor extends AbstractAttributeEditor {
 			estimatedHours = Float.valueOf(getTaskAttribute().getValue());
 			estimatedHours *= 1e2;
 		} catch (NumberFormatException e) {
-			; //Nothing todo
+			IStatus status = RedmineCorePlugin.toStatus(e, null, "INVALID_HOURS_FORMAT {0}", getTaskAttribute().getValue());
+			StatusHandler.log(status);
 		}
 		return (int)estimatedHours;
 	}

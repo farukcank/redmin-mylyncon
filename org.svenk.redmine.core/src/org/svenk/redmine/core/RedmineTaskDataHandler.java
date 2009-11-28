@@ -25,11 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.mylyn.commons.core.StatusHandler;
 import org.eclipse.mylyn.commons.net.Policy;
 import org.eclipse.mylyn.tasks.core.ITaskMapping;
 import org.eclipse.mylyn.tasks.core.RepositoryResponse;
@@ -70,13 +71,14 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		return new RedmineAttributeMapper(taskRepository);
 	}
 
-	public TaskData getTaskData(TaskRepository repository, String taskId, IProgressMonitor monitor)
-	throws CoreException {
+	public TaskData getTaskData(TaskRepository repository, String taskId, IProgressMonitor monitor) throws CoreException {
 		monitor = Policy.monitorFor(monitor);
 		try {
 			int id = Integer.parseInt(taskId);
 			monitor.beginTask("Task Download", IProgressMonitor.UNKNOWN);
 			return downloadTaskData(repository, id, monitor);
+		} catch(NumberFormatException e) {
+			throw new CoreException(RedmineCorePlugin.toStatus(e, repository, "INVALID_TASK_ID {0}", taskId));
 		} finally {
 			monitor.done();
 		}
@@ -92,7 +94,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 			client.updateAttributes(false, monitor);
 			ticket = client.getTicket(id, monitor);
 		} catch (OperationCanceledException e) {
-			throw e;
+			throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
 		} catch (RedmineException e) {
 			throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
 		}
@@ -102,11 +104,16 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 	public TaskData createTaskDataFromTicket(IRedmineClient client, TaskRepository repository, RedmineTicket ticket,
 			IProgressMonitor monitor) throws CoreException {
 
-		TaskData taskData = new TaskData(getAttributeMapper(repository), RedmineCorePlugin.REPOSITORY_KIND,
-				repository.getRepositoryUrl(), ticket.getId() + "");
-		createDefaultAttributes(taskData, client, ticket);
-		updateTaskData(repository, taskData, client, ticket);
-		return taskData;
+		try {
+			TaskData taskData = new TaskData(getAttributeMapper(repository), RedmineCorePlugin.REPOSITORY_KIND,
+					repository.getRepositoryUrl(), ticket.getId() + "");
+			createDefaultAttributes(taskData, client, ticket);
+			updateTaskData(repository, taskData, client, ticket);
+			return taskData;
+		} catch (RedmineException e) {
+			IStatus status = RedmineCorePlugin.toStatus(e, repository);
+			throw new CoreException(status);
+		}
 	}
 
 	public static Set<TaskAttribute> updateTaskData(TaskRepository repository, TaskData data,
@@ -125,9 +132,18 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 			taskAttribute.setValue(RedmineUtil.parseDate(ticket.getLastChanged()));
 			changedAttributes.add(taskAttribute);
 		}
+
 		
-		int projectId = Integer.parseInt(ticket.getValues().get(Key.PROJECT.getKey()));
-		RedmineProjectData projectData = client.getClientData().getProjectFromId(projectId);
+		String projectId = ticket.getValues().get(Key.PROJECT.getKey());
+		String projectName = null;
+		try {
+			RedmineProjectData projectData = client.getClientData().getProjectFromId(Integer.parseInt(projectId));
+			projectName = projectData.getProject().getName();
+		} catch (NumberFormatException e) {
+			throw new CoreException(RedmineCorePlugin.toStatus(e, repository, "INVALID_PROJECT_ID {0}", projectId));
+		} catch (NullPointerException e) {
+			throw new CoreException(RedmineCorePlugin.toStatus(e, repository, "UNKNOWN_PROJECT_ID {0}", projectId));
+		}
 
 		Map<String, String> valueByKey = ticket.getValues();
 		for (String key : valueByKey.keySet()) {
@@ -135,11 +151,13 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 
 			if(taskAttribute!=null) {
 				switch(RedmineAttribute.fromRedmineKey(key)) {
-				case PROJECT : taskAttribute.setValue(projectData.getProject().getName()); break;
+				case PROJECT : taskAttribute.setValue(projectName); break;
 				case ASSIGNED_TO:
 					try {
 						taskAttribute.setValue(String.valueOf(Integer.parseInt(valueByKey.get(key))));
-					} catch (NumberFormatException e) {}
+					} catch (NumberFormatException e) {
+						throw new CoreException(RedmineCorePlugin.toStatus(e, repository, "INVALID_MEMBER_ID {0}", valueByKey.get(key)));
+					}
 					break;
 				default : taskAttribute.setValue(valueByKey.get(key));
 				}
@@ -223,7 +241,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 				ticket.putBuiltinValue(RedmineTicket.Key.TRACKER, taskData.getRoot().getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue());
 				
 				int taskId = client.createTicket(ticket, monitor);
-				assert taskId>0;
+				Assert.isTrue(taskId>0);
 
 				return new RepositoryResponse(ResponseKind.TASK_CREATED, "" + taskId);
 				
@@ -234,8 +252,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 				return new RepositoryResponse(ResponseKind.TASK_UPDATED, "" + ticket.getId());
 			}
 		} catch (RedmineException e) {
-			throw new CoreException(new Status(IStatus.ERROR, RedmineCorePlugin.PLUGIN_ID,
-			e.getMessage(), e));
+			throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
 		}
 
 		
@@ -253,7 +270,12 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 			
 			//Input from wizard
 			RedmineProjectData projectData = client.getClientData().getProjectFromName(initializationData.getProduct());
-			int trackerId = Integer.parseInt(((IRedmineTaskMapping)initializationData).getTracker());
+			int trackerId = 0;
+			try {
+				trackerId = Integer.parseInt(((IRedmineTaskMapping)initializationData).getTracker());
+			} catch (NumberFormatException e) {
+				throw new CoreException(RedmineCorePlugin.toStatus(e, repository, "INVALID_TRACKER_ID {0}", ((IRedmineTaskMapping)initializationData).getTracker()));
+			}
 
 			//Initialize new ticket
 			RedmineTicket ticket = new RedmineTicket();
@@ -296,11 +318,20 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		}
 	}
 	
-	private static void createDefaultAttributes(TaskData data, IRedmineClient client, RedmineTicket ticket) {
-		int projectId = Integer.parseInt(ticket.getValues().get(Key.PROJECT.getKey()));
-		RedmineProjectData projectData = client.getClientData().getProjectFromId(projectId);
-		createDefaultAttributes(data, client, ticket, projectData);
-		createCustomAttributes(data, client, ticket, projectData);
+	private static void createDefaultAttributes(TaskData data, IRedmineClient client, RedmineTicket ticket) throws RedmineException {
+		try {
+			int projectId = Integer.parseInt(ticket.getValues().get(Key.PROJECT.getKey()));
+			RedmineProjectData projectData = client.getClientData().getProjectFromId(projectId);
+			createDefaultAttributes(data, client, ticket, projectData);
+			createCustomAttributes(data, client, ticket, projectData);
+		} catch (NumberFormatException e) {
+			throw new RedmineException("INVALID_PROJECT_ID", e);
+		} catch (NullPointerException e) {
+			//TODO refresh RepositoryConfiguration
+			IStatus status = RedmineCorePlugin.toStatus(e, null, "INCOMPLETE_REPOSITORY_CONFIGURATION");
+			StatusHandler.log(status);
+			throw new RedmineException(status.getMessage(), e);
+		}
 	}
 	
 	private static void createDefaultAttributes(TaskData data, IRedmineClient client, RedmineTicket ticket, RedmineProjectData projectData) {
@@ -360,7 +391,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 				attr.putOption("", "");
 			}
 			for (Object value : values) {
-				assert value instanceof RedmineTicketAttribute;
+				Assert.isTrue(value instanceof RedmineTicketAttribute);
 				if (value instanceof RedmineMember && !((RedmineMember)value).isAssignable()) { 
 					continue;
 				}
@@ -373,17 +404,21 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		return attr;
 	}
 
-	private static void createCustomAttributes(TaskData data, IRedmineClient client, RedmineTicket ticket, RedmineProjectData projectData) {
-		List<RedmineCustomField> customFields = projectData.getCustomTicketFields(Integer.parseInt(ticket.getValue(Key.TRACKER)));
-		for (RedmineCustomField customField : customFields) {
-			TaskAttribute attribute = createAttribute(data, customField);
-			if (customField.getType()==FieldType.LIST) {
-				attribute.putOption("", "");
-				for (String option : customField.getListValues()) {
-					attribute.putOption(option, option);
+	private static void createCustomAttributes(TaskData data, IRedmineClient client, RedmineTicket ticket, RedmineProjectData projectData) throws RedmineException {
+		try {
+			List<RedmineCustomField> customFields = projectData.getCustomTicketFields(Integer.parseInt(ticket.getValue(Key.TRACKER)));
+			for (RedmineCustomField customField : customFields) {
+				TaskAttribute attribute = createAttribute(data, customField);
+				if (customField.getType()==FieldType.LIST) {
+					attribute.putOption("", "");
+					for (String option : customField.getListValues()) {
+						attribute.putOption(option, option);
+					}
 				}
 			}
-		}
+		} catch (NumberFormatException e) {
+			throw new RedmineException("INVALID_TRACKER_ID", e);
+		};
 	}
 	
 	private static TaskAttribute createAttribute(TaskData data, RedmineCustomField customField) {

@@ -20,8 +20,8 @@
  *******************************************************************************/
 package org.svenk.redmine.core.qualitycontrol;
 
-import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.IRedmineClient;
+import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.exception.RedmineAuthenticationException;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
@@ -29,8 +29,8 @@ import org.svenk.redmine.core.exception.RedmineRemoteException;
 public aspect RedmineClientExceptionAspect {
 
 	pointcut catchRuntime() : 
-		execution(public * IRedmineClient+.*(..) throws RedmineException); 
-
+		execution(public * IRedmineClient+.*(..) throws RedmineException);
+	
 	Object around() throws RedmineException : catchRuntime() {
 		try {
 			return proceed();
@@ -44,4 +44,5 @@ public aspect RedmineClientExceptionAspect {
 			throw new RedmineException(e.getMessage(), e);
 		}
 	}
+
 }

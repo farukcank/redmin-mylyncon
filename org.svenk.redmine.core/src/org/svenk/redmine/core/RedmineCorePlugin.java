@@ -82,7 +82,18 @@ public class RedmineCorePlugin extends Plugin {
 	}
 
 	public static IStatus toStatus(Throwable e, TaskRepository repository) {
-		return new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage());
+		return new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e);
+	}
+
+	public static IStatus toStatus(Throwable e, TaskRepository repository, String message, String... params) {
+		for (int i = 0; i < params.length; i++) {
+			message.replace("{"+i+"}", params[i]==null ? "<NULL>" : params[i]);
+		}
+		
+		//unused placeholders
+		message = message.replaceAll("\\{\\d+\\}", "");
+		
+		return new Status(IStatus.ERROR, PLUGIN_ID, message, e);
 	}
 
 	public void logException(IStatus status, Exception exception) {

@@ -25,6 +25,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.mylyn.commons.core.StatusHandler;
+import org.svenk.redmine.core.RedmineCorePlugin;
+
 public class RedmineUtil {
 	public static Date parseDate(String time) {
 		Date date = null;
@@ -36,7 +40,8 @@ public class RedmineUtil {
 				try {
 					date = dateFormat.parse(time);
 				} catch (ParseException e1) {
-					//nothing to do
+					IStatus status = RedmineCorePlugin.toStatus(e1, null, "INVALID_DATE_FORMAT", time);
+					StatusHandler.log(status);
 				}
 			}
 		}

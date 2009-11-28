@@ -27,11 +27,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.mylyn.commons.core.StatusHandler;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.svenk.redmine.core.RedmineAttribute;
+import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.client.RedmineClientData;
 import org.svenk.redmine.core.client.RedmineProjectData;
+import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.RedmineCustomField.FieldType;
 import org.svenk.redmine.core.util.RedmineUtil;
 
@@ -215,9 +219,11 @@ public class RedmineTicket {
 		return valueByKey.get(key);
 	}
 	
-	public int getIntValue(Key key) {
-		return Integer.parseInt(getValue(key));
-	}
+	//TODO unused
+//	public int getIntValue(Key key) {
+//		//TODO handle NumberFormatException
+//		return Integer.parseInt(getValue(key));
+//	}
 	
 	public boolean isClosed() {
 		String statusId = valueByKey.get(Key.STATUS);
@@ -291,10 +297,18 @@ public class RedmineTicket {
 		return availableStatus;
 	}
 	
-	public static RedmineTicket fromTaskData(TaskData taskData, RedmineClientData clientData) {
-		RedmineTicket ticket = taskData.getTaskId().equals("") 
+	public static RedmineTicket fromTaskData(TaskData taskData, RedmineClientData clientData) throws RedmineException {
+		RedmineTicket ticket =null;
+		
+		try {
+			ticket = taskData.getTaskId().equals("") 
 			? new RedmineTicket() 
 			: new RedmineTicket(Integer.parseInt(taskData.getTaskId()));
+		} catch (NumberFormatException e) {
+			IStatus status = RedmineCorePlugin.toStatus(e, null, "INVALID_TASK_ID {0}", taskData.getTaskId());
+			StatusHandler.log(status);
+			throw new RedmineException(status.getMessage(), e);
+		}
 		
 		Map<String, TaskAttribute> attributeValues = taskData.getRoot().getAttributes();
 		
@@ -323,26 +337,33 @@ public class RedmineTicket {
 		return ticket;
 	}
 	
-	private void completeCustomFields(TaskData taskData, RedmineClientData clientData) {
+	private void completeCustomFields(TaskData taskData, RedmineClientData clientData) throws RedmineException {
 		TaskAttribute rootAttribute = taskData.getRoot();
 		
 		TaskAttribute projAttr = rootAttribute.getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey());
 		RedmineProjectData projectData = clientData.getProjectFromName(projAttr.getValue());
 
 		String attributeValue = null;
-		int trackerId = Integer.parseInt(rootAttribute.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue());
-		List<RedmineCustomField> ticketFields = projectData.getCustomTicketFields(trackerId); 
-		for (RedmineCustomField customField :ticketFields) {
-			//AttributeValue
-			TaskAttribute taskAttribute = rootAttribute.getMappedAttribute(RedmineCustomField.TASK_KEY_PREFIX + customField.getId());
-			attributeValue = (taskAttribute==null) ? "" : taskAttribute.getValue().trim();
-			
-			if (customField.getType()==FieldType.DATE && attributeValue.length()>0) {
-				attributeValue = RedmineUtil.toFormatedRedmineDate(RedmineUtil.parseDate(attributeValue));
-			} else if (customField.getType()==FieldType.BOOL && attributeValue.length()>0) {
-				attributeValue = Boolean.parseBoolean(attributeValue) ? "1" : "0";
+		String valStr = rootAttribute.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue();
+		try {
+			int trackerId = Integer.parseInt(valStr);
+			List<RedmineCustomField> ticketFields = projectData.getCustomTicketFields(trackerId); 
+			for (RedmineCustomField customField :ticketFields) {
+				//AttributeValue
+				TaskAttribute taskAttribute = rootAttribute.getMappedAttribute(RedmineCustomField.TASK_KEY_PREFIX + customField.getId());
+				attributeValue = (taskAttribute==null) ? "" : taskAttribute.getValue().trim();
+				
+				if (customField.getType()==FieldType.DATE && attributeValue.length()>0) {
+					attributeValue = RedmineUtil.toFormatedRedmineDate(RedmineUtil.parseDate(attributeValue));
+				} else if (customField.getType()==FieldType.BOOL && attributeValue.length()>0) {
+					attributeValue = Boolean.parseBoolean(attributeValue) ? "1" : "0";
+				}
+				this.putCustomFieldValue(Integer.valueOf(customField.getId()), attributeValue);
 			}
-			this.putCustomFieldValue(Integer.valueOf(customField.getId()), attributeValue);
+		} catch (NumberFormatException e) {
+			IStatus status = RedmineCorePlugin.toStatus(e, null, "INVALID_TRACKER_ID {0}", valStr);
+			StatusHandler.log(status);
+			throw new RedmineException(status.getMessage(), e);
 		}
 	}
 

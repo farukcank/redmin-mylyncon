@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -135,7 +136,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		try {
 			client = connector.getClientManager().getRedmineClient(getTaskRepository());
 		} catch (RedmineException e) {}
-		assert client!=null;
+		Assert.isNotNull(client);
 
 		setTitle(TITLE);
 		setDescription(DESCRIPTION);
@@ -542,6 +543,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 
 		if (client.supportServersideStoredQueries()) {
 			String storedQueryIdString = query.getAttribute(RedmineSearch.STORED_QUERY_ID);
+			//TODO handle NumberFormatException
 			int storedQueryId = (storedQueryIdString==null) ? 0 : Integer.parseInt(storedQueryIdString);
 			search.setStoredQueryId(storedQueryId);
 			RedmineStoredQuery storedQuery = (storedQueryId>0) ? projectData.getStoredQuery(storedQueryId) : null;
@@ -639,6 +641,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			return txtValue;
 		} else if (field instanceof SearchField) {
 			SearchField searchField = (SearchField)field;
+			//TODO handle NumberFormatException
 			int value = Integer.parseInt(txtValue);
 			switch (searchField) {
 			case STATUS:

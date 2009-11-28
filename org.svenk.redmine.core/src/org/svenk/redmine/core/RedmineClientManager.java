@@ -123,7 +123,7 @@ public class RedmineClientManager implements IRepositoryListener {
 			 }
 		} catch (Throwable e) {
 			StatusHandler.log(new Status(IStatus.WARNING, RedmineCorePlugin.PLUGIN_ID,
-					"The Redmine respository data cache could not be written", e));
+					"The Redmine respository data cache could not be read", e));
 		} finally {
 			if (in != null) {
 				try {
@@ -153,7 +153,7 @@ public class RedmineClientManager implements IRepositoryListener {
 			out.flush();
 		} catch (Throwable e) {
 			StatusHandler.log(new Status(IStatus.WARNING, RedmineCorePlugin.PLUGIN_ID,
-					"The Redmine respository data cache could not be read", e));
+					"The Redmine respository data cache could not be written", e));
 		} finally {
 			if (out != null) {
 				try {

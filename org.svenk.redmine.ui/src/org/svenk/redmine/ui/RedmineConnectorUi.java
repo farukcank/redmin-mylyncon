@@ -25,10 +25,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.jface.wizard.IWizard;
+import org.eclipse.mylyn.commons.core.StatusHandler;
 import org.eclipse.mylyn.tasks.core.IRepositoryQuery;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.ITaskComment;
@@ -110,7 +112,8 @@ public class RedmineConnectorUi extends AbstractRepositoryConnectorUi {
 					try {
 						links.add(new RevisionHyperlink(buildRegion(lineOffset, m.start(), m.end()), repository, task, Integer.parseInt(m.group(1))));
 					} catch (NumberFormatException e) {
-						//nothing to do
+						IStatus status = RedmineCorePlugin.toStatus(e, repository, "INVALID_REVISION_ID {0}", m.group(1));
+						StatusHandler.log(status);
 					}
 					
 				}

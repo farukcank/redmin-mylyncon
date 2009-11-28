@@ -28,5 +28,13 @@
             taskEditorExtension="org.eclipse.mylyn.wikitext.tasks.ui.editor.textileTaskEditorExtension">
       </repositoryAssociation>
    </extension>
+   <extension
+         point="org.eclipse.mylyn.commons.core.errorReporters">
+      <errorReporter
+            class="org.svenk.redmine.ui.RedmineErrorReporter"
+            id="org.svenk.redmine.ui.errorReporter"
+            label="RedmineErrorReporter">
+      </errorReporter>
+   </extension>
 
 </plugin>
