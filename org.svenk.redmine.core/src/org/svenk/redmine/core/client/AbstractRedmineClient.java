@@ -44,14 +44,19 @@ import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.mylyn.commons.core.StatusHandler;
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.commons.net.AuthenticationType;
+import org.eclipse.mylyn.commons.net.Policy;
 import org.eclipse.mylyn.commons.net.UnsupportedRequestException;
 import org.eclipse.mylyn.commons.net.WebUtil;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentSource;
 import org.svenk.redmine.core.IRedmineClient;
+import org.svenk.redmine.core.RedmineCorePlugin;
+import org.svenk.redmine.core.client.container.Version;
 import org.svenk.redmine.core.exception.RedmineAuthenticationException;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
@@ -79,12 +84,13 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	
 	private Date sessionExpiry;
 	
+	//TODO replace completely against vRedmine
 	protected double redmineVersion = 0D;
+	
+	protected Version.Redmine vRedmine;
 
 	protected RedmineTicket.Key attributeKeys[] = new RedmineTicket.Key[]{Key.ASSIGNED_TO, Key.PRIORITY, Key.VERSION, Key.CATEGORY, Key.STATUS, Key.TRACKER};
 	
-	protected final static String MSG_AUTHENTICATION_REQUIRED = "Authentication required";
-
 	public AbstractRedmineClient(AbstractWebLocation location, RedmineClientData clientData, TaskRepository repository) {
 		this.location = location;
 		this.data = clientData;
@@ -104,6 +110,8 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		if (!repository.getVersion().equals(TaskRepository.NO_VERSION_SPECIFIED)) {
 			redmineVersion = getRedmineVersion(repository.getVersion());
 		}
+		
+//		vRedmine = Version.Redmine.fromString(repository.getVersion());
 	}
 	
 	public String checkClientConnection(IProgressMonitor monitor) throws RedmineException {
@@ -287,15 +295,20 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		}
 		
 		if (!authenticated) {
+			if (Policy.isBackgroundMonitor(monitor)) {
+				throw new RedmineAuthenticationException(method.getStatusCode(),"MISSING_CREDENTIALS_MANUALLY_SYNC_REQUIRED");
+			}
 			try {
-				location.requestCredentials(authenticationType, MSG_AUTHENTICATION_REQUIRED, monitor);
+				location.requestCredentials(authenticationType, "AUTHENTICATION_REQUIRED", monitor);
 				if (!monitor.isCanceled()) {
 					performLogin(hostConfiguration, monitor);
 					return;
 				}
-			} catch (UnsupportedRequestException e1) {;
-			} catch (OperationCanceledException e1) {;
-				throw new RedmineAuthenticationException(method.getStatusCode(),MSG_AUTHENTICATION_REQUIRED);
+			} catch (UnsupportedRequestException e) {
+				IStatus status = RedmineCorePlugin.toStatus(e, null, "REQUEST_CREDENTIALS_FAILED");
+				StatusHandler.log(status);
+			} catch (OperationCanceledException e) {;
+				throw new RedmineAuthenticationException(method.getStatusCode(),"AUTHENTICATION_REQUIRED");
 			}
 		}
 
@@ -317,7 +330,9 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	}
 	
 	synchronized protected int performExecuteMethod(HttpMethod method, HostConfiguration hostConfiguration, IProgressMonitor monitor) throws RedmineException {
-		method.setRequestHeader("Cookie", sessionCookie);
+		if(sessionCookie!=null) {
+			method.setRequestHeader("Cookie", sessionCookie);
+		}
 
 		try {
 			String baseUrl = new URL(location.getUrl()).getPath();
