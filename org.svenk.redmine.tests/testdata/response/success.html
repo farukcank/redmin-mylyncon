@@ -1,0 +1,616 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<title>eCookbook - Bug #8: sdfsa - Redmine</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="description" content="Redmine" />
+<meta name="keywords" content="issue,bug,tracker" />
+<link href="/stylesheets/application.css?1256830798" media="all" rel="stylesheet" type="text/css" />
+<script src="/javascripts/prototype.js?1256830798" type="text/javascript"></script>
+<script src="/javascripts/effects.js?1256830798" type="text/javascript"></script>
+<script src="/javascripts/dragdrop.js?1256830798" type="text/javascript"></script>
+<script src="/javascripts/controls.js?1256830798" type="text/javascript"></script>
+
+<script src="/javascripts/application.js?1256830798" type="text/javascript"></script>
+<link href="/stylesheets/jstoolbar.css?1256830798" media="screen" rel="stylesheet" type="text/css" />
+<!--[if IE]>
+    <style type="text/css">
+      * html body{ width: expression( document.documentElement.clientWidth < 900 ? '900px' : '100%' ); }
+      body {behavior: url(/stylesheets/csshover.htc?1256830798);}
+    </style>
+<![endif]-->
+
+<!-- page specific tags -->
+<script src="/javascripts/calendar/calendar.js?1256830798" type="text/javascript"></script><script src="/javascripts/calendar/lang/calendar-en.js?1256830798" type="text/javascript"></script><script src="/javascripts/calendar/calendar-setup.js?1256830798" type="text/javascript"></script><link href="/stylesheets/calendar.css?1256830798" media="screen" rel="stylesheet" type="text/css" />
+    <link href="http://localhost:3008/issues/show/8?format=atom&amp;key=fee4a1f8b8d8a655c2caff593c51dbeda0e7e727" rel="alternate" title="eCookbook - Bug #8: sdfsa" type="application/atom+xml" />
+    <link href="/stylesheets/scm.css?1256830798" media="screen" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="wrapper">
+
+<div id="top-menu">
+    <div id="account">
+        <ul><li><a href="/my/account" class="my-account">My account</a></li>
+<li><a href="/logout" class="logout">Sign out</a></li></ul>    </div>
+    <div id="loggedas">Logged in as <a href="/account/show/2">jsmith</a></div>
+    <ul><li><a href="/" class="home">Home</a></li>
+<li><a href="/my/page" class="my-page">My page</a></li>
+
+<li><a href="/projects" class="projects">Projects</a></li>
+<li><a href="http://www.redmine.org/guide" class="help">Help</a></li></ul></div>
+      
+<div id="header">
+    <div id="quick-search">
+        <form action="/search/index/ecookbook" method="get">
+        <a href="/search/index/ecookbook" accesskey="4">Search</a>:
+        <input accesskey="f" class="small" id="q" name="q" size="20" type="text" />
+        </form>
+        
+
+<select onchange="if (this.value != '') { window.location = this.value; }">
+<option selected="selected">Jump to a project...</option>
+<option disabled="disabled">---</option>
+
+    <option value="/projects/show/ecookbook?jump=issues">eCookbook</option>
+    
+        
+        
+        <option value="/projects/show/private_child?jump=issues">&#187; Private child of eCookbook</option>
+    
+
+    <option value="/projects/show/onlinestore?jump=issues">OnlineStore</option>
+    
+        
+
+
+</select>
+
+    </div>
+    
+    <h1>eCookbook</h1>
+    
+    <div id="main-menu">
+        <ul><li><a href="/projects/show/ecookbook" class="overview">Overview</a></li>
+<li><a href="/projects/activity/ecookbook" class="activity">Activity</a></li>
+<li><a href="/projects/roadmap/ecookbook" class="roadmap">Roadmap</a></li>
+<li><a href="/projects/ecookbook/issues" class="issues selected">Issues</a></li>
+
+<li><a href="/projects/ecookbook/issues/new" accesskey="7" class="new-issue">New issue</a></li>
+<li><a href="/projects/ecookbook/news" class="news">News</a></li>
+<li><a href="/projects/ecookbook/documents" class="documents">Documents</a></li>
+<li><a href="/wiki/ecookbook" class="wiki">Wiki</a></li>
+<li><a href="/projects/ecookbook/boards" class="boards">Forums</a></li>
+<li><a href="/projects/list_files/ecookbook" class="files">Files</a></li>
+<li><a href="/repositories/show/ecookbook" class="repository">Repository</a></li>
+<li><a href="/projects/settings/ecookbook" class="settings">Settings</a></li></ul>
+    </div>
+
+</div>
+
+<div class="" id="main">
+    <div id="sidebar">        
+        
+    <h3>Issues</h3>
+<a href="/projects/ecookbook/issues?set_filter=1">View all issues</a><br />
+
+<a href="/reports/issue_report/ecookbook">Summary</a><br />
+<a href="/projects/changelog/ecookbook">Change log</a><br />
+
+
+
+
+<h3>Planning</h3>
+<p><a href="/projects/ecookbook/issues/calendar">Calendar</a> | <a href="/projects/ecookbook/issues/gantt">Gantt</a></p>
+
+
+
+<h3>Custom queries</h3>
+
+<a href="/projects/ecookbook/issues?query_id=1">Multiple custom fields query</a><br />
+
+<a href="/projects/ecookbook/issues?query_id=4">Public query for all projects</a><br />
+
+
+
+        
+    </div>
+    
+    <div id="content">
+				<div class="flash notice">Successful update.</div>
+        <div class="contextual">
+<a href="/issues/edit/8" accesskey="e" class="icon icon-edit" onclick="showAndScrollTo(&quot;update&quot;, &quot;notes&quot;); return false;">Update</a>
+<a href="/timelog/edit?issue_id=8" class="icon icon-time">Log time</a>
+
+<span id="watcher"><a class="icon icon-fav-off" href="/watchers/watch?object_id=8&amp;object_type=issue" onclick="new Ajax.Request('/watchers/watch?object_id=8&amp;object_type=issue', {asynchronous:true, evalScripts:true}); return false;">Watch</a></span>
+<a href="/projects/ecookbook/issues/new?copy_from=8" class="icon icon-copy">Copy</a>
+<a href="/issues/move/8" class="icon icon-move">Move</a>
+<a href="/issues/destroy/8" class="icon icon-del" onclick="if (confirm('Are you sure ?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;f.submit(); };return false;">Delete</a>
+</div>
+
+<h2>Bug #8</h2>
+
+<div class="issue status-1 priority-2 created-by-me details">
+        
+        <h3>sdfsa</h3>
+
+        <p class="author">
+        Added by <a href="/account/show/2">John Smith</a> <a href="/projects/activity/ecookbook?from=2009-11-03" title="11/03/2009 07:02 PM">25 days</a> ago.
+        Updated less than a minute ago.
+        </p>
+
+<table width="100%">
+<tr>
+    <td style="width:15%" class="status"><b>Status:</b></td><td style="width:35%" class="status">New</td>
+
+    <td style="width:15%" class="start-date"><b>Start:</b></td><td style="width:35%">11/14/2009</td>
+</tr>
+<tr>
+    <td class="priority"><b>Priority:</b></td><td class="priority">Normal</td>
+    <td class="due-date"><b>Due date:</b></td><td class="due-date">11/28/2009</td>
+</tr>
+<tr>
+    <td class="assigned-to"><b>Assigned to:</b></td><td>-</td>
+
+    <td class="progress"><b>% Done:</b></td><td class="progress"><table class="progress" style="width: 80px;"><tr><td class="todo" style="width: 100%;"></td></tr></table><p class="pourcent">0%</p></td>
+</tr>
+<tr>
+    <td class="category"><b>Category:</b></td><td>-</td>
+    
+    <td class="spent-time"><b>Spent time:</b></td>
+    <td class="spent-hours"><a href="/projects/ecookbook/timelog/details?issue_id=8" class="icon icon-time">7.30 hours</a></td>
+    
+
+</tr>
+<tr>
+    <td class="fixed-version"><b>Target version:</b></td><td>-</td>
+    
+</tr>
+<tr>
+    <td valign="top"><b>Database:</b></td><td valign="top"><p></p></td>
+    <td valign="top"><b>Searchable field:</b></td><td valign="top"><p>56</p></td>
+
+        </tr><tr>
+ 
+</tr>
+
+</table>
+<hr />
+
+<div class="contextual">
+<a class="icon icon-comment" href="#" onclick="new Ajax.Request('/issues/reply/8', {asynchronous:true, evalScripts:true}); return false;">Quote</a>
+</div>
+                              
+<p><strong>Description</strong></p>
+<div class="wiki">
+<p>nhjhvjhv</p>
+
+</div>
+
+<div class="attachments">
+
+<p><a href="/attachments/10/mylyn-context.zip" class="icon icon-attachment">mylyn-context.zip</a>
+  <span class="size">(883 Bytes)</span>
+  
+    <a href="/attachments/destroy/10" class="delete" onclick="if (confirm('Are you sure ?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;f.submit(); };return false;" title="Delete"><img alt="Delete" src="/images/delete.png?1256830797" /></a>
+  
+  
+    <span class="author">John Smith, 11/04/2009 05:23 PM</span>
+  
+  </p>
+
+<p><a href="/attachments/11/mylyn-context.zip" class="icon icon-attachment">mylyn-context.zip</a>
+  <span class="size">(893 Bytes)</span>
+  
+    <a href="/attachments/destroy/11" class="delete" onclick="if (confirm('Are you sure ?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;f.submit(); };return false;" title="Delete"><img alt="Delete" src="/images/delete.png?1256830797" /></a>
+  
+  
+    <span class="author">John Smith, 11/05/2009 07:02 PM</span>
+  
+  </p>
+
+<p><a href="/attachments/12/screenshot.png" class="icon icon-attachment">screenshot.png</a> - beschr
+  <span class="size">(183.3 KB)</span>
+
+  
+    <a href="/attachments/destroy/12" class="delete" onclick="if (confirm('Are you sure ?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;f.submit(); };return false;" title="Delete"><img alt="Delete" src="/images/delete.png?1256830797" /></a>
+  
+  
+    <span class="author">John Smith, 11/05/2009 07:03 PM</span>
+  
+  </p>
+
+<p><a href="/attachments/13/mylyn-context.zip" class="icon icon-attachment">mylyn-context.zip</a>
+  <span class="size">(893 Bytes)</span>
+  
+    <a href="/attachments/destroy/13" class="delete" onclick="if (confirm('Are you sure ?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;f.submit(); };return false;" title="Delete"><img alt="Delete" src="/images/delete.png?1256830797" /></a>
+  
+  
+    <span class="author">John Smith, 11/05/2009 07:05 PM</span>
+
+  
+  </p>
+
+<p><a href="/attachments/14/mylyn-context.zip" class="icon icon-attachment">mylyn-context.zip</a> - mylyn/context/zip
+  <span class="size">(893 Bytes)</span>
+  
+    <a href="/attachments/destroy/14" class="delete" onclick="if (confirm('Are you sure ?')) { var f = document.createElement('form'); f.style.display = 'none'; this.parentNode.appendChild(f); f.method = 'POST'; f.action = this.href;f.submit(); };return false;" title="Delete"><img alt="Delete" src="/images/delete.png?1256830797" /></a>
+  
+  
+    <span class="author">John Smith, 11/05/2009 07:08 PM</span>
+  
+  </p>
+
+</div>
+
+
+
+
+
+<hr />
+<div id="relations">
+<div class="contextual">
+
+    <a href="#" onclick="Element.toggle('new-relation-form'); this.blur(); return false;">Add</a>
+
+</div>
+
+<p><strong>Related issues</strong></p>
+
+
+
+<form action="/issues/8/relations/new" id="new-relation-form" method="post" onsubmit="new Ajax.Request('/issues/8/relations/new', {asynchronous:true, evalScripts:true, method:'post', parameters:Form.serialize(this)}); return false;" style="display: none;">
+
+
+<p><select id="relation_relation_type" name="relation[relation_type]" onchange="setPredecessorFieldsVisibility();"><option value="relates">related to</option>
+<option value="duplicates">duplicates</option>
+<option value="blocks">blocks</option>
+<option value="precedes">precedes</option></select>
+Issue #<input id="relation_issue_to_id" name="relation[issue_to_id]" size="6" type="text" />
+<span id="predecessor_fields" style="display:none;">
+
+Delay: <input id="relation_delay" name="relation[delay]" size="3" type="text" /> days
+</span>
+<input name="commit" type="submit" value="Add" />
+<a href="#" onclick="Element.toggle('new-relation-form'); this.blur(); return false;">Cancel</a>
+</p>
+
+<script type="text/javascript">
+//<![CDATA[
+setPredecessorFieldsVisibility();
+//]]>
+</script>
+
+</form>
+
+</div>
+
+
+<hr />
+<div id="watchers">
+<div class="contextual">
+<a href="#" onclick="new Ajax.Request('/watchers/new?object_id=8&amp;object_type=issue', {asynchronous:true, evalScripts:true}); return false;">Add</a>
+</div>
+
+<p><strong>Watchers</strong></p>
+
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+<div id="history">
+<h3>History</h3>
+
+  <div id="change-22" class="journal">
+    <h4><div style="float:right;"><a href="/issues/show/8#note-1">#1</a></div>
+    <a name="note-1"></a>
+		Updated by <a href="/account/show/2">John Smith</a> <a href="/projects/activity/ecookbook?from=2009-11-04" title="11/04/2009 05:23 PM">24 days</a> ago</h4>
+
+    
+    <ul>
+    
+       <li><strong>File</strong> <a href="/attachments/10/mylyn-context.zip">mylyn-context.zip</a> added</li>
+    
+    </ul>
+    <div class="wiki" id="journal-22-notes"><div class="contextual"><a href="#" onclick="new Ajax.Request('/issues/reply/8?journal_id=22', {asynchronous:true, evalScripts:true}); return false;" title="Quote"><img alt="Comment" src="/images/comment.png?1256830797" /></a></div><p>testctx</p></div>
+  </div>
+  
+
+  <div id="change-23" class="journal">
+
+    <h4><div style="float:right;"><a href="/issues/show/8#note-2">#2</a></div>
+    <a name="note-2"></a>
+		Updated by <a href="/account/show/2">John Smith</a> <a href="/projects/activity/ecookbook?from=2009-11-05" title="11/05/2009 07:02 PM">23 days</a> ago</h4>
+    
+    <ul>
+    
+       <li><strong>File</strong> <a href="/attachments/11/mylyn-context.zip">mylyn-context.zip</a> added</li>
+
+    
+    </ul>
+    <div class="wiki" id="journal-23-notes"><div class="contextual"><a href="#" onclick="new Ajax.Request('/issues/reply/8?journal_id=23', {asynchronous:true, evalScripts:true}); return false;" title="Quote"><img alt="Comment" src="/images/comment.png?1256830797" /></a></div><p>neuer kontext</p></div>
+  </div>
+  
+
+  <div id="change-24" class="journal">
+    <h4><div style="float:right;"><a href="/issues/show/8#note-3">#3</a></div>
+    <a name="note-3"></a>
+		Updated by <a href="/account/show/2">John Smith</a> <a href="/projects/activity/ecookbook?from=2009-11-05" title="11/05/2009 07:03 PM">23 days</a> ago</h4>
+
+    
+    <ul>
+    
+       <li><strong>File</strong> <a href="/attachments/12/screenshot.png">screenshot.png</a> added</li>
+    
+    </ul>
+    <div class="wiki" id="journal-24-notes"><div class="contextual"><a href="#" onclick="new Ajax.Request('/issues/reply/8?journal_id=24', {asynchronous:true, evalScripts:true}); return false;" title="Quote"><img alt="Comment" src="/images/comment.png?1256830797" /></a></div><p>komme</p></div>
+  </div>
+  
+
+  <div id="change-25" class="journal">
+
+    <h4><div style="float:right;"><a href="/issues/show/8#note-4">#4</a></div>
+    <a name="note-4"></a>
+		Updated by <a href="/account/show/2">John Smith</a> <a href="/projects/activity/ecookbook?from=2009-11-05" title="11/05/2009 07:05 PM">23 days</a> ago</h4>
+    
+    <ul>
+    
+       <li><strong>File</strong> <a href="/attachments/13/mylyn-context.zip">mylyn-context.zip</a> added</li>
+
+    
+    </ul>
+    <div class="wiki" id="journal-25-notes"><div class="contextual"><a href="#" onclick="new Ajax.Request('/issues/reply/8?journal_id=25', {asynchronous:true, evalScripts:true}); return false;" title="Quote"><img alt="Comment" src="/images/comment.png?1256830797" /></a></div><p>kommentar</p></div>
+  </div>
+  
+
+  <div id="change-26" class="journal">
+    <h4><div style="float:right;"><a href="/issues/show/8#note-5">#5</a></div>
+    <a name="note-5"></a>
+		Updated by <a href="/account/show/2">John Smith</a> <a href="/projects/activity/ecookbook?from=2009-11-05" title="11/05/2009 07:08 PM">23 days</a> ago</h4>
+
+    
+    <ul>
+    
+       <li><strong>File</strong> <a href="/attachments/14/mylyn-context.zip">mylyn-context.zip</a> added</li>
+    
+    </ul>
+    <div class="wiki" id="journal-26-notes"><div class="contextual"><a href="#" onclick="new Ajax.Request('/issues/reply/8?journal_id=26', {asynchronous:true, evalScripts:true}); return false;" title="Quote"><img alt="Comment" src="/images/comment.png?1256830797" /></a></div><p>neuer kontext kommentar</p></div>
+  </div>
+  
+
+  <div id="change-35" class="journal">
+
+    <h4><div style="float:right;"><a href="/issues/show/8#note-6">#6</a></div>
+    <a name="note-6"></a>
+		Updated by <a href="/account/show/2">John Smith</a> <a href="/projects/activity/ecookbook?from=2009-11-28" title="11/28/2009 06:32 PM">about 5 hours</a> ago</h4>
+    
+    <ul>
+    
+       <li><strong>Due date</strong> changed from <i>11/21/2009</i> to <i>11/28/2009</i></li>
+
+    
+    </ul>
+    
+  </div>
+  
+
+  <div id="change-36" class="journal">
+    <h4><div style="float:right;"><a href="/issues/show/8#note-7">#7</a></div>
+    <a name="note-7"></a>
+		Updated by <a href="/account/show/2">John Smith</a> <a href="/projects/activity/ecookbook?from=2009-11-28" title="11/28/2009 11:16 PM">less than a minute</a> ago</h4>
+
+    
+    <ul>
+    
+       <li><strong>Subject</strong> changed from <i>jhhghghg</i> to <i>sdfsa</i></li>
+    
+    </ul>
+    
+  </div>
+  
+
+
+</div>
+
+<div style="clear: both;"></div>
+
+
+  <div id="update" style="display:none;">
+  <h3>Update</h3>
+  <form action="/issues/edit/8" enctype="multipart/form-data" id="issue-form" method="post">
+    
+    
+    <div class="box">
+    
+        <fieldset class="tabular"><legend>Change properties
+        
+        <small>(<a href="/issues/show/8" onclick="Effect.toggle(&quot;issue_descr_fields&quot;, &quot;appear&quot;, {duration:0.3}); return false;">More</a>)</small>
+
+        
+        </legend>
+        
+
+<div id="issue_descr_fields" style="display:none">
+<p><label for="issue_subject">Subject<span class="required"> *</span></label><input id="issue_subject" name="issue[subject]" size="80" type="text" value="sdfsa" /></p>
+<p><label for="issue_description">Description</label><textarea accesskey="e" class="wiki-edit" cols="60" id="issue_description" name="issue[description]" rows="10">nhjhvjhv</textarea></p>
+</div>
+
+<div class="splitcontentleft">
+
+<p><label for="issue_status_id">Status<span class="required"> *</span></label><select id="issue_status_id" name="issue[status_id]"><option value="2">Assigned</option>
+
+<option value="3">Resolved</option>
+<option value="4">Feedback</option>
+<option value="5">Closed</option>
+<option value="6">Rejected</option>
+<option value="1" selected="selected">New</option></select></p>
+
+
+<p><label for="issue_priority_id">Priority<span class="required"> *</span></label><select id="issue_priority_id" name="issue[priority_id]"><option value="6">High</option>
+
+<option value="7">Urgent</option>
+<option value="8">Immediate</option>
+<option value="4">Low</option>
+<option value="5" selected="selected">Normal</option></select></p>
+<p><label for="issue_assigned_to_id">Assigned to</label><select id="issue_assigned_to_id" name="issue[assigned_to_id]"><option value=""></option>
+<option value="3">Dave Lopper</option>
+<option value="2">John Smith</option></select></p>
+
+<p><label for="issue_category_id">Category</label><select id="issue_category_id" name="issue[category_id]"><option value=""></option>
+
+<option value="1">Printing</option>
+<option value="2">Recipes</option></select>
+<a href="/issues/show/8" class="small" onclick="promptToRemote('New category', 'category[name]', '/projects/add_issue_category/ecookbook'); return false;" tabindex="199">New category</a></p>
+
+<p><label for="issue_fixed_version_id">Target version</label><select id="issue_fixed_version_id" name="issue[fixed_version_id]"><option value=""></option>
+<option value="1">0.1</option>
+<option value="2">1.0</option>
+<option value="3">2.0</option></select></p>
+</div>
+
+<div class="splitcontentright">
+<p><label for="issue_start_date">Start</label><input id="issue_start_date" name="issue[start_date]" size="10" type="text" value="2009-11-14" /><img alt="Calendar" class="calendar-trigger" id="issue_start_date_trigger" src="/images/calendar.png?1256830797" /><script type="text/javascript">
+//<![CDATA[
+Calendar.setup({inputField : 'issue_start_date', ifFormat : '%Y-%m-%d', button : 'issue_start_date_trigger' });
+//]]>
+</script></p>
+<p><label for="issue_due_date">Due date</label><input id="issue_due_date" name="issue[due_date]" size="10" type="text" value="2009-11-28" /><img alt="Calendar" class="calendar-trigger" id="issue_due_date_trigger" src="/images/calendar.png?1256830797" /><script type="text/javascript">
+//<![CDATA[
+Calendar.setup({inputField : 'issue_due_date', ifFormat : '%Y-%m-%d', button : 'issue_due_date_trigger' });
+//]]>
+</script></p>
+<p><label for="issue_estimated_hours">Estimated time</label><input id="issue_estimated_hours" name="issue[estimated_hours]" size="3" type="text" /> Hours</p>
+<p><label for="issue_done_ratio">% Done</label><select id="issue_done_ratio" name="issue[done_ratio]"><option value="0" selected="selected">0 %</option>
+<option value="10">10 %</option>
+<option value="20">20 %</option>
+
+<option value="30">30 %</option>
+<option value="40">40 %</option>
+<option value="50">50 %</option>
+<option value="60">60 %</option>
+<option value="70">70 %</option>
+<option value="80">80 %</option>
+<option value="90">90 %</option>
+<option value="100">100 %</option></select></p>
+</div>
+
+<div style="clear:both;"> </div>
+<div class="splitcontentleft">
+
+
+
+	<p><label for="issue_custom_field_values_1">Database</label><select id="issue_custom_field_values_1" name="issue[custom_field_values][1]"><option></option><option value="MySQL">MySQL</option>
+<option value="PostgreSQL">PostgreSQL</option>
+<option value="Oracle">Oracle</option></select></p>
+
+	<p><label for="issue_custom_field_values_2">Searchable field</label><input id="issue_custom_field_values_2" name="issue[custom_field_values][2]" type="text" value="56" /></p>
+
+</div><div class="splitcontentright">
+</div>
+<div style="clear:both;"> </div>
+
+
+
+
+
+
+
+
+<script src="/javascripts/jstoolbar/jstoolbar.js?1256830797" type="text/javascript"></script><script src="/javascripts/jstoolbar/textile.js?1256830797" type="text/javascript"></script><script src="/javascripts/jstoolbar/lang/jstoolbar-en.js?1256830797" type="text/javascript"></script><script type="text/javascript">
+//<![CDATA[
+var toolbar = new jsToolBar($('issue_description')); toolbar.setHelpLink('Text formatting: <a href="/help/wiki_syntax.html?1256830797" onclick="window.open(&quot;/help/wiki_syntax.html?1256830797&quot;, &quot;&quot;, &quot;resizable=yes, location=no, width=300, height=640, menubar=no, status=no, scrollbars=yes&quot;); return false;">Help</a>'); toolbar.draw();
+//]]>
+</script>
+
+        </fieldset>
+    
+    
+        <fieldset class="tabular"><legend>Log time</legend>
+        
+        <div class="splitcontentleft">
+        <p><label for="time_entry_hours">Spent time</label><input id="time_entry_hours" label="label_spent_time" name="time_entry[hours]" size="6" type="text" /> Hours</p>
+        </div>
+        <div class="splitcontentright">
+
+        <p><label for="time_entry_activity_id">Activity</label><select id="time_entry_activity_id" name="time_entry[activity_id]"><option value="9">Design</option>
+<option value="10" selected="selected">Development</option>
+<option value="11">QA</option></select></p>
+        </div>
+        <p><label for="time_entry_comments">Comment</label><input id="time_entry_comments" name="time_entry[comments]" size="60" type="text" /></p>
+        
+        	<p><label for="time_entry_custom_field_values_6">spentbrowser <span class="required">*</span></label><select id="time_entry_custom_field_values_6" name="time_entry[custom_field_values][6]"><option value="IE">IE</option>
+
+<option value="FF" selected="selected">FF</option></select></p>
+        
+        	<p><label for="time_entry_custom_field_values_7">spentnum</label><input id="time_entry_custom_field_values_7" name="time_entry[custom_field_values][7]" type="text" value="" /></p>
+        
+        
+    </fieldset>
+    
+    
+    <fieldset><legend>Notes</legend>
+    <textarea class="wiki-edit" cols="60" id="notes" name="notes" rows="10"></textarea>
+    <script src="/javascripts/jstoolbar/jstoolbar.js?1256830797" type="text/javascript"></script><script src="/javascripts/jstoolbar/textile.js?1256830797" type="text/javascript"></script><script src="/javascripts/jstoolbar/lang/jstoolbar-en.js?1256830797" type="text/javascript"></script><script type="text/javascript">
+//<![CDATA[
+var toolbar = new jsToolBar($('notes')); toolbar.setHelpLink('Text formatting: <a href="/help/wiki_syntax.html?1256830797" onclick="window.open(&quot;/help/wiki_syntax.html?1256830797&quot;, &quot;&quot;, &quot;resizable=yes, location=no, width=300, height=640, menubar=no, status=no, scrollbars=yes&quot;); return false;">Help</a>'); toolbar.draw();
+//]]>
+
+</script>
+    
+    
+    <p>Files<br /><span id="attachments_fields">
+<input name="attachments[1][file]" size="30" type="file" /><input name="attachments[1][description]" size="60" type="text" value="" />
+<em>Optional description</em>
+</span>
+<br />
+<small><a href="#" onclick="addFileField(); return false;">Add another file</a>
+(Maximum size: 5 MB)
+</small>
+</p>
+    </fieldset>
+    </div>
+
+    
+    <input id="issue_lock_version" name="issue[lock_version]" type="hidden" value="9" />
+    <input name="commit" type="submit" value="Submit" />
+    <a accesskey="r" href="#" onclick="new Ajax.Updater('preview', '/projects/ecookbook/issues/preview?id=8', {asynchronous:true, evalScripts:true, method:'post', onComplete:function(request){Element.scrollTo('preview')}, parameters:Form.serialize(&quot;issue-form&quot;)}); return false;">Preview</a>
+</form>
+
+<div id="preview" class="wiki"></div>
+
+  </div>
+
+
+<p class="other-formats">
+Also available in:
+
+<span><a href="/issues/show/8?format=atom&amp;key=fee4a1f8b8d8a655c2caff593c51dbeda0e7e727" class="feed">Atom</a></span>
+<span><a href="/issues/show/8?format=pdf" class="pdf">PDF</a></span>
+</p>
+
+
+
+
+
+
+
+        
+    </div>
+</div>
+
+<div id="ajax-indicator" style="display:none;"><span>Loading...</span></div>
+
+	
+<div id="footer">
+    Powered by <a href="http://www.redmine.org/">Redmine</a> &copy; 2006-2009 Jean-Philippe Lang
+</div>
+</div>
+
+</body>
+</html>

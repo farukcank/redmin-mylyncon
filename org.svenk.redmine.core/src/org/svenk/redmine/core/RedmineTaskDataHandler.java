@@ -44,6 +44,7 @@ import org.eclipse.mylyn.tasks.core.data.TaskCommentMapper;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.svenk.redmine.core.client.RedmineProjectData;
 import org.svenk.redmine.core.exception.RedmineException;
+import org.svenk.redmine.core.exception.RedmineStatusException;
 import org.svenk.redmine.core.model.RedmineAttachment;
 import org.svenk.redmine.core.model.RedmineCustomField;
 import org.svenk.redmine.core.model.RedmineMember;
@@ -251,6 +252,8 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 				client.updateTicket(ticket, comment, monitor);
 				return new RepositoryResponse(ResponseKind.TASK_UPDATED, "" + ticket.getId());
 			}
+		} catch (RedmineStatusException e) {
+			throw new CoreException(e.getStatus());
 		} catch (RedmineException e) {
 			throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
 		}

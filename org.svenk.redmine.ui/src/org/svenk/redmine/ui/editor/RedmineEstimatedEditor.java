@@ -104,12 +104,14 @@ public class RedmineEstimatedEditor extends AbstractAttributeEditor {
 
 	private int getValue() {
 		float estimatedHours = 0f;
-		try {
-			estimatedHours = Float.valueOf(getTaskAttribute().getValue());
-			estimatedHours *= 1e2;
-		} catch (NumberFormatException e) {
-			IStatus status = RedmineCorePlugin.toStatus(e, null, "INVALID_HOURS_FORMAT {0}", getTaskAttribute().getValue());
-			StatusHandler.log(status);
+		if (getTaskAttribute().getValue().length()>0) {
+			try {
+				estimatedHours = Float.valueOf(getTaskAttribute().getValue());
+				estimatedHours *= 1e2;
+			} catch (NumberFormatException e) {
+				IStatus status = RedmineCorePlugin.toStatus(e, null, "INVALID_ESTIMATED_HOURS {0}", getTaskAttribute().getValue());
+				StatusHandler.log(status);
+			}
 		}
 		return (int)estimatedHours;
 	}

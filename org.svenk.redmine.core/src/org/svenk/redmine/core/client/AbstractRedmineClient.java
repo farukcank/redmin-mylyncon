@@ -24,7 +24,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -37,6 +39,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.multipart.FilePart;
@@ -57,9 +60,11 @@ import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentSource;
 import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.client.container.Version;
+import org.svenk.redmine.core.client.container.Version.Release;
 import org.svenk.redmine.core.exception.RedmineAuthenticationException;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
+import org.svenk.redmine.core.exception.RedmineStatusException;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
 import org.svenk.redmine.core.util.internal.RedminePartSource;
@@ -78,11 +83,9 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	
 	protected RedmineClientData data;
 	
+	protected RedmineResponseReader responseReader;
+	
 	protected String characterEncoding;
-	
-	private String sessionCookie;
-	
-	private Date sessionExpiry;
 	
 	//TODO replace completely against vRedmine
 	protected double redmineVersion = 0D;
@@ -98,6 +101,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		this.characterEncoding = repository.getCharacterEncoding();
 		
 		this.httpClient.getParams().setContentCharset(characterEncoding);
+		this.httpClient.getParams().setCookiePolicy(CookiePolicy.RFC_2109);
 		
 		refreshRepositorySettings(repository);
 	}
@@ -111,7 +115,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 			redmineVersion = getRedmineVersion(repository.getVersion());
 		}
 		
-//		vRedmine = Version.Redmine.fromString(repository.getVersion());
+		vRedmine = Version.Redmine.fromString(repository.getVersion());
 	}
 	
 	public String checkClientConnection(IProgressMonitor monitor) throws RedmineException {
@@ -130,6 +134,13 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	}
 	
 	public boolean supportStartDueDate() {
+		return false;
+	}
+	
+	protected boolean isCsrfTokenRequired(HttpMethod method) {
+		if (vRedmine.compareTo(Release.ZEROEIGHTSEVEN)>=0) {
+			return (method.getName().equalsIgnoreCase("POST") && !method.getPath().contains("mylyn"));
+		}
 		return false;
 	}
 	
@@ -163,26 +174,41 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		List<NameValuePair> values = this.ticket2HttpData(ticket);
 		method.setRequestBody(values.toArray(new NameValuePair[values.size()]));
 
-		executeMethod(method, monitor);
-
-		Header respHeader = method.getResponseHeader("location");
-		if (respHeader != null) {
-			String location = respHeader.getValue();
-
-			Matcher m = Pattern.compile("(\\d+)$").matcher(location);
-			if (m.find()) {
-				try {
-					return Integer.parseInt(m.group(1));
-				} catch (NumberFormatException e) {
-					throw new RedmineException("Invalid Response: TicketId must be an Integer");
+		int statusCode  = executeMethod(method, monitor);
+		if (statusCode>=300 && statusCode<=399) {
+			Header respHeader = method.getResponseHeader("location");
+			if (respHeader != null) {
+				String location = respHeader.getValue();
+				
+				Matcher m = Pattern.compile("(\\d+)$").matcher(location);
+				if (m.find()) {
+					try {
+						return Integer.parseInt(m.group(1));
+					} catch (NumberFormatException e) {
+						throw new RedmineException("INVALID_TASK_ID");
+					}
+				} else {
+					throw new RedmineException("Can't find ID of ticket in response header");
 				}
-			} else {
-				throw new RedmineException("Can't find ID of ticket in response header");
 			}
-		} else {
-			throw new RedmineException("Invalid Response: unhandled input error");
-		}
-		
+		} else if(statusCode==HttpStatus.SC_OK) {
+			try {
+				Collection<String> messages = getResponseReader().readErrors(method.getResponseBodyAsStream());
+				if (messages!=null) {
+					StringBuilder sb = new StringBuilder();
+					for (Iterator<String> iterator = messages.iterator(); iterator.hasNext();) {
+						sb.append(iterator.next());
+						sb.append(" ");
+					}
+					throw new RedmineStatusException(IStatus.INFO, sb.toString().trim());
+				}
+			} catch (IOException e) {
+				IStatus status = RedmineCorePlugin.toStatus(e, null, "READING_OF_UPDATE_RESPONSE_FAILED");
+				StatusHandler.log(status);
+				throw new RedmineStatusException(status);
+			}
+		} 
+		throw new RedmineException("UNHANDLED_SUBMIT_ERROR");
 	}
 	
 	public void updateTicket(RedmineTicket ticket, String comment, IProgressMonitor monitor) throws RedmineException {
@@ -191,7 +217,26 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		List<NameValuePair> values = this.ticket2HttpData(ticket, comment);
 		method.setRequestBody(values.toArray(new NameValuePair[values.size()]));
 
-		executeMethod(method, monitor);
+		int statusCode = executeMethod(method, monitor);
+		if(statusCode==HttpStatus.SC_OK) {
+			try {
+				Collection<String> messages = getResponseReader().readErrors(method.getResponseBodyAsStream());
+				if (messages!=null) {
+					StringBuilder sb = new StringBuilder();
+					for (Iterator<String> iterator = messages.iterator(); iterator.hasNext();) {
+						sb.append(iterator.next());
+						sb.append(" ");
+					}
+					throw new RedmineStatusException(IStatus.INFO, sb.toString().trim());
+				}
+			} catch (IOException e) {
+				IStatus status = RedmineCorePlugin.toStatus(e, null, "READING_OF_UPDATE_RESPONSE_FAILED");
+				StatusHandler.log(status);
+				throw new RedmineStatusException(status);
+			}
+		}
+		
+		
 	}
 	
 	/**
@@ -280,18 +325,6 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 				break;
 			default :
 				authenticated = true;
-
-				//Session-Cookie(s)
-				Cookie[] cookies = httpClient.getState().getCookies();
-				sessionCookie = "";
-				sessionExpiry = null;
-				for (Cookie cookie : cookies) {
-					sessionCookie += cookie.getName() + "=" + cookie.getValue() + ";";
-					Date expiry = cookie.getExpiryDate();
-					if (expiry!=null && (sessionExpiry==null || expiry.getTime()<sessionExpiry.getTime())) {
-						sessionExpiry = expiry; 
-					}
-				}
 		}
 		
 		if (!authenticated) {
@@ -315,36 +348,51 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	}
 	
 	private boolean isAuthenticated(HostConfiguration hostConfiguration) {
-		//missing cookie
-		if (sessionCookie==null || sessionCookie.length()<1) {
-			return false;
+		Cookie[] cookies = httpClient.getState().getCookies();
+		for (Cookie cookie : cookies) {
+			if (cookie.getExpiryDate()==null || cookie.getExpiryDate().after(new Date())) {
+				if (cookie.getName().contains("session")) {
+					return true;
+				}
+			}
 		}
-		
-		//cookie without expiration date
-		if (sessionExpiry==null) {
-			return true;
-		}
-		
-		long timeout = (long)WebUtil.getConnectionTimeout();
-		return new Date().getTime()<sessionExpiry.getTime()-timeout;
+		return false;
 	}
 	
 	synchronized protected int performExecuteMethod(HttpMethod method, HostConfiguration hostConfiguration, IProgressMonitor monitor) throws RedmineException {
-		if(sessionCookie!=null) {
-			method.setRequestHeader("Cookie", sessionCookie);
-		}
-
 		try {
+			//complete URL
 			String baseUrl = new URL(location.getUrl()).getPath();
 			if (!method.getPath().startsWith(baseUrl)) {
 				method.setPath(baseUrl + method.getPath());
 			}
-			return WebUtil.execute(httpClient, hostConfiguration, method, monitor);
-		} catch (Exception e) {
-			if (e instanceof OperationCanceledException) {
-				monitor.setCanceled(true);
+
+			//POST Requests requires the Authenticity-Token
+			if(isCsrfTokenRequired(method)) {
+				HttpMethod csrfMethod = new GetMethod();
+				csrfMethod.setPath(method.getPath());
+				if (WebUtil.execute(httpClient, hostConfiguration, csrfMethod, monitor)==HttpStatus.SC_OK) {
+					String token = getResponseReader().readAuthenticityToken(csrfMethod.getResponseBodyAsStream());
+					((PostMethod)method).addParameter("authenticity_token", token);
+				}
 			}
+			
+			int statusCode =  WebUtil.execute(httpClient, hostConfiguration, method, monitor);
+			if (statusCode == HttpStatus.SC_UNPROCESSABLE_ENTITY) {
+				throw new RedmineRemoteException("INVALID_AUTHENTICITY_TOKEN");
+			}
+			return statusCode;
+		} catch (OperationCanceledException e) {
+			monitor.setCanceled(true);
 			throw new RedmineException(e.getMessage(), e);
+		} catch (RuntimeException e) {
+			IStatus status = RedmineCorePlugin.toStatus(e, null, "UNHANDLED_RUNTIME_EXCEPTION");
+			StatusHandler.fail(status);
+			throw new RedmineStatusException(status);
+		} catch (IOException e) {
+			IStatus status = RedmineCorePlugin.toStatus(e, null);
+			StatusHandler.log(status);
+			throw new RedmineStatusException(status);
 		}
 	}
 	
@@ -410,6 +458,13 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		List<NameValuePair> nameValuePair = ticket2HttpData(ticket);
 		nameValuePair.add(new NameValuePair("notes", comment));
 		return nameValuePair;
+	}
+	
+	private RedmineResponseReader getResponseReader() {
+		if (responseReader==null) {
+			responseReader = new RedmineResponseReader();
+		}
+		return responseReader;
 	}
 	
 	private String redmineKey2ValueName(Key redmineKey) {

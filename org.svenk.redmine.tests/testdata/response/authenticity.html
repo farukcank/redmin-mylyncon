@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<title>Private child of eCookbook - Redmine</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta name="description" content="Redmine" />
+<meta name="keywords" content="issue,bug,tracker" />
+<link href="/stylesheets/application.css?1258958797" media="all" rel="stylesheet" type="text/css" />
+<script src="/javascripts/prototype.js?1258958797" type="text/javascript"></script>
+<script src="/javascripts/effects.js?1258958797" type="text/javascript"></script>
+<script src="/javascripts/dragdrop.js?1258958797" type="text/javascript"></script>
+<script src="/javascripts/controls.js?1258958797" type="text/javascript"></script>
+
+<script src="/javascripts/application.js?1258958797" type="text/javascript"></script>
+<link href="/stylesheets/jstoolbar.css?1258958797" media="screen" rel="stylesheet" type="text/css" />
+<!--[if IE]>
+    <style type="text/css">
+      * html body{ width: expression( document.documentElement.clientWidth < 900 ? '900px' : '100%' ); }
+      body {behavior: url(/stylesheets/csshover.htc?1258958797);}
+    </style>
+<![endif]-->
+
+<!-- page specific tags -->
+<script src="/javascripts/calendar/calendar.js?1258958797" type="text/javascript"></script><script src="/javascripts/calendar/lang/calendar-en.js?1258958797" type="text/javascript"></script><script src="/javascripts/calendar/calendar-setup.js?1258958797" type="text/javascript"></script><link href="/stylesheets/calendar.css?1258958797" media="screen" rel="stylesheet" type="text/css" /></head>
+<body>
+<div id="wrapper">
+<div id="top-menu">
+    <div id="account">
+        <ul><li><a href="/my/account" class="my-account">My account</a></li>
+
+<li><a href="/logout" class="logout">Sign out</a></li></ul>    </div>
+    <div id="loggedas">Logged in as <a href="/account/show/2">jsmith</a></div>
+    <ul><li><a href="/" class="home">Home</a></li>
+<li><a href="/my/page" class="my-page">My page</a></li>
+<li><a href="/projects" class="projects">Projects</a></li>
+<li><a href="http://www.redmine.org/guide" class="help">Help</a></li></ul></div>
+      
+
+<div id="header">
+    <div id="quick-search">
+        <form action="/search/index/private_child" method="get">
+        <a href="/search/index/private_child" accesskey="4">Search</a>:
+        <input accesskey="f" class="small" id="q" name="q" size="20" type="text" />
+        </form>
+        
+<select onchange="if (this.value != '') { window.location = this.value; }">
+<option selected="selected">Jump to a project...</option>
+<option disabled="disabled">---</option>
+
+    <option value="/projects/show/ecookbook?jump=issues">eCookbook</option>
+    
+        
+        
+        <option value="/projects/show/private_child?jump=issues">&#187; Private child of eCookbook</option>
+    
+
+    <option value="/projects/show/onlinestore?jump=issues">OnlineStore</option>
+    
+        
+
+</select>
+
+    </div>
+    
+    <h1>Private child of eCookbook</h1>
+
+    
+    <div id="main-menu">
+        <ul><li><a href="/projects/show/private_child" class="overview">Overview</a></li>
+<li><a href="/projects/activity/private_child" class="activity">Activity</a></li>
+<li><a href="/projects/private_child/issues" class="issues selected">Issues</a></li>
+<li><a href="/projects/private_child/issues/new" accesskey="7" class="new-issue">New issue</a></li>
+<li><a href="/projects/settings/private_child" class="settings">Settings</a></li></ul>
+    </div>
+</div>
+
+<div class="nosidebar" id="main">
+    <div id="sidebar">        
+        
+        
+    </div>
+    
+    <div id="content">
+				
+        <h2>Bug #6</h2>
+
+<form action="/issues/edit/6" enctype="multipart/form-data" id="issue-form" method="post"><div style="margin:0;padding:0"><input name="authenticity_token" type="hidden" value="46ecd7461ff4b05f247b49d39a3dddc86a44bc56" /></div>
+    
+    
+    <div class="box">
+    
+        <fieldset class="tabular"><legend>Change properties
+        
+        <small>(<a href="/issues/edit/6" onclick="Effect.toggle(&quot;issue_descr_fields&quot;, &quot;appear&quot;, {duration:0.3}); return false;">More</a>)</small>
+
+        
+        </legend>
+        
+
+<div id="issue_descr_fields" style="display:none">
+<p><label for="issue_subject">Subject<span class="required"> *</span></label><input id="issue_subject" name="issue[subject]" size="80" type="text" value="Issue of a private subproject" /></p>
+<p><label for="issue_description">Description</label><textarea accesskey="e" class="wiki-edit" cols="60" id="issue_description" name="issue[description]" rows="10">This is an issue of a private subproject of cookbook</textarea></p>
+</div>
+
+<div class="splitcontentleft">
+
+<p><label for="issue_status_id">Status<span class="required"> *</span></label><select id="issue_status_id" name="issue[status_id]"><option value="2">Assigned</option>
+
+<option value="3">Resolved</option>
+<option value="4">Feedback</option>
+<option value="5">Closed</option>
+<option value="6">Rejected</option>
+<option value="1" selected="selected">New</option></select></p>
+
+
+<p><label for="issue_priority_id">Priority<span class="required"> *</span></label><select id="issue_priority_id" name="issue[priority_id]"><option value="4" selected="selected">Low</option>
+
+<option value="5">Normal</option>
+<option value="6">High</option>
+<option value="7">Urgent</option>
+<option value="8">Immediate</option></select></p>
+<p><label for="issue_assigned_to_id">Assigned to</label><select id="issue_assigned_to_id" name="issue[assigned_to_id]"><option value=""></option>
+<option value="2">John Smith</option></select></p>
+
+
+</div>
+
+<div class="splitcontentright">
+
+<p><label for="issue_start_date">Start</label><input id="issue_start_date" name="issue[start_date]" size="10" type="text" value="2009-11-23" /><img alt="Calendar" class="calendar-trigger" id="issue_start_date_trigger" src="/images/calendar.png?1258958797" /><script type="text/javascript">
+//<![CDATA[
+Calendar.setup({inputField : 'issue_start_date', ifFormat : '%Y-%m-%d', button : 'issue_start_date_trigger' });
+//]]>
+</script></p>
+<p><label for="issue_due_date">Due date</label><input id="issue_due_date" name="issue[due_date]" size="10" type="text" value="2009-11-24" /><img alt="Calendar" class="calendar-trigger" id="issue_due_date_trigger" src="/images/calendar.png?1258958797" /><script type="text/javascript">
+//<![CDATA[
+Calendar.setup({inputField : 'issue_due_date', ifFormat : '%Y-%m-%d', button : 'issue_due_date_trigger' });
+//]]>
+</script></p>
+<p><label for="issue_estimated_hours">Estimated time</label><input id="issue_estimated_hours" name="issue[estimated_hours]" size="3" type="text" /> Hours</p>
+<p><label for="issue_done_ratio">% Done</label><select id="issue_done_ratio" name="issue[done_ratio]"><option value="0" selected="selected">0 %</option>
+<option value="10">10 %</option>
+<option value="20">20 %</option>
+
+<option value="30">30 %</option>
+<option value="40">40 %</option>
+<option value="50">50 %</option>
+<option value="60">60 %</option>
+<option value="70">70 %</option>
+<option value="80">80 %</option>
+<option value="90">90 %</option>
+<option value="100">100 %</option></select></p>
+</div>
+
+<div style="clear:both;"> </div>
+<div class="splitcontentleft">
+
+
+
+	<p><label for="issue_custom_field_values_1">Database</label><select id="issue_custom_field_values_1" name="issue[custom_field_values][1]"><option></option><option value="MySQL">MySQL</option>
+<option value="PostgreSQL">PostgreSQL</option>
+<option value="Oracle">Oracle</option></select></p>
+
+	<p><label for="issue_custom_field_values_2">Searchable field</label><input id="issue_custom_field_values_2" name="issue[custom_field_values][2]" type="text" value="Default string" /></p>
+
+</div><div class="splitcontentright">
+</div>
+<div style="clear:both;"> </div>
+
+
+
+
+
+
+
+
+<script src="/javascripts/jstoolbar/jstoolbar.js?1258958797" type="text/javascript"></script><script src="/javascripts/jstoolbar/textile.js?1258958797" type="text/javascript"></script><script src="/javascripts/jstoolbar/lang/jstoolbar-en.js?1258958797" type="text/javascript"></script><script type="text/javascript">
+//<![CDATA[
+var toolbar = new jsToolBar($('issue_description')); toolbar.setHelpLink('Text formatting: <a href="/help/wiki_syntax.html?1258958797" onclick="window.open(&quot;/help/wiki_syntax.html?1258958797&quot;, &quot;&quot;, &quot;resizable=yes, location=no, width=300, height=640, menubar=no, status=no, scrollbars=yes&quot;); return false;">Help</a>'); toolbar.draw();
+//]]>
+</script>
+
+        </fieldset>
+    
+    
+    
+    <fieldset><legend>Notes</legend>
+    <textarea class="wiki-edit" cols="60" id="notes" name="notes" rows="10"></textarea>
+    <script src="/javascripts/jstoolbar/jstoolbar.js?1258958797" type="text/javascript"></script><script src="/javascripts/jstoolbar/textile.js?1258958797" type="text/javascript"></script><script src="/javascripts/jstoolbar/lang/jstoolbar-en.js?1258958797" type="text/javascript"></script><script type="text/javascript">
+//<![CDATA[
+var toolbar = new jsToolBar($('notes')); toolbar.setHelpLink('Text formatting: <a href="/help/wiki_syntax.html?1258958797" onclick="window.open(&quot;/help/wiki_syntax.html?1258958797&quot;, &quot;&quot;, &quot;resizable=yes, location=no, width=300, height=640, menubar=no, status=no, scrollbars=yes&quot;); return false;">Help</a>'); toolbar.draw();
+//]]>
+</script>
+    
+    
+    <p>Files<br /><span id="attachments_fields">
+
+<input name="attachments[1][file]" size="30" type="file" /><input name="attachments[1][description]" size="60" type="text" value="" />
+<em>Optional description</em>
+</span>
+<br />
+<small><a href="#" onclick="addFileField(); return false;">Add another file</a>
+(Maximum size: 5 MB)
+</small>
+</p>
+    </fieldset>
+    </div>
+    
+    <input id="issue_lock_version" name="issue[lock_version]" type="hidden" value="0" />
+    <input name="commit" type="submit" value="Submit" />
+
+    <a accesskey="r" href="#" onclick="new Ajax.Updater('preview', '/projects/private_child/issues/preview?id=6', {asynchronous:true, evalScripts:true, method:'post', onComplete:function(request){Element.scrollTo('preview')}, parameters:Form.serialize(&quot;issue-form&quot;) + '&amp;authenticity_token=' + encodeURIComponent('46ecd7461ff4b05f247b49d39a3dddc86a44bc56')}); return false;">Preview</a>
+</form>
+
+<div id="preview" class="wiki"></div>
+
+
+        
+    </div>
+</div>
+
+<div id="ajax-indicator" style="display:none;"><span>Loading...</span></div>
+	
+<div id="footer">
+    Powered by <a href="http://www.redmine.org/">Redmine</a> &copy; 2006-2009 Jean-Philippe Lang
+
+</div>
+</div>
+
+</body>
+</html>
