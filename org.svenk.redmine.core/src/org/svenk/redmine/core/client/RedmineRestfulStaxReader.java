@@ -679,7 +679,7 @@ public class RedmineRestfulStaxReader {
 			while(!(reader.nextTag()==XMLStreamConstants.END_ELEMENT && reader.getLocalName().equals(tagName))) {
 				CustomFieldTag tag = CustomFieldTag.fromTagName(reader.getLocalName());
 				if (tag==null) {
-					throw new RedmineInputParserException("Fehler beim Lesen eines CustomField, unbekanntes Tag : " + reader.getLocalName());
+					throw new RedmineInputParserException(Messages.RedmineRestfulStaxReader_PARSING_OF_CUSTOMFIELD_FAILED_UNKNOWN_TAG + reader.getLocalName());
 				}
 
 				switch(tag) {
@@ -725,10 +725,10 @@ public class RedmineRestfulStaxReader {
 			
 		} catch (NumberFormatException e) {
 			field = null;
-			throw new RedmineInputParserException("Parsing of Customfield failed", e);
+			throw new RedmineInputParserException(Messages.RedmineRestfulStaxReader_PARSING_OF_CUSTOMFIELD_FAILED, e);
 		} catch (XMLStreamException e) {
 			field = null;
-			throw new RedmineInputParserException("Parsing of Customfield failed", e);
+			throw new RedmineInputParserException(Messages.RedmineRestfulStaxReader_PARSING_OF_CUSTOMFIELD_FAILED, e);
 		} finally {
 			skipToEndTag(tagName, reader);
 		} 

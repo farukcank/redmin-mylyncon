@@ -20,6 +20,24 @@
  *******************************************************************************/
 package org.svenk.redmine.core.client;
 
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ATTACHMENT_DESCRIPTION;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ATTACHMENT_FILE;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ATTACHMENT_NOTES;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_CREDENTIALS_PASSWORD;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_CREDENTIALS_USERNAME;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_CSRF_TOKEN;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_CUSTOM_R07E;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_CUSTOM_R08L;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_DESCRIPTION;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_DONERATIO;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_ENDDATE;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_ESTIMATED;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_FIXEDVERSION;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_NOTES;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_REFERENCED_ID;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_STARTDATE;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_SUBJECT;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -68,7 +86,6 @@ import org.svenk.redmine.core.exception.RedmineStatusException;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
 import org.svenk.redmine.core.util.internal.RedminePartSource;
-
 
 
 abstract public class AbstractRedmineClient implements IRedmineClient {
@@ -120,8 +137,8 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	
 	public String checkClientConnection(IProgressMonitor monitor) throws RedmineException {
 		String version = checkClientVersion(monitor);
-		if (!(version.startsWith(""+REDMINE_VERSION_7) || version.startsWith(""+REDMINE_VERSION_8))) {
-			throw new RedmineException("This connector requires Redmine version 0.7.X or 0.8.X");
+		if (!(version.startsWith(Double.toString(REDMINE_VERSION_7)) || version.startsWith(Double.toString(REDMINE_VERSION_8)))) {
+			throw new RedmineException(Messages.AbstractRedmineClient_REQUIRED_REDMINE_VERSION);
 		}
 		return version;
 	}
@@ -158,9 +175,9 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		PostMethod method = new PostMethod(TICKET_EDIT_URL + ticketId);
 		
 		Part[] parts = new Part[]{
-				new FilePart("attachments[1][file]", new RedminePartSource(source, fileName), source.getContentType(), this.httpClient.getParams().getContentCharset()),
-				new StringPart("attachments[1][description]", description, characterEncoding),
-				new StringPart("notes", comment, characterEncoding)
+				new FilePart(CLIENT_FIELD_ATTACHMENT_FILE, new RedminePartSource(source, fileName), source.getContentType(), this.httpClient.getParams().getContentCharset()),
+				new StringPart(CLIENT_FIELD_ATTACHMENT_DESCRIPTION, description, characterEncoding),
+				new StringPart(CLIENT_FIELD_ATTACHMENT_NOTES, comment, characterEncoding)
 		};
 		
 		method.setRequestEntity(new MultipartRequestEntity(parts, method.getParams()));
@@ -185,10 +202,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 					try {
 						return Integer.parseInt(m.group(1));
 					} catch (NumberFormatException e) {
-						throw new RedmineException("INVALID_TASK_ID");
+						throw new RedmineException(Messages.AbstractRedmineClient_INVALID_TASK_ID);
 					}
 				} else {
-					throw new RedmineException("Can't find ID of ticket in response header");
+					throw new RedmineException(Messages.AbstractRedmineClient_MISSING_TASK_ID_IN_RESPONSE);
 				}
 			}
 		} else if(statusCode==HttpStatus.SC_OK) {
@@ -203,12 +220,12 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 					throw new RedmineStatusException(IStatus.INFO, sb.toString().trim());
 				}
 			} catch (IOException e) {
-				IStatus status = RedmineCorePlugin.toStatus(e, null, "READING_OF_UPDATE_RESPONSE_FAILED");
+				IStatus status = RedmineCorePlugin.toStatus(e, null, Messages.AbstractRedmineClient_READ_OF_UPDATE_RESPONSE_FAILED);
 				StatusHandler.log(status);
 				throw new RedmineStatusException(status);
 			}
 		} 
-		throw new RedmineException("UNHANDLED_SUBMIT_ERROR");
+		throw new RedmineException(Messages.AbstractRedmineClient_UNHANDLED_SUBMIT_ERROR);
 	}
 	
 	public void updateTicket(RedmineTicket ticket, String comment, IProgressMonitor monitor) throws RedmineException {
@@ -230,7 +247,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 					throw new RedmineStatusException(IStatus.INFO, sb.toString().trim());
 				}
 			} catch (IOException e) {
-				IStatus status = RedmineCorePlugin.toStatus(e, null, "READING_OF_UPDATE_RESPONSE_FAILED");
+				IStatus status = RedmineCorePlugin.toStatus(e, null, Messages.AbstractRedmineClient_READ_OF_UPDATE_RESPONSE_FAILED);
 				StatusHandler.log(status);
 				throw new RedmineStatusException(status);
 			}
@@ -272,7 +289,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 
 		if (statusCode==HttpStatus.SC_INTERNAL_SERVER_ERROR) {
 			Header statusHeader = method.getResponseHeader("status");
-			String msg = "Server Error";
+			String msg = Messages.AbstractRedmineClient_SERVER_ERROR;
 			if (statusHeader != null) {
 				msg += " : " + statusHeader.getValue().replace(""+HttpStatus.SC_INTERNAL_SERVER_ERROR, "").trim();
 			}
@@ -304,8 +321,8 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	 */
 	protected void performLogin(HostConfiguration hostConfiguration, IProgressMonitor monitor) throws RedmineException {
 		NameValuePair[] credentials = new NameValuePair[]{
-			new NameValuePair("username", location.getCredentials(AuthenticationType.REPOSITORY).getUserName()),	
-			new NameValuePair("password", location.getCredentials(AuthenticationType.REPOSITORY).getPassword())	
+			new NameValuePair(CLIENT_FIELD_CREDENTIALS_USERNAME, location.getCredentials(AuthenticationType.REPOSITORY).getUserName()),	
+			new NameValuePair(CLIENT_FIELD_CREDENTIALS_PASSWORD, location.getCredentials(AuthenticationType.REPOSITORY).getPassword())	
 		};
 		PostMethod method = new PostMethod(LOGIN_URL);
 		method.setRequestBody(credentials);
@@ -329,19 +346,19 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		
 		if (!authenticated) {
 			if (Policy.isBackgroundMonitor(monitor)) {
-				throw new RedmineAuthenticationException(method.getStatusCode(),"MISSING_CREDENTIALS_MANUALLY_SYNC_REQUIRED");
+				throw new RedmineAuthenticationException(method.getStatusCode(),Messages.AbstractRedmineClient_MISSING_CREDENTIALS_MANUALLY_SYNC_REQUIRED);
 			}
 			try {
-				location.requestCredentials(authenticationType, "AUTHENTICATION_REQUIRED", monitor);
+				location.requestCredentials(authenticationType, Messages.AbstractRedmineClient_AUTHENTICATION_REQUIRED, monitor);
 				if (!monitor.isCanceled()) {
 					performLogin(hostConfiguration, monitor);
 					return;
 				}
 			} catch (UnsupportedRequestException e) {
-				IStatus status = RedmineCorePlugin.toStatus(e, null, "REQUEST_CREDENTIALS_FAILED");
+				IStatus status = RedmineCorePlugin.toStatus(e, null, Messages.AbstractRedmineClient_CREDENTIALS_REQUEST_FAILED);
 				StatusHandler.log(status);
 			} catch (OperationCanceledException e) {;
-				throw new RedmineAuthenticationException(method.getStatusCode(),"AUTHENTICATION_REQUIRED");
+				throw new RedmineAuthenticationException(method.getStatusCode(),Messages.AbstractRedmineClient_AUTHENTICATION_REQUIRED);
 			}
 		}
 
@@ -373,20 +390,20 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 				csrfMethod.setPath(method.getPath());
 				if (WebUtil.execute(httpClient, hostConfiguration, csrfMethod, monitor)==HttpStatus.SC_OK) {
 					String token = getResponseReader().readAuthenticityToken(csrfMethod.getResponseBodyAsStream());
-					((PostMethod)method).addParameter("authenticity_token", token);
+					((PostMethod)method).addParameter(CLIENT_FIELD_CSRF_TOKEN, token);
 				}
 			}
 			
 			int statusCode =  WebUtil.execute(httpClient, hostConfiguration, method, monitor);
 			if (statusCode == HttpStatus.SC_UNPROCESSABLE_ENTITY) {
-				throw new RedmineRemoteException("INVALID_AUTHENTICITY_TOKEN");
+				throw new RedmineRemoteException(Messages.AbstractRedmineClient_INVALID_AUTHENTICITY_TOKEN);
 			}
 			return statusCode;
 		} catch (OperationCanceledException e) {
 			monitor.setCanceled(true);
 			throw new RedmineException(e.getMessage(), e);
 		} catch (RuntimeException e) {
-			IStatus status = RedmineCorePlugin.toStatus(e, null, "UNHANDLED_RUNTIME_EXCEPTION");
+			IStatus status = RedmineCorePlugin.toStatus(e, null, Messages.AbstractRedmineClient_UNHANDLED_RUNTIME_EXCEPTION);
 			StatusHandler.fail(status);
 			throw new RedmineStatusException(status);
 		} catch (IOException e) {
@@ -422,12 +439,12 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		Map<String, String> values = ticket.getValues();
 		List<NameValuePair> nameValuePair = new ArrayList<NameValuePair>(this.attributeKeys.length + 2);
 
-		nameValuePair.add(new NameValuePair("issue[subject]", values.get(Key.SUBJECT.getKey())));
-		nameValuePair.add(new NameValuePair("issue[description]", values.get(Key.DESCRIPTION.getKey())));
-		nameValuePair.add(new NameValuePair("issue[done_ratio]", values.get(Key.DONE_RATIO.getKey())));
-		nameValuePair.add(new NameValuePair("issue[estimated_hours]", values.get(Key.ESTIMATED_HOURS.getKey())));
-		nameValuePair.add(new NameValuePair("issue[start_date]", values.get(Key.START_DATE.getKey())));
-		nameValuePair.add(new NameValuePair("issue[due_date]", values.get(Key.DUE_DATE.getKey())));
+		nameValuePair.add(new NameValuePair(CLIENT_FIELD_ISSUE_SUBJECT, values.get(Key.SUBJECT.getKey())));
+		nameValuePair.add(new NameValuePair(CLIENT_FIELD_ISSUE_DESCRIPTION, values.get(Key.DESCRIPTION.getKey())));
+		nameValuePair.add(new NameValuePair(CLIENT_FIELD_ISSUE_DONERATIO, values.get(Key.DONE_RATIO.getKey())));
+		nameValuePair.add(new NameValuePair(CLIENT_FIELD_ISSUE_ESTIMATED, values.get(Key.ESTIMATED_HOURS.getKey())));
+		nameValuePair.add(new NameValuePair(CLIENT_FIELD_ISSUE_STARTDATE, values.get(Key.START_DATE.getKey())));
+		nameValuePair.add(new NameValuePair(CLIENT_FIELD_ISSUE_ENDDATE, values.get(Key.DUE_DATE.getKey())));
 		
 		//Handle RedmineTicketAttributes / ProjectAttributes
 		String xmlRpcKey;
@@ -445,9 +462,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		
 		//CustomTicketFields
 		for (Map.Entry<Integer, String> customValue : ticket.getCustomValues().entrySet()) {
-			String name = redmineVersion<REDMINE_VERSION_8
-				? "custom_fields[" + customValue.getKey() + "]"
-				: "issue[custom_field_values][" + customValue.getKey() + "]";
+				String name = redmineVersion<REDMINE_VERSION_8
+					? CLIENT_FIELD_ISSUE_CUSTOM_R07E
+					: CLIENT_FIELD_ISSUE_CUSTOM_R08L;
+				name = String.format(name, customValue.getKey());
 			nameValuePair.add(new NameValuePair(name, customValue.getValue()));
 		}
 		
@@ -456,7 +474,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	
 	protected List<NameValuePair> ticket2HttpData(RedmineTicket ticket, String comment) {
 		List<NameValuePair> nameValuePair = ticket2HttpData(ticket);
-		nameValuePair.add(new NameValuePair("notes", comment));
+		nameValuePair.add(new NameValuePair(CLIENT_FIELD_ISSUE_NOTES, comment));
 		return nameValuePair;
 	}
 	
@@ -469,10 +487,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	
 	private String redmineKey2ValueName(Key redmineKey) {
 		String name = redmineKey.name().toLowerCase();
-		if (name.equals("version")) {
-			name = "fixed_version";
+		if (name.equals(Key.VERSION.getKey())) {
+			name = CLIENT_FIELD_ISSUE_FIXEDVERSION;
 		}
-		return "issue[" + name + "_id]";
+		return String.format(CLIENT_FIELD_ISSUE_REFERENCED_ID, name);
 	}
 
 }

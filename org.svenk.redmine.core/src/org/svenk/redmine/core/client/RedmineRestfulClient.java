@@ -190,7 +190,7 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 		GetMethod method = new GetMethod(PATH_GET_PROJECTS);
 		InputStream in;
 
-		monitor.beginTask("Updating attributes", 3);
+		monitor.beginTask(Messages.RedmineRestfulClient_UPDATING_ATTRIBUTES, 3);
 		try {
 			executeMethod(method, monitor);
 			in = method.getResponseBodyAsStream();
