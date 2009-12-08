@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.svenk.redmine_feature"
-      label="Mylyn Connector: Redmine"
-      version="3.2.0.qualifier">
+      label="%featureName"
+      version="3.2.0.qualifier"
+      provider-name="%providerName"
+      plugin="org.svenk.redmine">
 
    <description url="http://redmin-mylyncon.wiki.sourceforge.net/Features">
-      Provides Task List integration, offline support and rich editing
-for the open source Redmine project management.
-Note: This version supports only the XML-RPC version of Redmine plugin.
+      %description
    </description>
 
    <copyright url="epl-v10.html">
-      Copyright (c) 2004, 2007 Mylyn project committers and others.
-Copyright (c) 2008  Sven Krzyzak and others.
+      %copyright
    </copyright>
 
    <license url="license.html">
@@ -61,7 +60,7 @@ Java and all Java-based trademarks are trademarks of Sun Microsystems, Inc. in t
    </license>
 
    <url>
-      <update label="Redmine Mylyn Connector" url="http://redmin-mylyncon.sourceforge.net/update-site/nightly"/>
+      <update label="%updateSiteName" url="http://redmin-mylyncon.sourceforge.net/update-site/nightly"/>
    </url>
 
    <requires>
@@ -87,21 +86,28 @@ Java and all Java-based trademarks are trademarks of Sun Microsystems, Inc. in t
          id="org.svenk.redmine.core"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.2.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.svenk.redmine.ui"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.2.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.svenk.redmine.dependency"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="3.2.0.qualifier"
+         unpack="false"/>
+
+   <plugin
+         id="org.svenk.redmine"
+         download-size="0"
+         install-size="0"
+         version="3.2.0.qualifier"
          unpack="false"/>
 
 </feature>
