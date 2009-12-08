@@ -5,7 +5,7 @@
 	</target>
 
 	<target name="custom.postGenerate" >
-		<xslt style="${buildHome}/build-files/aspectj.xsl" basedir="${buildDirectory}/plugins" destdir="${buildDirectory}/plugins" extension=".aspect.out.xml" includes="*/build.xml"></xslt>
+		<xslt style="${buildHome}/build-files/aspectj.xsl" basedir="${buildDirectory}/plugins" destdir="${buildDirectory}/plugins" extension=".aspect.out.xml" includes="*/build.xml" excludes="org.svenk.redmine/build.xml" ></xslt>
 		
 		<move todir="${buildDirectory}/plugins">
 			<mapper type="glob" from="*/build.aspect.out.xml" to="*/build.xml" />
