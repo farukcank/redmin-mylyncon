@@ -9,7 +9,7 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.mylyn.tasks.ui.TasksUiUtil;
-import org.svenk.redmine.core.IRedmineClient;
+import org.svenk.redmine.core.IRedmineConstants;
 import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.RedmineRepositoryConnector;
 import org.svenk.redmine.core.client.RedmineClientData;
@@ -68,7 +68,7 @@ public class RevisionHyperlink implements IHyperlink {
 		}
 		
 		StringBuilder builder = new StringBuilder(taskRepository.getRepositoryUrl());
-		builder.append(IRedmineClient.REVISION_URL);
+		builder.append(IRedmineConstants.REDMINE_URL_REVISION);
 		builder.append(product);
 		builder.append("?rev=");
 		builder.append(revision);

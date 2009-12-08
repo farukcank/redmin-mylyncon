@@ -180,7 +180,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 
 				String commentId = ""+journal.getId();
 				String commentUrl = RedmineRepositoryConnector.getTaskURL(repository.getUrl(), ticket.getId());
-				mapper.setUrl(commentUrl + IRedmineClient.COMMENT_URL + commentId);
+				mapper.setUrl(commentUrl + IRedmineConstants.REDMINE_URL_COMMENT + commentId);
 				mapper.setNumber(count++);
 				mapper.setCommentId(commentId);
 
@@ -200,7 +200,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 				mapper.setContentType(attachment.getContentType());
 				mapper.setFileName(attachment.getFilename());
 				mapper.setLength((long)attachment.getFilesize());
-				String url  = repository.getUrl() + IRedmineClient.ATTACHMENT_URL +  mapper.getAttachmentId();
+				String url  = repository.getUrl() + IRedmineConstants.REDMINE_URL_ATTACHMENT_DOWNLOAD +  mapper.getAttachmentId();
 				mapper.setUrl(url);
 				
 				TaskAttribute attribute = data.getRoot().createAttribute(TaskAttribute.PREFIX_ATTACHMENT + mapper.getAttachmentId());

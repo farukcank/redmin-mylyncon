@@ -58,4 +58,14 @@ public interface IRedmineConstants {
 	public final static String CLIENT_FIELD_ISSUE_FIXEDVERSION = "fixed_version";
 	public final static String CLIENT_FIELD_ISSUE_REFERENCED_ID = "issue[%s_id]";
 
+	public final static String REDMINE_URL_LOGIN = "/login";
+	public final static String REDMINE_URL_LOGIN_CALLBACK = "/login?back_url=";
+	public final static String REDMINE_URL_QUERY = "/issues";
+	public final static String REDMINE_URL_COMMENT = "#note-";
+	public final static String REDMINE_URL_TICKET = "/issues/show/";
+	public final static String REDMINE_URL_TICKET_NEW = "/projects/%s/issues/new";
+	public final static String REDMINE_URL_TICKET_EDIT = "/issues/edit/";
+	public final static String REDMINE_URL_REVISION = "/repositories/revision/";
+	public final static String REDMINE_URL_ATTACHMENT_DOWNLOAD = "/attachments/download/";
+
 }

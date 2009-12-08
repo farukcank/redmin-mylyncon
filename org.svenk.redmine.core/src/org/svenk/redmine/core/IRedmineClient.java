@@ -34,27 +34,7 @@ import org.svenk.redmine.core.model.RedmineTicket;
 
 public interface IRedmineClient {
 
-//	public static final String CHARSET = "UTF-8";
-//
-//	public static final String TIME_ZONE = "UTC";
-//
-	public static final String LOGIN_URL = "/login";
-
-	public static final String QUERY_URL = "/issues";
-
-	public final static String TICKET_URL = "/issues/show/";
-
-	public final static String COMMENT_URL = "#note-";
-
-	public static final String TICKET_NEW_URL = "/issues/new";
-
-	public static final String TICKET_EDIT_URL = "/issues/edit/";
-
-	public static final String REVISION_URL = "/repositories/revision/";
-
-	public static final String ATTACHMENT_URL = "/attachments/download/";
-
-	public boolean hasAttributes();
+public boolean hasAttributes();
 
 	public RedmineClientData getClientData();
 	

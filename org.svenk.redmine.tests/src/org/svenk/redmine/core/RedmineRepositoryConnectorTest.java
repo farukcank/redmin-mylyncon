@@ -123,7 +123,7 @@ public class RedmineRepositoryConnectorTest {
 	public void testGetRepositoryUrlFromTaskUrl() {
 		assertNull(connector.getRepositoryUrlFromTaskUrl("http://www.domain.tld"));
 		assertNull(connector.getRepositoryUrlFromTaskUrl("http://www.domain.tld/path/to/uri"));
-		assertEquals("http://www.domain.tld", connector.getRepositoryUrlFromTaskUrl("http://www.domain.tld" + IRedmineClient.TICKET_URL));
+		assertEquals("http://www.domain.tld", connector.getRepositoryUrlFromTaskUrl("http://www.domain.tld" + IRedmineConstants.REDMINE_URL_TICKET));
 	}
 
 	/**
@@ -148,9 +148,9 @@ public class RedmineRepositoryConnectorTest {
 	@Test
 	public void testGetTaskIdFromTaskUrl() {
 		assertNull(connector.getTaskIdFromTaskUrl("http://www.domain.tld"));
-		assertEquals("2", connector.getTaskIdFromTaskUrl("http://www.domain.tld" + IRedmineClient.TICKET_URL + "2"));
-		assertEquals("22", connector.getTaskIdFromTaskUrl("http://www.domain.tld" + IRedmineClient.TICKET_URL + "22"));
-		assertEquals("22", connector.getTaskIdFromTaskUrl("http://www.domain.tld" + IRedmineClient.TICKET_URL + "22/..."));
+		assertEquals("2", connector.getTaskIdFromTaskUrl("http://www.domain.tld" + IRedmineConstants.REDMINE_URL_TICKET + "2"));
+		assertEquals("22", connector.getTaskIdFromTaskUrl("http://www.domain.tld" + IRedmineConstants.REDMINE_URL_TICKET + "22"));
+		assertEquals("22", connector.getTaskIdFromTaskUrl("http://www.domain.tld" + IRedmineConstants.REDMINE_URL_TICKET + "22/..."));
 	}
 
 	/**

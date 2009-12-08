@@ -73,7 +73,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 
 	private final static String CLIENT_LABEL = "Redmine (supports redmine 0.7 and 0.8 with mylyn plugin)";
 	
-	private final static Pattern TASK_ID_FROM_TASK_URL = Pattern.compile(IRedmineClient.TICKET_URL + "(\\d+)");
+	private final static Pattern TASK_ID_FROM_TASK_URL = Pattern.compile(IRedmineConstants.REDMINE_URL_TICKET + "(\\d+)");
 
 	private TaskRepositoryLocationFactory taskRepositoryLocationFactory;
 
@@ -134,7 +134,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 
 	@Override
 	public String getRepositoryUrlFromTaskUrl(String taskURl) {
-		int index=taskURl.indexOf(IRedmineClient.TICKET_URL);
+		int index=taskURl.indexOf(IRedmineConstants.REDMINE_URL_TICKET);
 		return (index>0) ? taskURl.substring(0, index) : null;
 	}
 
@@ -164,7 +164,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 	}
 	
 	public static String getTaskURL(String repositoryUrl, String taskId) {
-		return repositoryUrl + IRedmineClient.TICKET_URL + taskId;
+		return repositoryUrl + IRedmineConstants.REDMINE_URL_TICKET + taskId;
 	}
 
 	public static String getTaskURL(String repositoryUrl, int taskId) {
