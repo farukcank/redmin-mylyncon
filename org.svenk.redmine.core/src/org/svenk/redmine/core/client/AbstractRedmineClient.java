@@ -37,6 +37,11 @@ import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_NOTES;
 import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_REFERENCED_ID;
 import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_STARTDATE;
 import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_SUBJECT;
+import static org.svenk.redmine.core.IRedmineConstants.REDMINE_URL_ATTACHMENT_DOWNLOAD;
+import static org.svenk.redmine.core.IRedmineConstants.REDMINE_URL_LOGIN;
+import static org.svenk.redmine.core.IRedmineConstants.REDMINE_URL_LOGIN_CALLBACK;
+import static org.svenk.redmine.core.IRedmineConstants.REDMINE_URL_TICKET_EDIT;
+import static org.svenk.redmine.core.IRedmineConstants.REDMINE_URL_TICKET_NEW;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -93,6 +98,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	protected final static double REDMINE_VERSION_7 = 0.7D;
 
 	protected final static double REDMINE_VERSION_8 = 0.8D;
+	
+	protected final static String HEADER_STATUS = "status"; //$NON-NLS-1$
+
+	protected final static String HEADER_REDIRECT = "location"; //$NON-NLS-1$
 
 	protected final HttpClient httpClient;
 	
@@ -155,14 +164,15 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	}
 	
 	protected boolean isCsrfTokenRequired(HttpMethod method) {
-		if (vRedmine.compareTo(Release.ZEROEIGHTSEVEN)>=0) {
-			return (method.getName().equalsIgnoreCase("POST") && !method.getPath().contains("mylyn"));
+		if (vRedmine!=null && vRedmine.compareTo(Release.ZEROEIGHTSEVEN)>=0) {
+			//TODO lookup for string part mylyn  isn't a perfect solution
+			return (method.getName().equalsIgnoreCase("POST") && !method.getPath().contains("mylyn")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return false;
 	}
 	
 	public InputStream getAttachmentContent(int attachmentId, IProgressMonitor monitor) throws RedmineException {
-		GetMethod method = new GetMethod(IRedmineClient.ATTACHMENT_URL + attachmentId);
+		GetMethod method = new GetMethod(REDMINE_URL_ATTACHMENT_DOWNLOAD + attachmentId);
 		try {
 			int statusCode = executeMethod(method, monitor);
 			return statusCode==HttpStatus.SC_OK ? method.getResponseBodyAsStream() : null;
@@ -172,7 +182,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	}
 	
 	public void uploadAttachment(int ticketId, String fileName, String comment, String description, AbstractTaskAttachmentSource source, IProgressMonitor monitor) throws RedmineException {
-		PostMethod method = new PostMethod(TICKET_EDIT_URL + ticketId);
+		PostMethod method = new PostMethod(REDMINE_URL_TICKET_EDIT + ticketId);
 		
 		Part[] parts = new Part[]{
 				new FilePart(CLIENT_FIELD_ATTACHMENT_FILE, new RedminePartSource(source, fileName), source.getContentType(), this.httpClient.getParams().getContentCharset()),
@@ -186,18 +196,18 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	}
 	
 	public int createTicket(RedmineTicket ticket, IProgressMonitor monitor) throws RedmineException {
-		PostMethod method = new PostMethod("/projects/" + ticket.getValue(Key.PROJECT) + TICKET_NEW_URL);
+		PostMethod method = new PostMethod(String.format(REDMINE_URL_TICKET_NEW, ticket.getValue(Key.PROJECT)));
 		
 		List<NameValuePair> values = this.ticket2HttpData(ticket);
 		method.setRequestBody(values.toArray(new NameValuePair[values.size()]));
 
 		int statusCode  = executeMethod(method, monitor);
 		if (statusCode>=300 && statusCode<=399) {
-			Header respHeader = method.getResponseHeader("location");
+			Header respHeader = method.getResponseHeader(HEADER_REDIRECT);
 			if (respHeader != null) {
 				String location = respHeader.getValue();
 				
-				Matcher m = Pattern.compile("(\\d+)$").matcher(location);
+				Matcher m = Pattern.compile("(\\d+)$").matcher(location); //$NON-NLS-1$
 				if (m.find()) {
 					try {
 						return Integer.parseInt(m.group(1));
@@ -215,7 +225,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 					StringBuilder sb = new StringBuilder();
 					for (Iterator<String> iterator = messages.iterator(); iterator.hasNext();) {
 						sb.append(iterator.next());
-						sb.append(" ");
+						sb.append(" "); //$NON-NLS-1$
 					}
 					throw new RedmineStatusException(IStatus.INFO, sb.toString().trim());
 				}
@@ -229,7 +239,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	}
 	
 	public void updateTicket(RedmineTicket ticket, String comment, IProgressMonitor monitor) throws RedmineException {
-		PostMethod method = new PostMethod(TICKET_EDIT_URL + ticket.getId());
+		PostMethod method = new PostMethod(REDMINE_URL_TICKET_EDIT + ticket.getId());
 
 		List<NameValuePair> values = this.ticket2HttpData(ticket, comment);
 		method.setRequestBody(values.toArray(new NameValuePair[values.size()]));
@@ -242,7 +252,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 					StringBuilder sb = new StringBuilder();
 					for (Iterator<String> iterator = messages.iterator(); iterator.hasNext();) {
 						sb.append(iterator.next());
-						sb.append(" ");
+						sb.append(" "); //$NON-NLS-1$
 					}
 					throw new RedmineStatusException(IStatus.INFO, sb.toString().trim());
 				}
@@ -280,7 +290,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	 * @throws RedmineException
 	 */
 	protected int executeMethod(HttpMethod method, HostConfiguration hostConfiguration, IProgressMonitor monitor, boolean authenticated) throws RedmineException {
-		if (!isAuthenticated(hostConfiguration)) {
+		if (requiresAuthentication(method) && !isAuthenticated(hostConfiguration)) {
 			performLogin(hostConfiguration, monitor);
 			authenticated = true;
 		}
@@ -288,12 +298,16 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		int statusCode = performExecuteMethod(method, hostConfiguration, monitor);
 
 		if (statusCode==HttpStatus.SC_INTERNAL_SERVER_ERROR) {
-			Header statusHeader = method.getResponseHeader("status");
+			Header statusHeader = method.getResponseHeader(HEADER_STATUS);
 			String msg = Messages.AbstractRedmineClient_SERVER_ERROR;
 			if (statusHeader != null) {
-				msg += " : " + statusHeader.getValue().replace(""+HttpStatus.SC_INTERNAL_SERVER_ERROR, "").trim();
+				msg += " : " + statusHeader.getValue().replace(""+HttpStatus.SC_INTERNAL_SERVER_ERROR, "").trim(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			throw new RedmineRemoteException(msg);
+		}
+		
+		if (statusCode>=400 && statusCode<=599) {
+			throw new RedmineRemoteException(method.getStatusLine().toString());
 		}
 		
 		if (statusCode==HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED) {
@@ -301,8 +315,8 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 			return executeMethod(method, hostConfiguration, monitor, authenticated);
 		}
 		
-		Header respHeader = method.getResponseHeader("location");
-		if (respHeader != null && (respHeader.getValue().endsWith(LOGIN_URL) || respHeader.getValue().indexOf(LOGIN_URL+"?back_url=")>=0)) {
+		Header respHeader = method.getResponseHeader(HEADER_REDIRECT);
+		if (respHeader != null && (respHeader.getValue().endsWith(REDMINE_URL_LOGIN) || respHeader.getValue().indexOf(REDMINE_URL_LOGIN_CALLBACK)>=0)) {
 			if (authenticated) {
 				hostConfiguration = refreshCredentials(AuthenticationType.REPOSITORY, method, monitor);
 			}
@@ -324,7 +338,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 			new NameValuePair(CLIENT_FIELD_CREDENTIALS_USERNAME, location.getCredentials(AuthenticationType.REPOSITORY).getUserName()),	
 			new NameValuePair(CLIENT_FIELD_CREDENTIALS_PASSWORD, location.getCredentials(AuthenticationType.REPOSITORY).getPassword())	
 		};
-		PostMethod method = new PostMethod(LOGIN_URL);
+		PostMethod method = new PostMethod(REDMINE_URL_LOGIN);
 		method.setRequestBody(credentials);
 
 		performExecuteMethod(method, hostConfiguration, monitor);
@@ -364,11 +378,15 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 
 	}
 	
+	protected boolean requiresAuthentication(HttpMethod method) {
+		return !method.getParams().getCookiePolicy().equals(CookiePolicy.IGNORE_COOKIES);
+	}
+	
 	private boolean isAuthenticated(HostConfiguration hostConfiguration) {
 		Cookie[] cookies = httpClient.getState().getCookies();
 		for (Cookie cookie : cookies) {
 			if (cookie.getExpiryDate()==null || cookie.getExpiryDate().after(new Date())) {
-				if (cookie.getName().contains("session")) {
+				if (cookie.getName().contains("session")) { //$NON-NLS-1$
 					return true;
 				}
 			}

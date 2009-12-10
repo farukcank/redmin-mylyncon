@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.svenk.redmine.core.IRedmineClient;
+import org.svenk.redmine.core.IRedmineConstants;
 import org.svenk.redmine.core.client.RedmineProjectData;
 import org.svenk.redmine.core.model.RedmineSearchFilter.CompareOperator;
 import org.svenk.redmine.core.model.RedmineSearchFilter.SearchField;
@@ -103,7 +103,7 @@ public class RedmineSearch {
 	
 	public String toQuery() {
 		StringBuffer sb = new StringBuffer(repositoryUrl);
-		sb.append(IRedmineClient.QUERY_URL);
+		sb.append(IRedmineConstants.REDMINE_URL_QUERY);
 		sb.append("?");
 		sb.append(toSearchQueryParam());
 		return sb.toString();
