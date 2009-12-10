@@ -164,7 +164,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	}
 	
 	protected boolean isCsrfTokenRequired(HttpMethod method) {
-		if (vRedmine.compareTo(Release.ZEROEIGHTSEVEN)>=0) {
+		if (vRedmine!=null && vRedmine.compareTo(Release.ZEROEIGHTSEVEN)>=0) {
 			//TODO lookup for string part mylyn  isn't a perfect solution
 			return (method.getName().equalsIgnoreCase("POST") && !method.getPath().contains("mylyn")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -290,7 +290,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	 * @throws RedmineException
 	 */
 	protected int executeMethod(HttpMethod method, HostConfiguration hostConfiguration, IProgressMonitor monitor, boolean authenticated) throws RedmineException {
-		if (!isAuthenticated(hostConfiguration)) {
+		if (requiresAuthentication(method) && !isAuthenticated(hostConfiguration)) {
 			performLogin(hostConfiguration, monitor);
 			authenticated = true;
 		}
@@ -304,6 +304,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 				msg += " : " + statusHeader.getValue().replace(""+HttpStatus.SC_INTERNAL_SERVER_ERROR, "").trim(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			throw new RedmineRemoteException(msg);
+		}
+		
+		if (statusCode>=400 && statusCode<=599) {
+			throw new RedmineRemoteException(method.getStatusLine().toString());
 		}
 		
 		if (statusCode==HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED) {
@@ -372,6 +376,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 			}
 		}
 
+	}
+	
+	protected boolean requiresAuthentication(HttpMethod method) {
+		return !method.getParams().getCookiePolicy().equals(CookiePolicy.IGNORE_COOKIES);
 	}
 	
 	private boolean isAuthenticated(HostConfiguration hostConfiguration) {
