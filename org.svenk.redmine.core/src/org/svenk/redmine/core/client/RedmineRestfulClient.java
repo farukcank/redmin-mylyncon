@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -69,7 +68,6 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 
 	public RedmineRestfulClient(AbstractWebLocation location, RedmineClientData clientData, TaskRepository repository) {
 		super(location, clientData, repository);
-		refreshRepositorySettings(repository);
 		
 		reader = new RedmineRestfulStaxReader();
 	}
@@ -94,7 +92,6 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 	@Override
 	protected String checkClientVersion(IProgressMonitor monitor) throws RedmineException {
 		GetMethod method = new GetMethod(PATH_GET_VERSION);
-		method.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
 
 		executeMethod(method, monitor);
 		InputStream in;

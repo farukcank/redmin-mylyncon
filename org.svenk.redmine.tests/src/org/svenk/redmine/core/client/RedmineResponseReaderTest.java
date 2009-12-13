@@ -26,7 +26,12 @@ public class RedmineResponseReaderTest extends TestCase {
 		String token = testee.readAuthenticityToken(in);
 		assertNotNull(token);
 		assertEquals("46ecd7461ff4b05f247b49d39a3dddc86a44bc56", token);
-		
+	}
+	
+	public void testReadnExistsNoAuthenticityToken() throws RedmineException {
+		InputStream in = getClass().getResourceAsStream("/response/noauthenticity.html");
+		String token = testee.readAuthenticityToken(in);
+		assertNull(token);
 	}
 	
 	public void testReadError_exists() throws RedmineException {

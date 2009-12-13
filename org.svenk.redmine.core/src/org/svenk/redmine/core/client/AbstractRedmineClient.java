@@ -117,8 +117,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	protected double redmineVersion = 0D;
 	
 	protected Version.Redmine vRedmine;
-
+	
 	protected RedmineTicket.Key attributeKeys[] = new RedmineTicket.Key[]{Key.ASSIGNED_TO, Key.PRIORITY, Key.VERSION, Key.CATEGORY, Key.STATUS, Key.TRACKER};
+	
+	protected final TaskRepository repository;
 	
 	public AbstractRedmineClient(AbstractWebLocation location, RedmineClientData clientData, TaskRepository repository) {
 		this.location = location;
@@ -129,6 +131,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		this.httpClient.getParams().setContentCharset(characterEncoding);
 		this.httpClient.getParams().setCookiePolicy(CookiePolicy.RFC_2109);
 		
+		this.repository = repository;
 		refreshRepositorySettings(repository);
 	}
 
@@ -140,7 +143,6 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		if (!repository.getVersion().equals(TaskRepository.NO_VERSION_SPECIFIED)) {
 			redmineVersion = getRedmineVersion(repository.getVersion());
 		}
-		
 		vRedmine = Version.Redmine.fromString(repository.getVersion());
 	}
 	
@@ -163,8 +165,21 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		return false;
 	}
 	
+	private boolean getEnforceCsrfToken() {
+		String val = repository.getProperty(CLIENT_FIELD_CSRF_TOKEN);
+		if (val==null) {
+			setEnforceCsrfToken(true);
+			return true;
+		}
+		return Boolean.parseBoolean(val);
+	}
+	
+	private void setEnforceCsrfToken(boolean flag) {
+		repository.setProperty(CLIENT_FIELD_CSRF_TOKEN, Boolean.toString(flag));
+	}
+	
 	protected boolean isCsrfTokenRequired(HttpMethod method) {
-		if (vRedmine!=null && vRedmine.compareTo(Release.ZEROEIGHTSEVEN)>=0) {
+		if (vRedmine==null && getEnforceCsrfToken() || vRedmine!=null && vRedmine.compareTo(Release.ZEROEIGHTSEVEN)>=0) {
 			//TODO lookup for string part mylyn  isn't a perfect solution
 			return (method.getName().equalsIgnoreCase("POST") && !method.getPath().contains("mylyn")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -290,7 +305,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	 * @throws RedmineException
 	 */
 	protected int executeMethod(HttpMethod method, HostConfiguration hostConfiguration, IProgressMonitor monitor, boolean authenticated) throws RedmineException {
-		if (requiresAuthentication(method) && !isAuthenticated(hostConfiguration)) {
+		if (!isAuthenticated(hostConfiguration)) {
 			performLogin(hostConfiguration, monitor);
 			authenticated = true;
 		}
@@ -378,10 +393,6 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 
 	}
 	
-	protected boolean requiresAuthentication(HttpMethod method) {
-		return !method.getParams().getCookiePolicy().equals(CookiePolicy.IGNORE_COOKIES);
-	}
-	
 	private boolean isAuthenticated(HostConfiguration hostConfiguration) {
 		Cookie[] cookies = httpClient.getState().getCookies();
 		for (Cookie cookie : cookies) {
@@ -408,12 +419,17 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 				csrfMethod.setPath(method.getPath());
 				if (WebUtil.execute(httpClient, hostConfiguration, csrfMethod, monitor)==HttpStatus.SC_OK) {
 					String token = getResponseReader().readAuthenticityToken(csrfMethod.getResponseBodyAsStream());
-					((PostMethod)method).addParameter(CLIENT_FIELD_CSRF_TOKEN, token);
+					if (token==null) {
+						setEnforceCsrfToken(false);
+					} else {
+						((PostMethod)method).addParameter(CLIENT_FIELD_CSRF_TOKEN, token);
+					}
 				}
 			}
 			
 			int statusCode =  WebUtil.execute(httpClient, hostConfiguration, method, monitor);
 			if (statusCode == HttpStatus.SC_UNPROCESSABLE_ENTITY) {
+				setEnforceCsrfToken(true);
 				throw new RedmineRemoteException(Messages.AbstractRedmineClient_INVALID_AUTHENTICITY_TOKEN);
 			}
 			return statusCode;
