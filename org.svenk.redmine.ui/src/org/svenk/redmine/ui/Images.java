@@ -30,8 +30,10 @@ public class Images {
 	
 	public final static String FIND_CLEAR = "/icons/etool16/clear.gif";
 
+	public final static String PERSON_NARROW = "/icons/etool16/person-narrow.gif";
+
 	public static ImageDescriptor getImageDescriptor(String key) {
-		ImageDescriptor imageDescriptor = RedmineUiPlugin.imageDescriptorFromPlugin("org.eclipse.mylyn.commons.ui", "/icons/etool16/clear.gif");
+		ImageDescriptor imageDescriptor = RedmineUiPlugin.imageDescriptorFromPlugin("org.eclipse.mylyn.commons.ui", key);
 		return imageDescriptor;
 	}
 

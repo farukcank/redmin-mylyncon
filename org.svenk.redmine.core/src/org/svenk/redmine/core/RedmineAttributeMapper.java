@@ -23,19 +23,27 @@ package org.svenk.redmine.core;
 
 import java.util.Date;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.mylyn.commons.core.StatusHandler;
+import org.eclipse.mylyn.tasks.core.IRepositoryPerson;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskAttributeMapper;
+import org.svenk.redmine.core.client.RedmineClientData;
+import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.util.RedmineUtil;
 
 public class RedmineAttributeMapper extends TaskAttributeMapper {
 
+	private RedmineClientData clientData;
+	
 	enum Flag {
 		READ_ONLY, HIDDEN, CUSTOM_FIELD, REQUIRED
 	}
 	
-	public RedmineAttributeMapper(TaskRepository taskRepository) {
+	public RedmineAttributeMapper(TaskRepository taskRepository, RedmineClientData clientData) {
 		super(taskRepository);
+		this.clientData = clientData;
 	}
 
 	@Override
@@ -51,5 +59,28 @@ public class RedmineAttributeMapper extends TaskAttributeMapper {
 	public String mapToRepositoryKey(TaskAttribute parent, String key) {
 		RedmineAttribute attribute = RedmineAttribute.getByTaskKey(key);
 		return (attribute != null) ? attribute.getRedmineKey() : key;
+	}
+	
+	@Override
+	public IRepositoryPerson getRepositoryPerson(TaskAttribute taskAttribute) {
+		IRepositoryPerson person =  super.getRepositoryPerson(taskAttribute);
+		
+		if (clientData==null || person.getPersonId()==null || person.getPersonId().equals("")) {
+			return person;
+		}
+		
+		try {
+			RedmineMember member = clientData.getPerson(Integer.parseInt(person.getPersonId()));
+			if (member!=null) {
+				if (person.getName()==null || person.getName().equals("")) {
+					person.setName(member.getName());
+				}
+			}
+		} catch (NumberFormatException e) {
+			IStatus status = RedmineCorePlugin.toStatus(e, null, "INVALID_MEMBER_ID_{0}", person.getPersonId());
+			StatusHandler.log(status);
+		}
+		
+		return person;
 	}
 }

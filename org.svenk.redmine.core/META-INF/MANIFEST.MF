@@ -18,6 +18,7 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.svenk.redmine.core,
  org.svenk.redmine.core.client,
  org.svenk.redmine.core.client.container,
+ org.svenk.redmine.core.data,
  org.svenk.redmine.core.exception,
  org.svenk.redmine.core.model,
  org.svenk.redmine.core.util

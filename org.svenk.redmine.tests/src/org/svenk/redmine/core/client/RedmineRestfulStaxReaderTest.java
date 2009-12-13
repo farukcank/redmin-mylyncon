@@ -131,7 +131,7 @@ public class RedmineRestfulStaxReaderTest extends TestCase {
 		
 		in.close();
 	}
-	
+
 	public void testVersion() throws Exception {
 		InputStream in = getClass().getResourceAsStream("/xmldata/version.xml");
 
@@ -148,6 +148,7 @@ public class RedmineRestfulStaxReaderTest extends TestCase {
 		
 		in.close();
 	}
+
 	public void testReadProjects() throws Exception  {
 		InputStream in = getClass().getResourceAsStream("/xmldata/projects.xml");
 		

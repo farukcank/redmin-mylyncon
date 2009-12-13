@@ -26,16 +26,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.svenk.redmine.core.model.RedmineActivity;
+import org.svenk.redmine.core.model.RedmineCustomField;
+import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.model.RedminePriority;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
 
 public class RedmineClientData implements Serializable {
 	
-	private static final long serialVersionUID = 2411077852012039140L;
+	private static final long serialVersionUID = 6L;
 
 	List<RedminePriority> priorities = new ArrayList<RedminePriority>(); 
 	
 	List<RedmineTicketStatus> statuses = new ArrayList<RedmineTicketStatus>(); 
+
+	List<RedmineActivity> activities = new ArrayList<RedmineActivity>();
+
+	List<RedmineCustomField> customFields = new ArrayList<RedmineCustomField>();
 
 	List<RedmineProjectData> projects = new ArrayList<RedmineProjectData>();
 	
@@ -50,6 +57,14 @@ public class RedmineClientData implements Serializable {
 		return statuses;
 	}
 
+	public List<RedmineActivity> getActivities() {
+		return activities;
+	}
+	
+	public List<RedmineCustomField> getCustomFields() {
+		return customFields;
+	}
+	
 	public List<RedmineProjectData> getProjects() {
 		return projects;
 	}
@@ -107,7 +122,27 @@ public class RedmineClientData implements Serializable {
 		}
 		return null;
 	}
+
+	public RedmineActivity getActivity(int value) {
+		for (RedmineActivity activity : activities) {
+			if (activity.getValue()==value) {
+				return activity;
+			}
+		}
+		return null;
+	}
 	
+	public RedmineMember getPerson(int value) {
+		//TODO list with all members required (project independent)
+		for (RedmineProjectData projectData : projects) {
+			RedmineMember member = projectData.getMember(value);
+			if(member!=null) {
+				return member;
+			}
+		}
+		return null;
+	}
+
 	public boolean needsUpdate() {
 		return priorities.size()==0 || statuses.size()==0 || projects.size()==0;
 	}

@@ -63,4 +63,6 @@ public boolean hasAttributes();
 	public boolean supportTaskRelations();
 	
 	public boolean supportStartDueDate();
+
+	public boolean supportTimeEntries();
 }

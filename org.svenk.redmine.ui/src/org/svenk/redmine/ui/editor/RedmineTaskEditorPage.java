@@ -91,12 +91,21 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 	protected Set<TaskEditorPartDescriptor> createPartDescriptors() {
 		Set<TaskEditorPartDescriptor> descriptors = super.createPartDescriptors();
 
+		//TODO change ID
 		descriptors.add(new TaskEditorPartDescriptor("ID-CHANGE-ME") {
 			@Override
 			public AbstractTaskEditorPart createPart() {
 				return new RedminePlanningEditorPart();
 			}
 		}.setPath(PATH_ATTRIBUTES));
+
+		//TODO change ID
+		descriptors.add(new TaskEditorPartDescriptor("ID-CHANGE-ME2") {
+			@Override
+			public AbstractTaskEditorPart createPart() {
+				return new RedmineTimeEntryEditorPart();
+			}
+		}.setPath(PATH_COMMENTS));
 
 		return descriptors;
 	}

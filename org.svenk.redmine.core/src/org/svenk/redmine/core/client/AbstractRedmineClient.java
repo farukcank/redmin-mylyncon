@@ -163,6 +163,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		return false;
 	}
 	
+	public boolean supportTimeEntries() {
+		return false;
+	}
+	
 	protected boolean isCsrfTokenRequired(HttpMethod method) {
 		if (vRedmine!=null && vRedmine.compareTo(Release.ZEROEIGHTSEVEN)>=0) {
 			//TODO lookup for string part mylyn  isn't a perfect solution

@@ -42,9 +42,12 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskAttributeMapper;
 import org.eclipse.mylyn.tasks.core.data.TaskCommentMapper;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
+import org.svenk.redmine.core.client.RedmineClientData;
 import org.svenk.redmine.core.client.RedmineProjectData;
+import org.svenk.redmine.core.data.RedmineTaskTimeEntryMapper;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineStatusException;
+import org.svenk.redmine.core.model.RedmineActivity;
 import org.svenk.redmine.core.model.RedmineAttachment;
 import org.svenk.redmine.core.model.RedmineCustomField;
 import org.svenk.redmine.core.model.RedmineMember;
@@ -54,6 +57,7 @@ import org.svenk.redmine.core.model.RedmineTicketAttribute;
 import org.svenk.redmine.core.model.RedmineTicketJournal;
 import org.svenk.redmine.core.model.RedmineTicketProgress;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
+import org.svenk.redmine.core.model.RedmineTimeEntry;
 import org.svenk.redmine.core.model.RedmineCustomField.FieldType;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
 import org.svenk.redmine.core.util.RedmineUtil;
@@ -69,7 +73,8 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 
 	@Override
 	public TaskAttributeMapper getAttributeMapper(TaskRepository taskRepository) {
-		return new RedmineAttributeMapper(taskRepository);
+		RedmineClientData clientData = connector.getClientManager().getClientData(taskRepository);
+		return new RedmineAttributeMapper(taskRepository, clientData);
 	}
 
 	public TaskData getTaskData(TaskRepository repository, String taskId, IProgressMonitor monitor) throws CoreException {
@@ -205,6 +210,34 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 				
 				TaskAttribute attribute = data.getRoot().createAttribute(TaskAttribute.PREFIX_ATTACHMENT + mapper.getAttachmentId());
 				mapper.applyTo(attribute);
+			}
+		}
+
+		if (client.supportTimeEntries()) {
+			RedmineTimeEntry[] timeEntries = ticket.getTimeEntries();
+			if(timeEntries != null) {
+				for (RedmineTimeEntry timeEntry : timeEntries) {
+					RedmineTaskTimeEntryMapper mapper = new RedmineTaskTimeEntryMapper(timeEntry, client.getClientData());
+					TaskAttribute attribute = data.getRoot().createAttribute(IRedmineConstants.TASK_ATTRIBUTE_TIMEENTRY + timeEntry.getId());
+					mapper.applyTo(attribute);
+		
+					//Options(s) for ActivityId
+					TaskAttribute activityAttribute = RedmineTaskTimeEntryMapper.getActivityAttribute(attribute);
+					RedmineActivity activity = client.getClientData().getActivity(mapper.getActivityId());
+					if (activity!=null) {
+						activityAttribute.putOption(""+activity.getValue(), activity.getName());
+					}
+		
+					//Labels of CustomFields
+					for(RedmineCustomField customField : client.getClientData().getCustomFields()) {
+						TaskAttribute customAttribute = RedmineTaskTimeEntryMapper.getCustomAttribute(attribute, customField.getId());
+						if (customAttribute!=null) {
+							customAttribute.getMetaData().setLabel(customField.getName());
+						}
+					}
+					
+				}
+				
 			}
 		}
 

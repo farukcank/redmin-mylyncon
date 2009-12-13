@@ -25,6 +25,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.svenk.redmine.core.model.RedmineActivity;
 import org.svenk.redmine.core.model.RedmineCustomField;
 import org.svenk.redmine.core.model.RedmineCustomField.FieldType;
 
@@ -62,6 +63,22 @@ public class RedmineRestfulStaxReaderWS26Test extends TestCase {
 		assertEquals(100, field.getMax());
 		assertFalse(field.isRequired());
 
+		in.close();
+	}
+
+	public void testReadActivities() throws Exception  {
+		InputStream in = getClass().getResourceAsStream("/xmldata/activities.xml");
+		
+		List<RedmineActivity> list = testee.readActivities(in);
+		
+		assertNotNull(list);
+		assertEquals(3, list.size());
+		
+		RedmineActivity activity = list.get(1);
+		assertEquals(10, activity.getValue());
+		assertEquals("Development", activity.getName());
+		assertEquals(true, activity.isDefaultPriority());
+		
 		in.close();
 	}
 

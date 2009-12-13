@@ -53,6 +53,10 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 	protected final static String PATH_GET_PRIORITIES = "/mylyn/priorities";
 	
 	protected final static String PATH_GET_ISSUE_STATUS = "/mylyn/issuestatus";
+
+	protected final static String PATH_GET_ACTIVITIES = "/mylyn/activities";
+
+	protected final static String PATH_GET_CUSTOM_FIELDS = "/mylyn/customfields";
 	
 	protected final static String PATH_GET_TICKET = "/mylyn/issue/" + PLACEHOLDER;
 
@@ -182,8 +186,16 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 
 	@Override
 	public boolean supportStartDueDate() {
+		//TODO replace like vRedmine.compareTo(Release.ZEROEIGHTSEVEN
 		return wsVersion >= IRedmineConstants.PLUGIN_VERSION_2_6;
 	}
+
+	@Override
+	public boolean supportTimeEntries() {
+		//TODO replace like vRedmine.compareTo(Release.ZEROEIGHTSEVEN
+		return wsVersion >= IRedmineConstants.PLUGIN_VERSION_2_6;
+	}
+
 	public synchronized void updateAttributes(boolean force, IProgressMonitor monitor) throws RedmineException {
 		if (!force && hasAttributes()) {
 			return;
@@ -192,7 +204,7 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 		GetMethod method = new GetMethod(PATH_GET_PROJECTS);
 		InputStream in;
 
-		monitor.beginTask(Messages.RedmineRestfulClient_UPDATING_ATTRIBUTES, 3);
+		monitor.beginTask(Messages.RedmineRestfulClient_UPDATING_ATTRIBUTES, supportTimeEntries() ? 5 : 3);
 		try {
 			executeMethod(method, monitor);
 			in = method.getResponseBodyAsStream();
@@ -223,6 +235,29 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 				throw new OperationCanceledException();
 			}
 
+			if (supportTimeEntries()) {
+				method = new GetMethod(PATH_GET_ACTIVITIES);
+				executeMethod(method, monitor);
+				in = method.getResponseBodyAsStream();
+				data.activities.clear();
+				data.activities.addAll(reader.readActivities(in));
+				monitor.worked(1);
+				if (monitor.isCanceled()) {
+					throw new OperationCanceledException();
+				}
+				
+				method = new GetMethod(PATH_GET_CUSTOM_FIELDS);
+				executeMethod(method, monitor);
+				in = method.getResponseBodyAsStream();
+				data.customFields.clear();
+				data.customFields.addAll(reader.readCustomFields(in));
+				monitor.worked(1);
+				if (monitor.isCanceled()) {
+					throw new OperationCanceledException();
+				}
+				
+			}
+			
 			data.lastupdate=new Date().getTime();
 		} catch (IOException e) {
 			throw new RedmineRemoteException(e.getMessage(), e);
