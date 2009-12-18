@@ -414,7 +414,7 @@ public class RedmineRestfulStaxReader {
 				if (key==null) {
 					if (reader.getLocalName().equals("availableStatus")) {
 						List<Integer> idList = ticket.getAvailableStatusList();
-						for (String id : reader.getElementText().split("\\s")) {
+						for (String id : reader.getElementText().split("\\s+")) {
 							id = id.trim();
 							if (id.length()>0) {
 								idList.add(Integer.valueOf(id));
@@ -712,7 +712,7 @@ public class RedmineRestfulStaxReader {
 						field.setListValues(possibleValues.toArray(new String[possibleValues.size()]));
 						break;
 					case trackers : 
-						String[] trackerIdVals = reader.getElementText().trim().split("\\s");
+						String[] trackerIdVals = reader.getElementText().trim().split("\\s+");
 						int[] trackerIds = new int[trackerIdVals.length];
 						for (int i=trackerIdVals.length-1; i>=0; i--) {
 							trackerIds[i] = Integer.parseInt(trackerIdVals[i]);

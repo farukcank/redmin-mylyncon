@@ -83,7 +83,7 @@
   <defaultValue>Default string</defaultValue>
   <required>false</required>
   <filter>false</filter>
-  <trackers>1 3</trackers>
+  <trackers> 1  3 </trackers>
 </issueCustomField>
   </issueCustomFields>
   <queries>
