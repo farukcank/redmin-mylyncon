@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issue xmlns="http://redmin-mylyncon.sf.net/schemas/WS-API-2.6" id="4">
+  <subject>Issue on project 2</subject>
+  <description>Issue on project 2</description>
+  <author>John Smith</author>
+  <createdOn unixtime="1256770800">2009-10-29T00:00:00+01:00</createdOn>
+  <updatedOn unixtime="1257030000">2009-11-01T00:00:00+01:00</updatedOn>
+  <projectId>2</projectId>
+  <trackerId>1</trackerId>
+  <priorityId>4</priorityId>
+  <statusId>1</statusId>
+  <doneRatio>0</doneRatio>
+  <availableStatus>2 3 4 5 6 1</availableStatus>
+  <watched>false</watched>
+  <watchers></watchers>
+  <customValues>
+  </customValues>
+  <journals>
+  </journals>
+  <attachments>
+    <attachment id="7">
+      <author>redMine Admin</author>
+      <createdOn unixtime="1153336047">2006-07-19T21:07:27+02:00</createdOn>
+      <filename>archive.zip</filename>
+      <filesize>157</filesize>
+      <digest>b91e08d0cf966d5c6ff411bd8c4cc3a2</digest>
+      <contentType>application/octet-stream</contentType>
+      <description></description>
+    </attachment>
+  </attachments>
+  <issueRelations>
+  </issueRelations>
+  <timeEntries viewAllowed="false" newAllowed="false">
+  </timeEntries>
+</issue>

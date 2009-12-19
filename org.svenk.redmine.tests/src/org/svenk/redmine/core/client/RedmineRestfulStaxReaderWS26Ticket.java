@@ -65,6 +65,13 @@ public class RedmineRestfulStaxReaderWS26Ticket extends TestCase {
 		in.close();
 	}
 	
+	public void testReadTicket4() throws Exception {
+		InputStream in = getClass().getResourceAsStream("/xmldata/issue_4.xml");
+		RedmineTicket ticket = testee.readTicket(in);
+		assertNotNull(ticket);
+		in.close();
+	}
+	
 	protected void validateTicket3Core(RedmineTicket ticket) {
 		assertEquals(3, ticket.getId());
 		assertEquals("Error 281 when updating a recipe", ticket.getValue(Key.SUBJECT));

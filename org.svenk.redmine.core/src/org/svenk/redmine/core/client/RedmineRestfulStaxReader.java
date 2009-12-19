@@ -455,12 +455,17 @@ public class RedmineRestfulStaxReader {
 					} else if (reader.getLocalName().equals("timeEntries")) {
 						//TODO AccessControl
 						//TODO sum
-						reader.nextTag();//sum
-						reader.getElementText();
-						while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
-							RedmineTimeEntry timeEntry = readCurrentTagAsTimeEntry(reader);
-							if (timeEntry!=null) {
-								ticket.addTimeEntry(timeEntry);
+						boolean viewAllowed = Boolean.parseBoolean(reader.getAttributeValue(NS_PREFIX, "viewAllowed"));
+//						boolean newAllowed = Boolean.parseBoolean(reader.getAttributeValue(NS_PREFIX, "newAllowed"));
+						
+						if (viewAllowed) {
+							reader.nextTag();//sum
+							reader.getElementText();
+							while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
+								RedmineTimeEntry timeEntry = readCurrentTagAsTimeEntry(reader);
+								if (timeEntry!=null) {
+									ticket.addTimeEntry(timeEntry);
+								}
 							}
 						}
 					} else {
