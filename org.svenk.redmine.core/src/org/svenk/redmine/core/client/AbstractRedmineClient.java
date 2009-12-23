@@ -57,6 +57,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HeaderElement;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -102,6 +103,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	protected final static String HEADER_STATUS = "status"; //$NON-NLS-1$
 
 	protected final static String HEADER_REDIRECT = "location"; //$NON-NLS-1$
+
+	protected final static String HEADER_WWW_AUTHENTICATE = "WWW-Authenticate"; //$NON-NLS-1$
+
+	protected final static String HEADER_WWW_AUTHENTICATE_REALM = "realm"; //$NON-NLS-1$
 
 	protected final HttpClient httpClient;
 	
@@ -162,6 +167,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	}
 	
 	public boolean supportStartDueDate() {
+		return false;
+	}
+
+	protected boolean supportAdditionalHttpAuth() {
 		return false;
 	}
 	
@@ -321,13 +330,18 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 			throw new RedmineRemoteException(msg);
 		}
 		
-		if (statusCode>=400 && statusCode<=599) {
-			throw new RedmineRemoteException(method.getStatusLine().toString());
-		}
-		
 		if (statusCode==HttpStatus.SC_PROXY_AUTHENTICATION_REQUIRED) {
 			hostConfiguration = refreshCredentials(AuthenticationType.PROXY, method, monitor);
 			return executeMethod(method, hostConfiguration, monitor, authenticated);
+		}
+		
+		if(statusCode==HttpStatus.SC_UNAUTHORIZED && supportAdditionalHttpAuth()) {
+			hostConfiguration = refreshCredentials(AuthenticationType.HTTP, method, monitor);
+			return executeMethod(method, hostConfiguration, monitor, authenticated);
+		}
+
+		if (statusCode>=400 && statusCode<=599) {
+			throw new RedmineRemoteException(method.getStatusLine().toString());
 		}
 		
 		Header respHeader = method.getResponseHeader(HEADER_REDIRECT);
@@ -458,13 +472,26 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	 */
 	protected HostConfiguration refreshCredentials(AuthenticationType authenticationType, HttpMethod method, IProgressMonitor monitor) throws RedmineException {
 		try {
-			location.requestCredentials(authenticationType, method.getStatusText(), monitor);
+			String message = method.getStatusText();
+			if(authenticationType.equals(AuthenticationType.HTTP)) {
+				Header authHeader = method.getResponseHeader(HEADER_WWW_AUTHENTICATE);
+				if(authHeader!=null) {
+					for (HeaderElement headerElem : authHeader.getElements()) {
+						if (headerElem.getName().contains(HEADER_WWW_AUTHENTICATE_REALM)) {
+							message += ": " + headerElem.getValue();
+							break;
+						}
+					}
+				}
+			}
+			location.requestCredentials(authenticationType, message, monitor);
+			
 			return WebUtil.createHostConfiguration(httpClient, location, monitor);
 		} catch (UnsupportedRequestException e) {
 			throw new RedmineException(e.getMessage(), e.getCause());
 		} catch (OperationCanceledException e) {
 			monitor.setCanceled(true);
-			throw new RedmineException(e.getMessage(), e.getCause());
+			throw new RedmineException(Messages.AbstractRedmineClient_AUTHENTICATION_CANCELED);
 		}
 	}
 

@@ -24,6 +24,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.svenk.redmine.core.client.messages"; //$NON-NLS-1$
+	public static String AbstractRedmineClient_AUTHENTICATION_CANCELED;
 	public static String AbstractRedmineClient_AUTHENTICATION_REQUIRED;
 	public static String AbstractRedmineClient_CREDENTIALS_REQUEST_FAILED;
 	public static String AbstractRedmineClient_INVALID_AUTHENTICITY_TOKEN;

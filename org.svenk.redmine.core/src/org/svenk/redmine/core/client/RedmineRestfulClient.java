@@ -181,6 +181,12 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 	public boolean supportStartDueDate() {
 		return wsVersion >= IRedmineConstants.PLUGIN_VERSION_2_6;
 	}
+
+	@Override
+	protected boolean supportAdditionalHttpAuth() {
+		return true;
+	}
+
 	public synchronized void updateAttributes(boolean force, IProgressMonitor monitor) throws RedmineException {
 		if (!force && hasAttributes()) {
 			return;
