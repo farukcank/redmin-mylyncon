@@ -84,6 +84,7 @@ public class RedmineRepositorySettingsPage extends
 		setNeedsTimeZone(false);
 		setNeedsAdvanced(false);
 		setNeedsValidation(true);
+		setNeedsHttpAuth(true);
 		
 		if (taskRepository != null && taskRepository.hasProperty(RedmineClientFactory.CLIENT_IMPLEMENTATION_CLASS)) {
 			clientImplClassName = taskRepository.getProperty(RedmineClientFactory.CLIENT_IMPLEMENTATION_CLASS);
