@@ -24,6 +24,9 @@ import java.io.InputStream;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.mylyn.commons.core.StatusHandler;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentHandler;
@@ -71,6 +74,15 @@ public class RedmineTaskAttachmentHandler extends AbstractTaskAttachmentHandler 
 		String fileName = source.getName();
 		String description = source.getDescription();
 		
+		//TODO remove
+		StringBuffer debug = new StringBuffer();
+		debug.append("AttachementSource");
+		debug.append(" - Name:").append(source.getName());
+		debug.append(" - Length:").append(source.getLength());
+		debug.append(" - Type:").append(source.getContentType());
+		debug.append(" - Description:").append(source.getDescription());
+
+		
 		if (attachmentAttribute!=null) {
 			TaskAttachmentMapper mapper = TaskAttachmentMapper.createFrom(attachmentAttribute);
 			if (mapper.getFileName() != null) {
@@ -82,7 +94,18 @@ public class RedmineTaskAttachmentHandler extends AbstractTaskAttachmentHandler 
 			if (mapper.getDescription() != null) {
 				description = mapper.getDescription();
 			}
-		} 
+
+			//TODO remove
+			debug.append(" | AttachementAttribute ");
+			debug.append(" - FileName:").append(mapper.getFileName());
+			debug.append(" - Length:").append(mapper.getLength());
+			debug.append(" - Type:").append(mapper.getContentType());
+			debug.append(" - Description:").append(mapper.getDescription());
+		}
+		
+		//TODO remove
+		IStatus status = new Status(Status.INFO, RedmineCorePlugin.PLUGIN_ID, debug.toString());
+		StatusHandler.log(status);
 		
 		try {
 			IRedmineClient client = connector.getClientManager().getRedmineClient(repository);

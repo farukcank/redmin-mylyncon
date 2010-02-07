@@ -99,6 +99,8 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	protected final static double REDMINE_VERSION_7 = 0.7D;
 
 	protected final static double REDMINE_VERSION_8 = 0.8D;
+
+	protected final static double REDMINE_VERSION_9 = 0.9D;
 	
 	protected final static String HEADER_STATUS = "status"; //$NON-NLS-1$
 
@@ -153,7 +155,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	
 	public String checkClientConnection(IProgressMonitor monitor) throws RedmineException {
 		String version = checkClientVersion(monitor);
-		if (!(version.startsWith(Double.toString(REDMINE_VERSION_7)) || version.startsWith(Double.toString(REDMINE_VERSION_8)))) {
+		if (!(version.startsWith(Double.toString(REDMINE_VERSION_7)) || version.startsWith(Double.toString(REDMINE_VERSION_8)) || version.startsWith(Double.toString(REDMINE_VERSION_9)))) {
 			throw new RedmineException(Messages.AbstractRedmineClient_REQUIRED_REDMINE_VERSION);
 		}
 		return version;
@@ -388,20 +390,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		}
 		
 		if (!authenticated) {
-			if (Policy.isBackgroundMonitor(monitor)) {
-				throw new RedmineAuthenticationException(method.getStatusCode(),Messages.AbstractRedmineClient_MISSING_CREDENTIALS_MANUALLY_SYNC_REQUIRED);
-			}
-			try {
-				location.requestCredentials(authenticationType, Messages.AbstractRedmineClient_AUTHENTICATION_REQUIRED, monitor);
-				if (!monitor.isCanceled()) {
-					performLogin(hostConfiguration, monitor);
-					return;
-				}
-			} catch (UnsupportedRequestException e) {
-				IStatus status = RedmineCorePlugin.toStatus(e, null, Messages.AbstractRedmineClient_CREDENTIALS_REQUEST_FAILED);
-				StatusHandler.log(status);
-			} catch (OperationCanceledException e) {;
-				throw new RedmineAuthenticationException(method.getStatusCode(),Messages.AbstractRedmineClient_AUTHENTICATION_REQUIRED);
+			hostConfiguration = refreshCredentials(authenticationType, method, monitor);
+			if (!monitor.isCanceled()) {
+				performLogin(hostConfiguration, monitor);
+				return;
 			}
 		}
 
@@ -471,8 +463,12 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	 * @throws RedmineException
 	 */
 	protected HostConfiguration refreshCredentials(AuthenticationType authenticationType, HttpMethod method, IProgressMonitor monitor) throws RedmineException {
+		if (Policy.isBackgroundMonitor(monitor)) {
+			throw new RedmineAuthenticationException(method.getStatusCode(),Messages.AbstractRedmineClient_MISSING_CREDENTIALS_MANUALLY_SYNC_REQUIRED);
+		}
+		
 		try {
-			String message = method.getStatusText();
+			String message = Messages.AbstractRedmineClient_AUTHENTICATION_REQUIRED;
 			if(authenticationType.equals(AuthenticationType.HTTP)) {
 				Header authHeader = method.getResponseHeader(HEADER_WWW_AUTHENTICATE);
 				if(authHeader!=null) {
@@ -488,7 +484,9 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 			
 			return WebUtil.createHostConfiguration(httpClient, location, monitor);
 		} catch (UnsupportedRequestException e) {
-			throw new RedmineException(e.getMessage(), e.getCause());
+			IStatus status = RedmineCorePlugin.toStatus(e, null, Messages.AbstractRedmineClient_CREDENTIALS_REQUEST_FAILED);
+			StatusHandler.log(status);
+			throw new RedmineStatusException(status);
 		} catch (OperationCanceledException e) {
 			monitor.setCanceled(true);
 			throw new RedmineException(Messages.AbstractRedmineClient_AUTHENTICATION_CANCELED);
