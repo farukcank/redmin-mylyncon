@@ -37,6 +37,7 @@ import org.eclipse.mylyn.tasks.ui.editors.AbstractAttributeEditor;
 import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
 import org.eclipse.mylyn.tasks.ui.editors.AttributeEditorToolkit;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -47,10 +48,12 @@ import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
+import org.eclipse.ui.forms.widgets.AbstractHyperlink;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ImageHyperlink;
 import org.eclipse.ui.forms.widgets.Section;
+import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.data.RedmineTaskTimeEntryMapper;
 import org.svenk.redmine.ui.Images;
 
@@ -67,42 +70,51 @@ public class RedmineTimeEntryEditorPart extends AbstractTaskEditorPart {
 	
 	public RedmineTimeEntryEditorPart() {
 		super();
-		setPartName("Time Entries");
+		setPartName(Messages.RedmineTimeEntryEditorPart_TIME_ENTRIES_SECTION_TITLE);
 	}
 	@Override
-	public void createControl(Composite parent, FormToolkit toolkit) {
+	public void createControl(Composite parent, final FormToolkit toolkit) {
 		initialize();
 
 		section = createSection(parent, toolkit, hasIncoming);
-		//TODO add count of timeentries  and sum of time
-//		section.setText(section.getText() + " (" + commentAttributes.size() + ")");
+
+		StringBuilder nameDetail = new StringBuilder(section.getText());
+		nameDetail.append(" (").append(timeEntryAttributes.size()); //$NON-NLS-1$
+		
+		TaskAttribute totalAttribute = getTaskData().getRoot().getAttribute(RedmineAttribute.TIME_ENTRY_TOTAL.getRedmineKey());
+		if(totalAttribute!=null && totalAttribute.getValue()!="") { //$NON-NLS-1$
+			nameDetail.append(" - ").append(Messages.RedmineTimeEntryEditorPart_TIME_ENTRIES_TOTAL); //$NON-NLS-1$
+			nameDetail.append(": ").append(totalAttribute.getValue()); //$NON-NLS-1$
+			nameDetail.append(Messages.RedmineTimeEntryEditorPart_TIME_ENTRIES_HOURS);
+		}
+		
+		nameDetail.append(")"); //$NON-NLS-1$
+		section.setText(nameDetail.toString());
 		
 		if (timeEntryAttributes.isEmpty()) {
 			section.setEnabled(false);
 		} else {
+			if (hasIncoming) {
 				expandSection(toolkit, section);
-			
-//			if (hasIncoming) {
-//				expandSection(toolkit, section);
-//			} else {
-//				section.addExpansionListener(new ExpansionAdapter() {
-//					@Override
-//					public void expansionStateChanged(ExpansionEvent event) {
-//						if (section.getClient() == null) {
-//							try {
+			} else {
+				section.addExpansionListener(new ExpansionAdapter() {
+					@Override
+					public void expansionStateChanged(ExpansionEvent event) {
+						if (section.getClient() == null) {
+							try {
 //								expandAllInProgress = true;
-//								getTaskEditorPage().setReflow(false);
-//
-//								expandSection(toolkit, section);
-//							} finally {
+								getTaskEditorPage().setReflow(false);
+
+								expandSection(toolkit, section);
+							} finally {
 //								expandAllInProgress = false;
-//								getTaskEditorPage().setReflow(true);
-//							}
-//							getTaskEditorPage().reflow();
-//						}
-//					}
-//				});
-//			}
+								getTaskEditorPage().setReflow(true);
+							}
+							getTaskEditorPage().reflow();
+						}
+					}
+				});
+			}
 		}
 		setSection(toolkit, section);
 
@@ -144,21 +156,24 @@ public class RedmineTimeEntryEditorPart extends AbstractTaskEditorPart {
 	
 	private class TimeEntryViewer {
 		
-		private static final String KEY_EDITOR = "viewer";
-		
 		private TaskAttribute attribute;
 		
 		private RedmineTaskTimeEntryMapper mapper;
 		
 		private ExpandableComposite timeEntryComposite;
 		
+		private boolean hasIncoming;
+		
 		private TimeEntryViewer(TaskAttribute timeEntryAttribute) {
 			attribute = timeEntryAttribute;
 			mapper = RedmineTaskTimeEntryMapper.createFrom(timeEntryAttribute);
+			hasIncoming = getModel().hasIncomingChanges(timeEntryAttribute);
+			
 		}
 		
 		private Control createControl(final Composite composite, final FormToolkit toolkit) {
-			
+			Color bgColor = hasIncoming ? getTaskEditorPage().getAttributeEditorToolkit().getColorIncoming() : null;
+
 //			Composite composite = toolkit.createComposite(parent);
 //			GridLayout gl = new GridLayout(6, false);
 //			composite.setLayout(gl);
@@ -172,12 +187,14 @@ public class RedmineTimeEntryEditorPart extends AbstractTaskEditorPart {
 			| ExpandableComposite.COMPACT;
 
 			timeEntryComposite = toolkit.createExpandableComposite(composite, style);
-//			timeEntryComposite.clientVerticalSpacing = 0;
-//			timeEntryComposite.setLayout(new GridLayout());
-//			timeEntryComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//			timeEntryComposite.setTitleBarForeground(toolkit.getColors().getColor(IFormColors.TITLE));
-		
-			createTitle(timeEntryComposite, toolkit);
+			timeEntryComposite.clientVerticalSpacing = 0;
+			timeEntryComposite.setLayout(new GridLayout());
+			timeEntryComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			timeEntryComposite.setTitleBarForeground(toolkit.getColors().getColor(IFormColors.TITLE));
+			timeEntryComposite.setBackground(bgColor);
+			
+			
+			final AbstractHyperlink titleLink = createTitle(timeEntryComposite, toolkit, bgColor);
 
 			final Composite detailsComposite = toolkit.createComposite(timeEntryComposite);
 			timeEntryComposite.setClient(detailsComposite);
@@ -188,7 +205,7 @@ public class RedmineTimeEntryEditorPart extends AbstractTaskEditorPart {
 			gd.horizontalSpan = 4;
 			detailsComposite.setLayoutData(gd);
 
-
+			/* Expand: Click on caret */
 			timeEntryComposite.addExpansionListener(new ExpansionAdapter() {
 				@Override
 				public void expansionStateChanged(ExpansionEvent event) {
@@ -196,12 +213,25 @@ public class RedmineTimeEntryEditorPart extends AbstractTaskEditorPart {
 				}
 			});
 
-//			createLabeledReadOnlyText(toolkit, composite, "Hours", "" + mapper.getHours());
+			/* Expand: Click on title */
+			titleLink.addHyperlinkListener(new HyperlinkAdapter() {
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					boolean expand = !timeEntryComposite.isExpanded();
+					timeEntryComposite.setExpanded(expand);
+					expandTimeEntry(toolkit, detailsComposite, expand);
+				}
+			});
+
+			if(hasIncoming && !timeEntryComposite.isExpanded()) {
+				timeEntryComposite.setExpanded(true);
+				expandTimeEntry(toolkit, detailsComposite, true);
+			}
 			
 			return composite;
 		}
 
-		private Composite createTitle(final ExpandableComposite timeEntryComposite, final FormToolkit toolkit) {
+		private AbstractHyperlink createTitle(final ExpandableComposite timeEntryComposite, final FormToolkit toolkit, Color bgColor) {
 			// always visible
 			Composite titleComposite = toolkit.createComposite(timeEntryComposite);
 			timeEntryComposite.setTextClient(titleComposite);
@@ -213,15 +243,9 @@ public class RedmineTimeEntryEditorPart extends AbstractTaskEditorPart {
 			EditorUtil.center(rowLayout);
 			titleComposite.setLayout(rowLayout);
 			titleComposite.setBackground(null);
-
+			
 			ImageHyperlink expandCommentHyperlink = createTitleHyperLink(toolkit, titleComposite);
 			expandCommentHyperlink.setFont(timeEntryComposite.getFont());
-			expandCommentHyperlink.addHyperlinkListener(new HyperlinkAdapter() {
-				@Override
-				public void linkActivated(HyperlinkEvent e) {
-					timeEntryComposite.setExpanded(!timeEntryComposite.isExpanded());
-				}
-			});
 //
 //			// only visible when section is expanded
 //			final Composite buttonComposite = toolkit.createComposite(titleComposite);
@@ -243,29 +267,17 @@ public class RedmineTimeEntryEditorPart extends AbstractTaskEditorPart {
 			AbstractAttributeEditor attributeEditor = createAttributeEditor(RedmineTaskTimeEntryMapper.getHoursAttribute(attribute));
 			attributeEditor.createLabelControl(titleComposite, toolkit);
 			attributeEditor.createControl(titleComposite, toolkit);
+			attributeEditor.getLabelControl().setBackground(bgColor);
 			editorToolkit.adapt(attributeEditor);
 
 			//Activity
 			attributeEditor = createAttributeEditor(RedmineTaskTimeEntryMapper.getActivityAttribute(attribute));
 			attributeEditor.createLabelControl(titleComposite, toolkit);
 			attributeEditor.createControl(titleComposite, toolkit);
+			attributeEditor.getLabelControl().setBackground(bgColor);
 			editorToolkit.adapt(attributeEditor);
-
-			Collection<TaskAttribute> customAttributes = RedmineTaskTimeEntryMapper.getCustomAttributes(attribute);
-			if (customAttributes!=null) {
-				for (TaskAttribute customAttribute : customAttributes) {
-					System.out.println(customAttribute.getId());
-					System.out.println(customAttribute.getMetaData().getLabel());
-					attributeEditor = createAttributeEditor(RedmineTaskTimeEntryMapper.getActivityAttribute(customAttribute));
-					if (attributeEditor!=null) {
-						attributeEditor.createLabelControl(titleComposite, toolkit);
-						attributeEditor.createControl(titleComposite, toolkit);
-						editorToolkit.adapt(attributeEditor);
-					}
-				}
-			}
 			
-			return titleComposite;
+			return expandCommentHyperlink;
 		}
 
 		private ImageHyperlink createTitleHyperLink(final FormToolkit toolkit, final Composite toolbarComp) {
@@ -292,7 +304,7 @@ public class RedmineTimeEntryEditorPart extends AbstractTaskEditorPart {
 			//Date
 			if (mapper.getSpentOn()!=null) {
 				if(sb.length()>0) {
-					sb.append(", ");
+					sb.append(", "); //$NON-NLS-1$
 				}
 				sb.append(DateFormat.getDateInstance(DateFormat.MEDIUM).format(mapper.getSpentOn()));
 			}
@@ -305,7 +317,7 @@ public class RedmineTimeEntryEditorPart extends AbstractTaskEditorPart {
 
 		private void expandTimeEntry(FormToolkit toolkit, Composite composite, boolean expanded) {
 //			buttonComposite.setVisible(expanded);
-			if (expanded && composite.getData(KEY_EDITOR) == null) {
+			if (expanded) {
 				// create viewer
 				
 				AttributeEditorToolkit editorToolkit = getTaskEditorPage().getAttributeEditorToolkit();
@@ -321,27 +333,41 @@ public class RedmineTimeEntryEditorPart extends AbstractTaskEditorPart {
 //							getTaskEditorPage().selectionChanged(taskComment);
 //						}
 //					});
-					composite.setData(KEY_EDITOR, editor);
+					
 
 					editorToolkit.adapt(editor);
 					getTaskEditorPage().reflow();
 				}
-			} else if (!expanded && composite.getData(KEY_EDITOR) != null) {
+				
+				Collection<TaskAttribute> customAttributes = RedmineTaskTimeEntryMapper.getCustomAttributes(attribute);
+				if (customAttributes!=null) {
+					for (TaskAttribute customAttribute : customAttributes) {
+						editor = createAttributeEditor(customAttribute);
+						if (editor != null) {
+							editor.createLabelControl(composite, toolkit);
+							editor.getLabelControl().setText(editor.getLabel() + ":"); //$NON-NLS-1$
+							editor.createControl(composite, toolkit);
+							
+							editorToolkit.adapt(editor);
+							getTaskEditorPage().reflow();
+						}
+					}
+				}
+				
+			} else if (!expanded /* && composite.getData(KEY_EDITOR) != null */) {
 //				// dispose viewer
-				AbstractAttributeEditor editor = (AbstractAttributeEditor) composite.getData(KEY_EDITOR);
-//				editor.getControl().setMenu(null);
-				editor.getControl().dispose();
-				editor.getLabelControl().dispose();
-				composite.setData(KEY_EDITOR, null);
+				
+				Control[] childElems = composite.getChildren();
+				for (Control childElem : childElems) {
+					childElem.dispose();
+				}
+				
+//				AbstractAttributeEditor editor = (AbstractAttributeEditor) composite.getData(KEY_EDITOR);
+////				editor.getControl().setMenu(null);
+
 				getTaskEditorPage().reflow();
 			}
 //			getTaskEditorPage().selectionChanged(taskComment);
-		}
-
-		private void createLabeledReadOnlyText(final FormToolkit toolkit, Composite parent, String label, String value) {
-			
-			toolkit.createLabel(parent, label);
-			toolkit.createText(parent,value, SWT.READ_ONLY);
 		}
 
 	}
