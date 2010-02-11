@@ -229,7 +229,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 					}
 		
 					//Labels of CustomFields
-					for(RedmineCustomField customField : client.getClientData().getCustomFields()) {
+					for(RedmineCustomField customField : client.getClientData().getTimeEntryCustomFields()) {
 						TaskAttribute customAttribute = RedmineTaskTimeEntryMapper.getCustomAttribute(attribute, customField.getId());
 						if (customAttribute!=null) {
 							customAttribute.getMetaData().setLabel(customField.getName());
@@ -391,6 +391,10 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 			createAttribute(data, RedmineAttribute.COMMENT);
 			createAttribute(data, RedmineAttribute.STATUS, ticket.getStatuses(), false);
 			createAttribute(data, RedmineAttribute.RELATION, ticket.getRelations(), false);
+			
+			if (client.supportTimeEntries()) {
+				createAttribute(data, RedmineAttribute.TIME_ENTRY_TOTAL);
+			}
 		} else {
 			createAttribute(data, RedmineAttribute.STATUS, client.getClientData().getStatuses(), false);
 		}

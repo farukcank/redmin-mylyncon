@@ -431,9 +431,10 @@ public class RedmineRestfulStaxReader {
 						}
 					} else if (reader.getLocalName().equals("timeEntries")) {
 						//TODO AccessControl
-						//TODO sum
+						
 						reader.nextTag();//sum
-						reader.getElementText();
+						ticket.putBuiltinValue(Key.TIME_ENTRY_TOTAL, reader.getElementText());
+
 						while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
 							RedmineTimeEntry timeEntry = readCurrentTagAsTimeEntry(reader);
 							if (timeEntry!=null) {

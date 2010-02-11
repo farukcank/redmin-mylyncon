@@ -38,6 +38,7 @@ public interface IRedmineConstants {
 	public final static String TASK_ATTRIBUTE_TIMEENTRY_COMMENTS = "task.redmine.timeentry.comments";
 	public final static String TASK_ATTRIBUTE_TIMEENTRY_CUSTOMVALUE = "task.redmine.timeentry.customvalue.";
 	public final static String TASK_ATTRIBUTE_TIMEENTRY_CUSTOMVALUES = "task.redmine.timeentry.customvalues";
+	public final static String TASK_ATTRIBUTE_TIMEENTRY_TOTAL = "task.redmine.timeentry.total";
 	
 	public final static String CLIENT_FIELD_CREDENTIALS_USERNAME = "username";
 	public final static String CLIENT_FIELD_CREDENTIALS_PASSWORD = "password";

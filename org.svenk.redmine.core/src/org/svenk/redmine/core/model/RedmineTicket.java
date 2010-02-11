@@ -68,6 +68,7 @@ public class RedmineTicket {
 		COMMENT("notes"), 
 //		VIEW_STATE("view_state"), 
 		
+		TIME_ENTRY_TOTAL("spenttime"),
 		TIME_ENTRY_HOURS("time_entry[hours]"),
 		TIME_ENTRY_COMMENTS("time_entry[comments]"),
 		TIME_ENTRY_ACTIVITY("time_entry[activity_id]")
@@ -374,5 +375,5 @@ public class RedmineTicket {
 	public void setLastChanged(Date lastChanged) {
 		this.lastChanged = lastChanged;
 	}
-
+	
 }

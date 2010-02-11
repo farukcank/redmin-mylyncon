@@ -31,6 +31,8 @@ import org.svenk.redmine.core.model.RedmineCustomField;
 import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.model.RedminePriority;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
+import org.svenk.redmine.core.model.RedmineCustomField.CustomType;
+import org.svenk.redmine.core.model.RedmineCustomField.FieldType;
 
 public class RedmineClientData implements Serializable {
 	
@@ -63,6 +65,19 @@ public class RedmineClientData implements Serializable {
 	
 	public List<RedmineCustomField> getCustomFields() {
 		return customFields;
+	}
+	
+	public List<RedmineCustomField> getTimeEntryCustomFields() {
+		//TODO optimize
+		List<RedmineCustomField> fields = new ArrayList<RedmineCustomField>(customFields.size());
+		
+		for (RedmineCustomField customField : customFields) {
+			if (customField.getCustomType()==CustomType.TimeEntryCustomField) {
+				fields.add(customField);
+			}
+		}
+		
+		return fields;
 	}
 	
 	public List<RedmineProjectData> getProjects() {

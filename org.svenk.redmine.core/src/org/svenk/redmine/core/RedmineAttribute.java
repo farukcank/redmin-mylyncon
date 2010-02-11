@@ -20,9 +20,10 @@
  *******************************************************************************/
 package org.svenk.redmine.core;
 
+import static org.svenk.redmine.core.IRedmineConstants.TASK_ATTRIBUTE_TIMEENTRY_ACTIVITY;
 import static org.svenk.redmine.core.IRedmineConstants.TASK_ATTRIBUTE_TIMEENTRY_COMMENTS;
 import static org.svenk.redmine.core.IRedmineConstants.TASK_ATTRIBUTE_TIMEENTRY_HOURS;
-import static org.svenk.redmine.core.IRedmineConstants.TASK_ATTRIBUTE_TIMEENTRY_ACTIVITY;
+import static org.svenk.redmine.core.IRedmineConstants.TASK_ATTRIBUTE_TIMEENTRY_TOTAL;
 
 import java.util.EnumSet;
 
@@ -52,7 +53,8 @@ public enum RedmineAttribute {
 	ESTIMATED(Key.ESTIMATED_HOURS, "Estimated hours: ", RedmineAttribute.TASK_KEY_ESTIMATE, IRedmineConstants.EDITOR_TYPE_ESTIMATED, Flag.HIDDEN),
 	RELATION(Key.RELATIONSHIPS, "Relationship", null, RedmineAttribute.TASK_KEY_RELATION, Flag.HIDDEN),
 	
-	TIME_ENTRY_HOURS(Key.TIME_ENTRY_HOURS, "Spent time (Hours):", TASK_ATTRIBUTE_TIMEENTRY_HOURS, TaskAttribute.TYPE_SHORT_TEXT, Flag.HIDDEN),
+	TIME_ENTRY_TOTAL(Key.TIME_ENTRY_TOTAL, "Total (hours):", TASK_ATTRIBUTE_TIMEENTRY_TOTAL, TaskAttribute.TYPE_SHORT_TEXT, Flag.HIDDEN),
+	TIME_ENTRY_HOURS(Key.TIME_ENTRY_HOURS, "Spent time (hours):", TASK_ATTRIBUTE_TIMEENTRY_HOURS, TaskAttribute.TYPE_SHORT_TEXT, Flag.HIDDEN),
 	TIME_ENTRY_ACTIVITY(Key.TIME_ENTRY_ACTIVITY, "Activity:", TASK_ATTRIBUTE_TIMEENTRY_ACTIVITY, TaskAttribute.TYPE_SINGLE_SELECT, Flag.HIDDEN),
 	TIME_ENTRY_COMMENTS(Key.TIME_ENTRY_COMMENTS, "Comment:", TASK_ATTRIBUTE_TIMEENTRY_COMMENTS, TaskAttribute.TYPE_LONG_TEXT, Flag.HIDDEN)
 	; 
