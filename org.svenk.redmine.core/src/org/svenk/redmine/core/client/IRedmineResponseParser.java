@@ -18,30 +18,15 @@
  * Contributors:
  *     Sven Krzyzak - adapted Trac implementation for Redmine
  *******************************************************************************/
-package org.svenk.redmine.core.qualitycontrol;
 
-import org.apache.commons.httpclient.HttpMethod;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.svenk.redmine.core.RedmineCorePlugin;
-import org.svenk.redmine.core.client.AbstractRedmineClient;
+package org.svenk.redmine.core.client;
+
+import java.io.InputStream;
+
 import org.svenk.redmine.core.exception.RedmineException;
 
-public aspect RedmineClientProgressMonitorAspect {
+public interface IRedmineResponseParser<T> {
 
+	T parseResponse(InputStream input, int sc) throws RedmineException;
 	
-	pointcut executeMethod(HttpMethod method, IProgressMonitor monitor) : 
-		execution(protected int AbstractRedmineClient.executeMethod(HttpMethod, IProgressMonitor) throws RedmineException)
-		&& args (method, monitor);
-	
-	int around (HttpMethod method, IProgressMonitor monitor) throws RedmineException : executeMethod(method, monitor) {
-		if (monitor==null) {
-			monitor = new NullProgressMonitor();
-
-			NullPointerException npe = new NullPointerException("IProgressMonitor is null");
-			npe.setStackTrace(Thread.currentThread().getStackTrace());
-			RedmineCorePlugin.getDefault().logUnexpectedException(npe);
-		}
-		return proceed(method, monitor);
-	}
 }

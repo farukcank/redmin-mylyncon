@@ -29,11 +29,13 @@ public class Messages extends NLS {
 	public static String AbstractRedmineClient_CREDENTIALS_REQUEST_FAILED;
 	public static String AbstractRedmineClient_INVALID_AUTHENTICITY_TOKEN;
 	public static String AbstractRedmineClient_INVALID_TASK_ID;
+	public static String AbstractRedmineClient_LOGIN_FORMALY_INEFFECTIVE;
 	public static String AbstractRedmineClient_MISSING_CREDENTIALS_MANUALLY_SYNC_REQUIRED;
 	public static String AbstractRedmineClient_MISSING_TASK_ID_IN_RESPONSE;
 	public static String AbstractRedmineClient_READ_OF_UPDATE_RESPONSE_FAILED;
 	public static String AbstractRedmineClient_REQUIRED_REDMINE_VERSION;
 	public static String AbstractRedmineClient_SERVER_ERROR;
+	public static String AbstractRedmineClient_UNEXPECTED_RESPONSE_CODE;
 	public static String AbstractRedmineClient_UNHANDLED_RUNTIME_EXCEPTION;
 	public static String AbstractRedmineClient_UNHANDLED_SUBMIT_ERROR;
 	public static String RedmineRestfulClient_UPDATING_ATTRIBUTES;

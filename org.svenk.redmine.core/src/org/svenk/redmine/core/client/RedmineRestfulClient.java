@@ -20,7 +20,6 @@
  *******************************************************************************/
 package org.svenk.redmine.core.client;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,7 +35,7 @@ import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.svenk.redmine.core.IRedmineConstants;
 import org.svenk.redmine.core.client.container.Version;
 import org.svenk.redmine.core.exception.RedmineException;
-import org.svenk.redmine.core.exception.RedmineRemoteException;
+import org.svenk.redmine.core.model.RedminePriority;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
 
@@ -62,14 +61,26 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 	protected final static String PATH_GET_CHANGED_TICKETS = "/mylyn/" + PLACEHOLDER + "/updatedsince";
 	protected final static String PATH_GET_CHANGED_TICKETS_PARAM = "unixtime";
 
-	private final RedmineRestfulStaxReader reader;
-	
 	private double wsVersion = 0D;
+	
+	private IRedmineResponseParser<Version> versionParser;
+
+	private IRedmineResponseParser<List<Integer>> updatedTicketsParser;
+
+	private IRedmineResponseParser<RedmineTicket> ticketParser;
+
+	private IRedmineResponseParser<List<RedmineTicket>> ticketsParser;
+
+	private IRedmineResponseParser<List<RedmineProjectData>> projectsParser;
+
+	private IRedmineResponseParser<List<RedminePriority>> prioritiesParser;
+	
+	private IRedmineResponseParser<List<RedmineTicketStatus>> ticketStatusParser;
 
 	public RedmineRestfulClient(AbstractWebLocation location, RedmineClientData clientData, TaskRepository repository) {
 		super(location, clientData, repository);
 		
-		reader = new RedmineRestfulStaxReader();
+		createResponseParsers();
 	}
 
 	public void refreshRepositorySettings(TaskRepository repository) {
@@ -93,32 +104,16 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 	protected String checkClientVersion(IProgressMonitor monitor) throws RedmineException {
 		GetMethod method = new GetMethod(PATH_GET_VERSION);
 
-		executeMethod(method, monitor);
-		InputStream in;
-		try {
-			in = method.getResponseBodyAsStream();
-			Version version = reader.readVersion(in);
-			
-			String v = version.redmine.version + "v" + version.plugin.major + "." + version.plugin.minor;
-			return v;
-		} catch (IOException e) {
-			throw new RedmineRemoteException(e.getMessage(), e);
-		}
+		Version version = executeMethod(method, versionParser, monitor);
+		String v = version.redmine.version + "v" + version.plugin.major + "." + version.plugin.minor;
+		return v;
 	}
 
 	public List<Integer> getChangedTicketId(Integer projectId, Date changedSince, IProgressMonitor monitor) throws RedmineException {
 		GetMethod method = new GetMethod(PATH_GET_CHANGED_TICKETS.replace(PLACEHOLDER, projectId.toString()));
 		method.setQueryString(new NameValuePair[]{new NameValuePair(PATH_GET_CHANGED_TICKETS_PARAM, ""+changedSince.getTime()/1000)});
 		
-		executeMethod(method, monitor);
-		InputStream in;
-		try {
-			in = method.getResponseBodyAsStream();
-			List<Integer> list = reader.readUpdatedTickets(in);
-			return list;
-		} catch (IOException e) {
-			throw new RedmineRemoteException(e.getMessage(), e);
-		}
+		return executeMethod(method, updatedTicketsParser, monitor);
 	}
 
 	public RedmineClientData getClientData() {
@@ -128,18 +123,13 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 	public RedmineTicket getTicket(int id, IProgressMonitor monitor) throws RedmineException {
 		GetMethod method = new GetMethod(PATH_GET_TICKET.replace(PLACEHOLDER, ""+id));
 
-		executeMethod(method, monitor);
-		InputStream in;
-		try {
-			in = method.getResponseBodyAsStream();
-			RedmineTicket ticket = reader.readTicket(in);
-			if (ticket!=null) {
-				completeAvailableStatus(ticket, data);
-			}
+		RedmineTicket ticket = executeMethod(method, ticketParser, monitor);
+		if(ticket!=null) {
+			completeAvailableStatus(ticket, data);
 			return ticket;
-		} catch (IOException e) {
-			throw new RedmineRemoteException(e.getMessage(), e);
 		}
+		
+		return null;
 	}
 
 	public boolean hasAttributes() {
@@ -155,17 +145,9 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 			method.setQueryString(new NameValuePair[]{new NameValuePair(PATH_SEARCH_TICKETS_QUERY_ID, storedQueryId)});
 		}
 
-		executeMethod(method, monitor);
-		InputStream in;
-		try {
-			in = method.getResponseBodyAsStream();
-			List<RedmineTicket> list = reader.readTickets(in);
-			for (RedmineTicket redmineTicket : list) {
-				completeAvailableStatus(redmineTicket, data);
-				tickets.add(redmineTicket);
-			}
-		} catch (IOException e) {
-			throw new RedmineRemoteException(e.getMessage(), e);
+		for (RedmineTicket redmineTicket :  executeMethod(method, ticketsParser, monitor)) {
+			completeAvailableStatus(redmineTicket, data);
+			tickets.add(redmineTicket);
 		}
 	}
 
@@ -192,44 +174,33 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 			return;
 		}
 
-		GetMethod method = new GetMethod(PATH_GET_PROJECTS);
-		InputStream in;
-
 		monitor.beginTask(Messages.RedmineRestfulClient_UPDATING_ATTRIBUTES, 3);
-		try {
-			executeMethod(method, monitor);
-			in = method.getResponseBodyAsStream();
-			data.projects.clear();
-			data.projects.addAll(reader.readProjects(in));
-			monitor.worked(1);
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
 
-			method = new GetMethod(PATH_GET_PRIORITIES);
-			executeMethod(method, monitor);
-			in = method.getResponseBodyAsStream();
-			data.priorities.clear();
-			data.priorities.addAll(reader.readPriorities(in));
-			monitor.worked(1);
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-			
-			method = new GetMethod(PATH_GET_ISSUE_STATUS);
-			executeMethod(method, monitor);
-			in = method.getResponseBodyAsStream();
-			data.statuses.clear();
-			data.statuses.addAll(reader.readTicketStatuses(in));
-			monitor.worked(1);
-			if (monitor.isCanceled()) {
-				throw new OperationCanceledException();
-			}
-
-			data.lastupdate=new Date().getTime();
-		} catch (IOException e) {
-			throw new RedmineRemoteException(e.getMessage(), e);
+		GetMethod method = new GetMethod(PATH_GET_PROJECTS);
+		data.projects.clear();
+		data.projects.addAll(executeMethod(method, projectsParser, monitor));
+		monitor.worked(1);
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
 		}
+
+		method = new GetMethod(PATH_GET_PRIORITIES);
+		data.priorities.clear();
+		data.priorities.addAll(executeMethod(method, prioritiesParser, monitor));
+		monitor.worked(1);
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+		
+		method = new GetMethod(PATH_GET_ISSUE_STATUS);
+		data.statuses.clear();
+		data.statuses.addAll(executeMethod(method, ticketStatusParser, monitor));
+		monitor.worked(1);
+		if (monitor.isCanceled()) {
+			throw new OperationCanceledException();
+		}
+
+		data.lastupdate=new Date().getTime();
 	}
 	
 	//TODO nach Entfernung des XmlRpc Clients den Status überarbeiten 
@@ -242,6 +213,50 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 		}
 		ticket.setStatuses(statuses);
 	}
+	
+	private void createResponseParsers() {
+		final RedmineRestfulStaxReader reader = new RedmineRestfulStaxReader();
 
+		versionParser = new IRedmineResponseParser<Version>() {
+			public Version parseResponse(InputStream input, int sc) throws RedmineException {
+				return reader.readVersion(input);
+			}
+		}; 
 
+		updatedTicketsParser = new IRedmineResponseParser<List<Integer>>() {
+			public List<Integer> parseResponse(InputStream input, int sc) throws RedmineException {
+				return reader.readUpdatedTickets(input);
+			}
+		};
+
+		ticketParser = new IRedmineResponseParser<RedmineTicket>() {
+			public RedmineTicket parseResponse(InputStream input, int sc) throws RedmineException {
+				return reader.readTicket(input);
+			}
+		};
+		
+		ticketsParser = new IRedmineResponseParser<List<RedmineTicket>>() {
+			public List<RedmineTicket> parseResponse(InputStream input, int sc) throws RedmineException {
+				return reader.readTickets(input);
+			}
+		};
+
+		projectsParser = new IRedmineResponseParser<List<RedmineProjectData>>() {
+			public List<RedmineProjectData> parseResponse(InputStream input, int sc) throws RedmineException {
+				return reader.readProjects(input);
+			}
+		};
+
+		prioritiesParser = new IRedmineResponseParser<List<RedminePriority>>() {
+			public List<RedminePriority> parseResponse(InputStream input, int sc) throws RedmineException {
+				return reader.readPriorities(input);
+			}
+		};
+
+		ticketStatusParser = new IRedmineResponseParser<List<RedmineTicketStatus>>() {
+			public List<RedmineTicketStatus> parseResponse(InputStream input, int sc) throws RedmineException {
+				return reader.readTicketStatuses(input);
+			}
+		};
+	}
 }

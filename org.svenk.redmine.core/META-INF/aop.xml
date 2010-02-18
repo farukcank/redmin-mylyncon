@@ -2,6 +2,7 @@
 <aspectj>
 	<weaver>
 		<exclude within="org.svenk.redmine.core.accesscontrol.*"/>
+		<exclude within="org.svenk.redmine.core.client.*"/>
 		<exclude within="org.svenk.redmine.core.qualitycontrol.*"/>
 	</weaver>
 </aspectj>

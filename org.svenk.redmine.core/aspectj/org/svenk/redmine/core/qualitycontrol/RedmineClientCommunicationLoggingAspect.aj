@@ -22,7 +22,6 @@ package org.svenk.redmine.core.qualitycontrol;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.Date;
 
@@ -35,12 +34,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.mylyn.commons.net.WebUtil;
 import org.svenk.redmine.core.RedmineCorePlugin;
-import org.svenk.redmine.core.client.AbstractRedmineClient;
 import org.svenk.redmine.core.client.RedmineRestfulClient;
-import org.svenk.redmine.core.client.RedmineRestfulStaxReader;
-import org.svenk.redmine.core.exception.RedmineException;
 
-public privileged aspect RedmineClientCommunicationLoggingAspect percflow(execution(public * RedmineRestfulClient.*(..))) {
+public privileged aspect RedmineClientCommunicationLoggingAspect {
 
 	private PrintWriter logWriter = null;
 	
@@ -105,23 +101,5 @@ public privileged aspect RedmineClientCommunicationLoggingAspect percflow(execut
 			System.out.println("Logging failed");
 			System.out.println(e);
 		}
-	}
-	
-	pointcut catchMethod(HttpMethod method) : 
-		if(loggingEnabled())
-		&& cflow(restfulAction())
-		&& call(int AbstractRedmineClient.executeMethod(HttpMethod, IProgressMonitor))
-		&& args (method, IProgressMonitor);
-
-	after(HttpMethod method) returning() : catchMethod(method) {
-		this.method = method;
-	}
-	
-	pointcut readStaxEntity() :
-		if(loggingEnabled())
-		&& call(* RedmineRestfulStaxReader.read*(InputStream) throws RedmineException);
-	
-	after() throwing(Exception e) : readStaxEntity() {
-		logCommunication(this.method, e);
 	}
 }
