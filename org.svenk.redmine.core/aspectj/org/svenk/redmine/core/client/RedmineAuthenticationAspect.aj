@@ -21,6 +21,7 @@
 
 package org.svenk.redmine.core.client;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 
@@ -120,8 +121,9 @@ public aspect RedmineAuthenticationAspect perthis(this(AbstractRedmineClient)) {
 	/**
 	 * Do catch of missing authenticity token ...
 	 */
-	pointcut checkCsrfFailure() :
-		execution(int AbstractRedmineClient.performExecuteMethod(..));
+	pointcut checkCsrfFailure(HttpMethod method) :
+		execution(int AbstractRedmineClient.performExecuteMethod(HttpMethod, ..))
+		&& args(method, ..);
 
 	/**
 	 * ... and logging.
@@ -130,10 +132,20 @@ public aspect RedmineAuthenticationAspect perthis(this(AbstractRedmineClient)) {
 	 * @param sc
 	 * @throws RedmineException
 	 */
-	after() returning(int sc) throws RedmineException : checkCsrfFailure() {
-		if (sc==HttpStatus.SC_UNPROCESSABLE_ENTITY) {
+	after(HttpMethod method) returning(int sc) throws RedmineException : checkCsrfFailure(method) {
+		if (sc==HttpStatus.SC_UNPROCESSABLE_ENTITY) { //0.8
 			setRepositoryProperty(true);
 			throw new RedmineRemoteException(Messages.AbstractRedmineClient_INVALID_AUTHENTICITY_TOKEN);
+		} else if(sc==HttpStatus.SC_INTERNAL_SERVER_ERROR) { //0.9
+			try {
+				String errResponse = new String(method.getResponseBody());
+				if(errResponse.contains("authenticity token")) {
+					throw new RedmineRemoteException(Messages.AbstractRedmineClient_INVALID_AUTHENTICITY_TOKEN);
+				}
+			} catch (IOException e) {
+				IStatus status = RedmineCorePlugin.toStatus(e, null);
+				StatusHandler.log(status);
+			}
 		}
 	}
 

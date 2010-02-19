@@ -82,6 +82,7 @@ import org.eclipse.mylyn.commons.net.UnsupportedRequestException;
 import org.eclipse.mylyn.commons.net.WebUtil;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentSource;
+import org.eclipse.mylyn.tasks.core.data.TaskAttachmentPartSource;
 import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.client.container.Version;
@@ -91,7 +92,6 @@ import org.svenk.redmine.core.exception.RedmineRemoteException;
 import org.svenk.redmine.core.exception.RedmineStatusException;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicket.Key;
-import org.svenk.redmine.core.util.internal.RedminePartSource;
 
 
 abstract public class AbstractRedmineClient implements IRedmineClient {
@@ -195,16 +195,23 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		//assigned by RedmineAuthenticityTokenAspect
 		NameValuePair tokenValue = method.getParameter(CLIENT_FIELD_CSRF_TOKEN);
 		
-		Part[] parts = new Part[]{
-				new FilePart(CLIENT_FIELD_ATTACHMENT_FILE, new RedminePartSource(source, fileName), source.getContentType(), this.httpClient.getParams().getContentCharset()),
-				new StringPart(CLIENT_FIELD_ATTACHMENT_DESCRIPTION, description, characterEncoding),
-				new StringPart(CLIENT_FIELD_ATTACHMENT_NOTES, comment, characterEncoding),
-				new StringPart(CLIENT_FIELD_CSRF_TOKEN, tokenValue==null ? "" : tokenValue.getValue(), characterEncoding), //$NON-NLS-1$
-		};
+		List<Part> parts = new ArrayList<Part>(4);
+		parts.add(new StringPart(CLIENT_FIELD_ATTACHMENT_DESCRIPTION, description, characterEncoding));
+		parts.add(new StringPart(CLIENT_FIELD_ATTACHMENT_NOTES, comment, characterEncoding));
+		if(tokenValue!=null) {
+			parts.add(new StringPart(CLIENT_FIELD_CSRF_TOKEN, tokenValue==null ? "" : tokenValue.getValue(), characterEncoding)); //$NON-NLS-1$
+		}
+
+		//Workaround: http://rack.lighthouseapp.com/projects/22435/tickets/79-multipart-handling-incorrectly-assuming-file-upload
+		for (Part part : parts) {
+			((StringPart)part).setContentType(null);
+		}
 		
-		method.setRequestEntity(new MultipartRequestEntity(parts, method.getParams()));
 		
-		String errorMsg = executeMethod(method, submitErrorParser, monitor);
+		parts.add(new FilePart(CLIENT_FIELD_ATTACHMENT_FILE, new TaskAttachmentPartSource(source, fileName), source.getContentType(), this.httpClient.getParams().getContentCharset()));
+		method.setRequestEntity(new MultipartRequestEntity(parts.toArray(new Part[parts.size()]), method.getParams()));
+
+		String errorMsg = executeMethod(method, submitErrorParser, monitor, HttpStatus.SC_OK, HttpStatus.SC_MOVED_TEMPORARILY);
 		if (errorMsg!=null) {
 			throw new RedmineStatusException(IStatus.INFO, errorMsg);
 		}
@@ -320,6 +327,12 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 			if (statusHeader != null) {
 				msg += " : " + statusHeader.getValue().replace(""+HttpStatus.SC_INTERNAL_SERVER_ERROR, "").trim(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
+			
+//			try {
+//				System.out.println(new String(method.getResponseBody()));
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
 			
 			throw new RedmineRemoteException(msg);
 		}
