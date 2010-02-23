@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.mylyn.commons.core.StatusHandler;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
+import org.svenk.redmine.core.IRedmineConstants;
 import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.client.RedmineClientData;
@@ -50,10 +51,17 @@ public class RedmineTaskDataValidator {
 		return result;
 	}
 	
+	/**
+	 * Validates after changes on model
+	 * 
+	 * @param taskData
+	 * @param attribute
+	 * @return
+	 */
 	public RedmineTaskDataValidatorResult validateTaskAttribute(TaskData taskData, TaskAttribute attribute) {
 		RedmineTaskDataValidatorResult result = new RedmineTaskDataValidatorResult();
 
-		if (attribute.getId().startsWith(RedmineCustomField.TASK_KEY_PREFIX)) {
+		if (attribute.getId().startsWith(IRedmineConstants.TASK_KEY_PREFIX_TICKET_CF)) {
 			TaskAttribute rootAttr = taskData.getRoot();
 			TaskAttribute projAttr = rootAttr.getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey());
 			RedmineProjectData projectData = clientData.getProjectFromName(projAttr.getValue());
@@ -63,7 +71,7 @@ public class RedmineTaskDataValidator {
 				valStr = rootAttr.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue();
 				List<RedmineCustomField> ticketFields = projectData.getCustomTicketFields(Integer.parseInt(valStr));
 				
-				valStr = attribute.getId().substring(RedmineCustomField.TASK_KEY_PREFIX.length());
+				valStr = attribute.getId().substring(IRedmineConstants.TASK_KEY_PREFIX_TICKET_CF.length());
 				
 				try {
 					int fieldId = Integer.parseInt(valStr);
@@ -148,7 +156,7 @@ public class RedmineTaskDataValidator {
 			String attributeValue = null;
 			TaskAttribute taskAttribute = null;
 			for (RedmineCustomField customField : ticketFields) {
-				taskAttribute = rootAttr.getMappedAttribute(RedmineCustomField.TASK_KEY_PREFIX + customField.getId());
+				taskAttribute = rootAttr.getMappedAttribute(IRedmineConstants.TASK_KEY_PREFIX_TICKET_CF + customField.getId());
 				attributeValue = (taskAttribute==null) ? "" : taskAttribute.getValue().trim();
 				validateCustomAttribute(attributeValue, customField, result);
 			}

@@ -39,6 +39,10 @@ public interface IRedmineConstants {
 	public final static String TASK_ATTRIBUTE_TIMEENTRY_CUSTOMVALUE = "task.redmine.timeentry.customvalue.";
 	public final static String TASK_ATTRIBUTE_TIMEENTRY_CUSTOMVALUES = "task.redmine.timeentry.customvalues";
 	public final static String TASK_ATTRIBUTE_TIMEENTRY_TOTAL = "task.redmine.timeentry.total";
+	public final static String TASK_ATTRIBUTE_TIMEENTRY_NEW = "task.redmine.timeentry.new";
+	
+	public final static String TASK_KEY_PREFIX_TICKET_CF = "task.redmine.custom.";
+	public final static String TASK_KEY_PREFIX_TIMEENTRY_CF = "task.redmine.timeentry.custom.";
 	
 	public final static String CLIENT_FIELD_CREDENTIALS_USERNAME = "username";
 	public final static String CLIENT_FIELD_CREDENTIALS_PASSWORD = "password";
@@ -49,7 +53,10 @@ public interface IRedmineConstants {
 	
 	public final static String CLIENT_FIELD_ISSUE_SUBJECT = "issue[subject]";
 	public final static String CLIENT_FIELD_ISSUE_DESCRIPTION = "issue[description]";
-	public final static String CLIENT_FIELD_ISSUE_NOTES = "notes";
+	public final static String CLIENT_FIELD_ISSUE_AUTHOR = "autor";
+	public final static String CLIENT_FIELD_ISSUE_CREATED = "created_on";
+	public final static String CLIENT_FIELD_ISSUE_UPDATED = "updated_on";
+	public final static String CLIENT_FIELD_NOTES = "notes";
 	public final static String CLIENT_FIELD_ISSUE_DONERATIO = "issue[done_ratio]";
 	public final static String CLIENT_FIELD_ISSUE_ESTIMATED = "issue[estimated_hours]";
 	public final static String CLIENT_FIELD_ISSUE_STARTDATE = "issue[start_date]";
@@ -57,7 +64,18 @@ public interface IRedmineConstants {
 	public final static String CLIENT_FIELD_ISSUE_CUSTOM_R07E = "custom_fields[%d]";
 	public final static String CLIENT_FIELD_ISSUE_CUSTOM_R08L = "issue[custom_field_values][%d]";
 	public final static String CLIENT_FIELD_ISSUE_FIXEDVERSION = "fixed_version";
-	public final static String CLIENT_FIELD_ISSUE_REFERENCED_ID = "issue[%s_id]";
+	public final static String CLIENT_FIELD_ISSUE_REFERENCE_ASSIGNED = "issue[assigned_to_id]";
+	public final static String CLIENT_FIELD_ISSUE_REFERENCE_PROJECT = "issue[project_id]";
+	public final static String CLIENT_FIELD_ISSUE_REFERENCE_TRACKER = "issue[tracker_id]";
+	public final static String CLIENT_FIELD_ISSUE_REFERENCE_CATEGORY = "issue[category_id]";
+	public final static String CLIENT_FIELD_ISSUE_REFERENCE_PRIORITY = "issue[priority_id]";
+	public final static String CLIENT_FIELD_ISSUE_REFERENCE_STATUS = "issue[status_id]";
+	public final static String CLIENT_FIELD_ISSUE_REFERENCE_VERSION = "issue[fixed_version_id]";
+
+	public final static String CLIENT_FIELD_TIMEENTRY_HOURS = "time_entry[hours]";
+	public final static String CLIENT_FIELD_TIMEENTRY_ACTIVITY = "time_entry[activity_id]";
+	public final static String CLIENT_FIELD_TIMEENTRY_COMMENTS = "time_entry[comments]";
+	public final static String CLIENT_FIELD_TIMEENTRY_CF = "time_entry[custom_field_values][%d]";
 
 	public final static String REDMINE_URL_LOGIN = "/login";
 	public final static String REDMINE_URL_LOGIN_CALLBACK = "/login?back_url=";
