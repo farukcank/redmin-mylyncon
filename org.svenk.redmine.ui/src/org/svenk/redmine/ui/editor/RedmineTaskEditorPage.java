@@ -107,6 +107,14 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 			}
 		}.setPath(PATH_COMMENTS));
 
+		//TODO change ID
+		descriptors.add(new TaskEditorPartDescriptor("ID-CHANGE-ME3") {
+			@Override
+			public AbstractTaskEditorPart createPart() {
+				return new RedmineNewTimeEntryEditorPart();
+			}
+		}.setPath(PATH_COMMENTS));
+		
 		return descriptors;
 	}
 
