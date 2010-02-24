@@ -23,18 +23,24 @@ package org.svenk.redmine.core.model;
 import java.io.Serializable;
 
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
+import org.svenk.redmine.core.IRedmineConstants;
 
 public class RedmineCustomField implements Serializable, IRedmineQueryField {
 
-	private static final long serialVersionUID = 3L;
+	private static final long serialVersionUID = 4L;
 
-	public final static String TASK_KEY_PREFIX = "task.redmine.custom.";
 
 	
 	public enum CustomType {
-		IssueCustomField,
-		TimeEntryCustomField;
+		IssueCustomField(IRedmineConstants.TASK_KEY_PREFIX_TICKET_CF),
+		TimeEntryCustomField(IRedmineConstants.TASK_KEY_PREFIX_TIMEENTRY_CF);
 
+		public final String taskKeyPrefix;
+		
+		CustomType(String taskKeyPrefix) {
+			this.taskKeyPrefix = taskKeyPrefix;
+		}
+		
 		public static CustomType fromString(String name) {
 			for (CustomType type : CustomType.values()) {
 				if (type.name().equalsIgnoreCase(name)) {
@@ -138,6 +144,10 @@ public class RedmineCustomField implements Serializable, IRedmineQueryField {
 
 	public CustomType getCustomType() {
 		return this.customType;
+	}
+	
+	public String getTaskKeyPrefix() {
+		return this.customType.taskKeyPrefix;
 	}
 	
 	public String getName() {

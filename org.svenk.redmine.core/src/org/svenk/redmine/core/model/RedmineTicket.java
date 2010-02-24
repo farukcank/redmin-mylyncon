@@ -20,6 +20,27 @@
  *******************************************************************************/
 package org.svenk.redmine.core.model;
 
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_AUTHOR;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_CREATED;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_DESCRIPTION;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_DONERATIO;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_ENDDATE;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_ESTIMATED;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_REFERENCE_ASSIGNED;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_REFERENCE_CATEGORY;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_REFERENCE_PRIORITY;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_REFERENCE_PROJECT;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_REFERENCE_STATUS;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_REFERENCE_TRACKER;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_REFERENCE_VERSION;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_STARTDATE;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_SUBJECT;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_UPDATED;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_NOTES;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_TIMEENTRY_ACTIVITY;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_TIMEENTRY_COMMENTS;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_TIMEENTRY_HOURS;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -27,74 +48,44 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.mylyn.commons.core.StatusHandler;
-import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
-import org.eclipse.mylyn.tasks.core.data.TaskData;
-import org.svenk.redmine.core.RedmineAttribute;
-import org.svenk.redmine.core.RedmineCorePlugin;
-import org.svenk.redmine.core.client.RedmineClientData;
-import org.svenk.redmine.core.client.RedmineProjectData;
-import org.svenk.redmine.core.exception.RedmineException;
-import org.svenk.redmine.core.model.RedmineCustomField.FieldType;
-import org.svenk.redmine.core.util.RedmineUtil;
+import org.svenk.redmine.core.accesscontrol.internal.RedmineAcl;
 
 public class RedmineTicket {
 
 	public enum Key {
-		ID("id", true),
-//		ADDITIONAL_INFO("additional_information"),
-		ASSIGNED_TO("assigned_to"),
-		CATEGORY("category"), 
-		CREATED_ON("created_on", true), 
-		DESCRIPTION("description"), 
-		ESTIMATED_HOURS("estimated_hours"), 
-		UPDATED_ON("updated_on", true), 
-		DUE_DATE("due_date"), 
-		START_DATE("start_date"), 
-		PRIORITY("priority"),
-		PROJECT("project", true), 
-//		PROJECTION("projection"),
+		ID("id"),
+		ASSIGNED_TO(CLIENT_FIELD_ISSUE_REFERENCE_ASSIGNED),
+		CATEGORY(CLIENT_FIELD_ISSUE_REFERENCE_CATEGORY), 
+		CREATED_ON(CLIENT_FIELD_ISSUE_CREATED), 
+		DESCRIPTION(CLIENT_FIELD_ISSUE_DESCRIPTION), 
+		ESTIMATED_HOURS(CLIENT_FIELD_ISSUE_ESTIMATED), 
+		UPDATED_ON(CLIENT_FIELD_ISSUE_UPDATED), 
+		DUE_DATE(CLIENT_FIELD_ISSUE_ENDDATE), 
+		START_DATE(CLIENT_FIELD_ISSUE_STARTDATE), 
+		PRIORITY(CLIENT_FIELD_ISSUE_REFERENCE_PRIORITY),
+		PROJECT(CLIENT_FIELD_ISSUE_REFERENCE_PROJECT), 
 		RELATIONSHIPS("relationships"),
-		AUTHOR("autor", true),  
-//		REPRODUCIBILITY("reproducibility"), 
-//		RESOLUTION("resolution"), 
-		TRACKER("tracker", true), 
-		STATUS("status"), 
-		DONE_RATIO("done_ratio"), 
-//		STEPS_TO_REPRODUCE("steps_to_reproduce"),
-		SUBJECT("subject"),
-		VERSION("version"), 
-		COMMENT("notes"), 
-//		VIEW_STATE("view_state"), 
+		AUTHOR(CLIENT_FIELD_ISSUE_AUTHOR),  
+		TRACKER(CLIENT_FIELD_ISSUE_REFERENCE_TRACKER), 
+		STATUS(CLIENT_FIELD_ISSUE_REFERENCE_STATUS), 
+		DONE_RATIO(CLIENT_FIELD_ISSUE_DONERATIO), 
+		SUBJECT(CLIENT_FIELD_ISSUE_SUBJECT),
+		VERSION(CLIENT_FIELD_ISSUE_REFERENCE_VERSION), 
+		COMMENT(CLIENT_FIELD_NOTES), 
 		
-		TIME_ENTRY_HOURS("time_entry[hours]"),
-		TIME_ENTRY_COMMENTS("time_entry[comments]"),
-		TIME_ENTRY_ACTIVITY("time_entry[activity_id]")
+		TIME_ENTRY_TOTAL("spenttime"),
+		TIME_ENTRY_HOURS(CLIENT_FIELD_TIMEENTRY_HOURS),
+		TIME_ENTRY_COMMENTS(CLIENT_FIELD_TIMEENTRY_COMMENTS),
+		TIME_ENTRY_ACTIVITY(CLIENT_FIELD_TIMEENTRY_ACTIVITY)
 		
 		;
 
-//		public static Key fromKey(String name) {
-//			for (Key key : Key.values()) {
-//				if (key.getKey().equals(name)) {
-//					return key;
-//				}
-//			}
-//			return null;
-//		}
-
 		private String key;
-		private boolean readonly;
 
 		Key(String key) {
-			this(key, false);
+			this.key = key;
 		}
 
-		Key(String key, boolean readonly) {
-			this.key = key;
-			this.readonly = readonly;
-		}
-		
 		@Override
 		public String toString() {
 			return key;
@@ -104,13 +95,9 @@ public class RedmineTicket {
 			return key;
 		}
 		
-		public boolean isReadonly() {
-			return readonly;
-		}
-		
 		public static Key fromString(String string) {
 			for (Key key : Key.values()) {
-				if (key.toString().equals(string)) {
+				if (key.name().equals(string.toUpperCase())) {
 					return key;
 				}
 			}
@@ -119,14 +106,12 @@ public class RedmineTicket {
 		
 		public static Key fromTagName(String tagName) {
 			String string = null;
-			if (tagName.equals("author")) {
-				string = "autor";
-			} else if(tagName.equals("fixedVersionId")) {
+			if(tagName.equals("fixedVersionId")) {
 				string = "version";
 			} else {
 				string = tagName.replaceFirst("Id$", "").replaceAll("([A-Z])", "_$1").toLowerCase();
 			}
-			return fromString(string);
+			return  fromString(string);
 		}
 	}
 
@@ -152,6 +137,7 @@ public class RedmineTicket {
 
 	private List<RedmineTicketRelation> relations;
 	
+	private Map<RedmineAcl, Boolean> accesscontrol = new HashMap<RedmineAcl, Boolean>(3);
 
 	public RedmineTicket() {
 	}
@@ -201,6 +187,13 @@ public class RedmineTicket {
 		return Collections.unmodifiableMap(valueByCustomFieldId);
 	}
 
+	public void putRight(RedmineAcl right, boolean value) {
+		accesscontrol.put(right, value);
+	}
+	
+	public boolean getRight(RedmineAcl right) {
+		return accesscontrol.containsKey(right) && accesscontrol.get(right);
+	}
 
 
 	public int getId() {
@@ -297,76 +290,6 @@ public class RedmineTicket {
 		return availableStatus;
 	}
 	
-	public static RedmineTicket fromTaskData(TaskData taskData, RedmineClientData clientData) throws RedmineException {
-		RedmineTicket ticket =null;
-		
-		try {
-			ticket = taskData.getTaskId().equals("") 
-			? new RedmineTicket() 
-			: new RedmineTicket(Integer.parseInt(taskData.getTaskId()));
-		} catch (NumberFormatException e) {
-			IStatus status = RedmineCorePlugin.toStatus(e, null, "INVALID_TASK_ID {0}", taskData.getTaskId());
-			StatusHandler.log(status);
-			throw new RedmineException(status.getMessage(), e);
-		}
-		
-		Map<String, TaskAttribute> attributeValues = taskData.getRoot().getAttributes();
-		
-		//default attributes
-		for (RedmineAttribute redmineAttribute : RedmineAttribute.values()) {
-			if (redmineAttribute.isReadOnly()) {
-				continue;
-			}
-			
-			TaskAttribute taskAttribute = attributeValues.get(redmineAttribute.getRedmineKey());
-			if (taskAttribute != null) {
-				
-				String attributeValue = taskAttribute.getValue();
-				String type = taskAttribute.getMetaData().getType();
-
-				if (type.equals(TaskAttribute.TYPE_DATE) && !attributeValue.equals("")) {
-					attributeValue = RedmineUtil.toFormatedRedmineDate(RedmineUtil.parseDate(attributeValue));
-				}
-
-				ticket.putBuiltinValue(redmineAttribute.getTicketKey(), attributeValue);
-			}
-		}
-	
-		ticket.completeCustomFields(taskData, clientData);
-		
-		return ticket;
-	}
-	
-	private void completeCustomFields(TaskData taskData, RedmineClientData clientData) throws RedmineException {
-		TaskAttribute rootAttribute = taskData.getRoot();
-		
-		TaskAttribute projAttr = rootAttribute.getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey());
-		RedmineProjectData projectData = clientData.getProjectFromName(projAttr.getValue());
-
-		String attributeValue = null;
-		String valStr = rootAttribute.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue();
-		try {
-			int trackerId = Integer.parseInt(valStr);
-			List<RedmineCustomField> ticketFields = projectData.getCustomTicketFields(trackerId); 
-			for (RedmineCustomField customField :ticketFields) {
-				//AttributeValue
-				TaskAttribute taskAttribute = rootAttribute.getMappedAttribute(RedmineCustomField.TASK_KEY_PREFIX + customField.getId());
-				attributeValue = (taskAttribute==null) ? "" : taskAttribute.getValue().trim();
-				
-				if (customField.getType()==FieldType.DATE && attributeValue.length()>0) {
-					attributeValue = RedmineUtil.toFormatedRedmineDate(RedmineUtil.parseDate(attributeValue));
-				} else if (customField.getType()==FieldType.BOOL && attributeValue.length()>0) {
-					attributeValue = Boolean.parseBoolean(attributeValue) ? "1" : "0";
-				}
-				this.putCustomFieldValue(Integer.valueOf(customField.getId()), attributeValue);
-			}
-		} catch (NumberFormatException e) {
-			IStatus status = RedmineCorePlugin.toStatus(e, null, "INVALID_TRACKER_ID {0}", valStr);
-			StatusHandler.log(status);
-			throw new RedmineException(status.getMessage(), e);
-		}
-	}
-
 	public void setCreated(Date created) {
 		this.created = created;
 	}
@@ -374,5 +297,5 @@ public class RedmineTicket {
 	public void setLastChanged(Date lastChanged) {
 		this.lastChanged = lastChanged;
 	}
-
+	
 }

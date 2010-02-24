@@ -20,11 +20,14 @@
  *******************************************************************************/
 package org.svenk.redmine.core.qualitycontrol;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.mylyn.commons.core.StatusHandler;
 import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.exception.RedmineAuthenticationException;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
+import org.svenk.redmine.core.exception.RedmineStatusException;
 
 public aspect RedmineClientExceptionAspect {
 
@@ -40,8 +43,9 @@ public aspect RedmineClientExceptionAspect {
 			RedmineCorePlugin.getDefault().logUnexpectedException(e);
 			throw e;
 		} catch (RuntimeException e) {
-			RedmineCorePlugin.getDefault().logUnexpectedException(e);
-			throw new RedmineException(e.getMessage(), e);
+			IStatus status = RedmineCorePlugin.toStatus(e, null, "UNHANDLED_RUNTIME_EXCEPTION");
+			StatusHandler.fail(status);
+			throw new RedmineStatusException(status);
 		}
 	}
 

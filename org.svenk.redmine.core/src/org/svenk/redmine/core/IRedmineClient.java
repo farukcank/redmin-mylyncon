@@ -23,6 +23,7 @@ package org.svenk.redmine.core;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
@@ -46,9 +47,9 @@ public boolean hasAttributes();
 	
 	public void updateAttributes(boolean force, IProgressMonitor monitor) throws RedmineException;
 	
-	public int createTicket(RedmineTicket ticket, IProgressMonitor monitor) throws RedmineException;
+	public int createTicket(String project, Map<String, String> postValues, IProgressMonitor monitor) throws RedmineException;
 	
-	public void updateTicket(RedmineTicket ticket, String comment, IProgressMonitor monitor) throws RedmineException;
+	public void updateTicket(int ticketId, Map<String, String> postValues, String comment, IProgressMonitor monitor) throws RedmineException;
 
 	public InputStream getAttachmentContent(int attachmentId, IProgressMonitor monitor) throws RedmineException;
 
@@ -63,4 +64,6 @@ public boolean hasAttributes();
 	public boolean supportTaskRelations();
 	
 	public boolean supportStartDueDate();
+
+	public boolean supportTimeEntries();
 }

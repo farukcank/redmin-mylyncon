@@ -24,17 +24,7 @@ import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ATTACHMENT_D
 import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ATTACHMENT_FILE;
 import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ATTACHMENT_NOTES;
 import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_CSRF_TOKEN;
-import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_CUSTOM_R07E;
-import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_CUSTOM_R08L;
-import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_DESCRIPTION;
-import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_DONERATIO;
-import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_ENDDATE;
-import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_ESTIMATED;
-import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_FIXEDVERSION;
-import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_NOTES;
-import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_REFERENCED_ID;
-import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_STARTDATE;
-import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_ISSUE_SUBJECT;
+import static org.svenk.redmine.core.IRedmineConstants.CLIENT_FIELD_NOTES;
 import static org.svenk.redmine.core.IRedmineConstants.REDMINE_URL_ATTACHMENT_DOWNLOAD;
 import static org.svenk.redmine.core.IRedmineConstants.REDMINE_URL_LOGIN;
 import static org.svenk.redmine.core.IRedmineConstants.REDMINE_URL_LOGIN_CALLBACK;
@@ -51,6 +41,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -184,6 +175,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		return false;
 	}
 	
+	public boolean supportTimeEntries() {
+		return false;
+	}
+	
 	public InputStream getAttachmentContent(int attachmentId, IProgressMonitor monitor) throws RedmineException {
 		GetMethod method = new GetMethod(REDMINE_URL_ATTACHMENT_DOWNLOAD + attachmentId);
 		return executeMethod(method, attachmentParser, monitor);
@@ -217,10 +212,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		}
 	}
 	
-	public int createTicket(RedmineTicket ticket, IProgressMonitor monitor) throws RedmineException {
-		PostMethod method = new PostMethod(String.format(REDMINE_URL_TICKET_NEW, ticket.getValue(Key.PROJECT)));
+	public int createTicket(String project, Map<String, String> postValues, IProgressMonitor monitor) throws RedmineException {
+		PostMethod method = new PostMethod(String.format(REDMINE_URL_TICKET_NEW, project));
 		
-		List<NameValuePair> values = this.ticket2HttpData(ticket);
+		List<NameValuePair> values = this.ticket2HttpData(postValues);
 		method.addParameters(values.toArray(new NameValuePair[values.size()]));
 
 		String errorMsg = executeMethod(method, submitErrorParser, monitor, HttpStatus.SC_OK, HttpStatus.SC_MOVED_TEMPORARILY);
@@ -248,10 +243,12 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		throw new RedmineException(Messages.AbstractRedmineClient_UNHANDLED_SUBMIT_ERROR);
 	}
 	
-	public void updateTicket(RedmineTicket ticket, String comment, IProgressMonitor monitor) throws RedmineException {
-		PostMethod method = new PostMethod(REDMINE_URL_TICKET_EDIT + ticket.getId());
+	public void updateTicket(int ticketId, Map<String, String> postValues, String comment, IProgressMonitor monitor) throws RedmineException {
+		PostMethod method = new PostMethod(REDMINE_URL_TICKET_EDIT + ticketId);
 
-		List<NameValuePair> values = this.ticket2HttpData(ticket, comment);
+		List<NameValuePair> values = this.ticket2HttpData(postValues);
+		values.add(new NameValuePair(CLIENT_FIELD_NOTES, comment));
+
 		method.addParameters(values.toArray(new NameValuePair[values.size()]));
 
 		String errorMsg = executeMethod(method, submitErrorParser, monitor, HttpStatus.SC_OK, HttpStatus.SC_MOVED_TEMPORARILY);
@@ -422,48 +419,12 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 			throw new RedmineException(Messages.AbstractRedmineClient_AUTHENTICATION_CANCELED);
 		}
 	}
-
-	protected List<NameValuePair> ticket2HttpData(RedmineTicket ticket) {
-		
-		Map<String, String> values = ticket.getValues();
-		List<NameValuePair> nameValuePair = new ArrayList<NameValuePair>(this.attributeKeys.length + 2);
-
-		nameValuePair.add(new NameValuePair(CLIENT_FIELD_ISSUE_SUBJECT, values.get(Key.SUBJECT.getKey())));
-		nameValuePair.add(new NameValuePair(CLIENT_FIELD_ISSUE_DESCRIPTION, values.get(Key.DESCRIPTION.getKey())));
-		nameValuePair.add(new NameValuePair(CLIENT_FIELD_ISSUE_DONERATIO, values.get(Key.DONE_RATIO.getKey())));
-		nameValuePair.add(new NameValuePair(CLIENT_FIELD_ISSUE_ESTIMATED, values.get(Key.ESTIMATED_HOURS.getKey())));
-		nameValuePair.add(new NameValuePair(CLIENT_FIELD_ISSUE_STARTDATE, values.get(Key.START_DATE.getKey())));
-		nameValuePair.add(new NameValuePair(CLIENT_FIELD_ISSUE_ENDDATE, values.get(Key.DUE_DATE.getKey())));
-		
-		//Handle RedmineTicketAttributes / ProjectAttributes
-		String xmlRpcKey;
-		boolean existingTicket = ticket.getId()>0;
-		for (Key key : this.attributeKeys) {
-			if (key.isReadonly() && existingTicket) {
-				continue;
-			}
-			xmlRpcKey = redmineKey2ValueName(key);
-			String value = values.get(key.getKey());
-			if (value!=null) {
-				nameValuePair.add(new NameValuePair(xmlRpcKey, values.get(key.getKey())));
-			}
-		}
-		
-		//CustomTicketFields
-		for (Map.Entry<Integer, String> customValue : ticket.getCustomValues().entrySet()) {
-				String name = redmineVersion<REDMINE_VERSION_8
-					? CLIENT_FIELD_ISSUE_CUSTOM_R07E
-					: CLIENT_FIELD_ISSUE_CUSTOM_R08L;
-				name = String.format(name, customValue.getKey());
-			nameValuePair.add(new NameValuePair(name, customValue.getValue()));
-		}
-		
-		return nameValuePair;
-	}
 	
-	protected List<NameValuePair> ticket2HttpData(RedmineTicket ticket, String comment) {
-		List<NameValuePair> nameValuePair = ticket2HttpData(ticket);
-		nameValuePair.add(new NameValuePair(CLIENT_FIELD_ISSUE_NOTES, comment));
+	protected List<NameValuePair> ticket2HttpData(Map<String, String> postValues) {
+		List<NameValuePair> nameValuePair = new ArrayList<NameValuePair>(postValues.size());
+		for (Entry<String, String> entry : postValues.entrySet()) {
+			nameValuePair.add(new NameValuePair(entry.getKey(), entry.getValue()));
+		}
 		return nameValuePair;
 	}
 	
@@ -472,14 +433,6 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 			responseReader = new RedmineResponseReader();
 		}
 		return responseReader;
-	}
-	
-	private String redmineKey2ValueName(Key redmineKey) {
-		String name = redmineKey.name().toLowerCase();
-		if (name.equals(Key.VERSION.getKey())) {
-			name = CLIENT_FIELD_ISSUE_FIXEDVERSION;
-		}
-		return String.format(CLIENT_FIELD_ISSUE_REFERENCED_ID, name);
 	}
 
 	private void createResponseParsers() {

@@ -16,8 +16,10 @@ Bundle-Activator: org.svenk.redmine.core.RedmineCorePlugin
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Export-Package: org.svenk.redmine.core,
+ org.svenk.redmine.core.accesscontrol.internal;x-friends:="org.svenk.redmine.tests",
  org.svenk.redmine.core.client,
  org.svenk.redmine.core.client.container,
+ org.svenk.redmine.core.data,
  org.svenk.redmine.core.exception,
  org.svenk.redmine.core.model,
  org.svenk.redmine.core.util

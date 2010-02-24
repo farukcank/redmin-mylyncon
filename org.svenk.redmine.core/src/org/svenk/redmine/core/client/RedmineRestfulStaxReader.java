@@ -33,9 +33,11 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.svenk.redmine.core.accesscontrol.internal.RedmineAcl;
 import org.svenk.redmine.core.client.container.Version;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineInputParserException;
+import org.svenk.redmine.core.model.RedmineActivity;
 import org.svenk.redmine.core.model.RedmineAttachment;
 import org.svenk.redmine.core.model.RedmineCustomField;
 import org.svenk.redmine.core.model.RedmineCustomValue;
@@ -196,61 +198,38 @@ public class RedmineRestfulStaxReader {
 		return list;
 	}
 
-	protected RedmineTimeEntry readCurrentTagAsTimeEntry(XMLStreamReader reader) throws XMLStreamException {
-		RedmineTimeEntry timeEntry = null;
+	public List<RedmineActivity> readActivities(InputStream in) throws RedmineException {
+		List<RedmineActivity> list = new ArrayList<RedmineActivity>();
+		
 		try {
-			int id = Integer.parseInt(reader.getAttributeValue(NS_PREFIX, "id"));
-
-			reader.nextTag();
-			float hours = Float.parseFloat(reader.getElementText());
-
-			reader.nextTag();
-			int activityId = Integer.parseInt(reader.getElementText());
-
-			reader.nextTag();
-			int userId = Integer.parseInt(reader.getElementText());
-
-			timeEntry = new RedmineTimeEntry();
-			timeEntry.setId(id);
-			timeEntry.setHours(hours);
-			timeEntry.setActivityId(activityId);
-			timeEntry.setUserId(userId);
-
-			reader.nextTag();
-			timeEntry.setSpentOn(RedmineUtil.parseDate(reader.getElementText()));
-
-			reader.nextTag();
-			timeEntry.setComments(reader.getElementText());
-
-			reader.nextTag();//customValues
+			XMLStreamReader reader = inputFactory.createXMLStreamReader(in);
+			
+			reader.nextTag();//priorities
 			while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
-				RedmineCustomValue customValue = readCurrentTagAsCustomValue(reader);
-				if (customValue!=null) {
-					timeEntry.addCustomValue(customValue);
-				}
+				int id = Integer.parseInt(reader.getAttributeValue(NS_PREFIX, "id"));
+				
+				reader.nextTag();//name
+				String name = reader.getElementText().trim();
+				
+				reader.nextTag();//position
+				int position = Integer.parseInt(reader.getElementText());
+				
+				RedmineActivity activity = new RedmineActivity(name, id, position);
+				
+				reader.nextTag();//default
+				activity.setDefaultPriority(Boolean.parseBoolean(reader.getElementText()));
+				
+				list.add(activity);
+				
+				reader.nextTag();//priority End-Tag
 			}
 			
-		} finally {
-			skipToEndTag("timeEntry", reader);
+		} catch (XMLStreamException e) {
+			throw new RedmineException(e.getMessage(), e);
 		}
-		return timeEntry;
+		
+		return list;
 	}
-
-	protected RedmineCustomValue readCurrentTagAsCustomValue(XMLStreamReader reader) throws XMLStreamException {
-		RedmineCustomValue customValue = null;
-		try {
-			int customFieldId = Integer.parseInt(reader.getAttributeValue(NS_PREFIX, "customFieldId"));
-			String value = reader.getElementText();
-			
-			customValue = new RedmineCustomValue();
-			customValue.setCustomFieldId(customFieldId);
-			customValue.setValue(value);
-		} finally {
-//			skipToEndTag("customValue", reader);
-		}
-		return customValue;
-	}
-
 
 	public List<RedmineCustomField> readCustomFields(InputStream in) throws RedmineException {
 		List<RedmineCustomField> list = new ArrayList<RedmineCustomField>();
@@ -259,17 +238,16 @@ public class RedmineRestfulStaxReader {
 			XMLStreamReader reader = inputFactory.createXMLStreamReader(in);
 			
 			reader.nextTag();//customFields
-			while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
-				RedmineCustomField field = readCurrentTagAsCustomField(reader);
-				if (field!=null) {
-					list.add(field);
+			while(reader.nextTag()==XMLStreamConstants.START_ELEMENT && reader.getLocalName().equals("customField")) {
+				RedmineCustomField customField = readCurrentTagAsCustomField(reader);
+				if(customField!=null) {
+					list.add(customField);
 				}
 			}
-			
 		} catch (XMLStreamException e) {
 			throw new RedmineException(e.getMessage(), e);
 		}
-
+		
 		return list;
 	}
 
@@ -453,19 +431,16 @@ public class RedmineRestfulStaxReader {
 							}
 						}
 					} else if (reader.getLocalName().equals("timeEntries")) {
-						//TODO AccessControl
-						//TODO sum
-						boolean viewAllowed = Boolean.parseBoolean(reader.getAttributeValue(NS_PREFIX, "viewAllowed"));
-//						boolean newAllowed = Boolean.parseBoolean(reader.getAttributeValue(NS_PREFIX, "newAllowed"));
+						ticket.putRight(RedmineAcl.TIMEENTRY_VIEW, Boolean.parseBoolean(reader.getAttributeValue(NS_PREFIX, "viewAllowed")));
+						ticket.putRight(RedmineAcl.TIMEENTRY_NEW, Boolean.parseBoolean(reader.getAttributeValue(NS_PREFIX, "newAllowed")));
 						
-						if (viewAllowed) {
-							reader.nextTag();//sum
-							reader.getElementText();
-							while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
-								RedmineTimeEntry timeEntry = readCurrentTagAsTimeEntry(reader);
-								if (timeEntry!=null) {
-									ticket.addTimeEntry(timeEntry);
-								}
+						reader.nextTag();//sum
+						ticket.putBuiltinValue(Key.TIME_ENTRY_TOTAL, reader.getElementText());
+
+						while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
+							RedmineTimeEntry timeEntry = readCurrentTagAsTimeEntry(reader);
+							if (timeEntry!=null) {
+								ticket.addTimeEntry(timeEntry);
 							}
 						}
 					} else {
@@ -581,6 +556,61 @@ public class RedmineRestfulStaxReader {
 			skipToEndTag("issueRelation", reader);
 		}
 		return relation;
+	}
+
+	protected RedmineTimeEntry readCurrentTagAsTimeEntry(XMLStreamReader reader) throws XMLStreamException {
+		RedmineTimeEntry timeEntry = null;
+		try {
+			int id = Integer.parseInt(reader.getAttributeValue(NS_PREFIX, "id"));
+
+			reader.nextTag();
+			float hours = Float.parseFloat(reader.getElementText());
+
+			reader.nextTag();
+			int activityId = Integer.parseInt(reader.getElementText());
+
+			reader.nextTag();
+			int userId = Integer.parseInt(reader.getElementText());
+
+			timeEntry = new RedmineTimeEntry();
+			timeEntry.setId(id);
+			timeEntry.setHours(hours);
+			timeEntry.setActivityId(activityId);
+			timeEntry.setUserId(userId);
+
+			reader.nextTag();
+			timeEntry.setSpentOn(RedmineUtil.parseDate(reader.getElementText()));
+
+			reader.nextTag();
+			timeEntry.setComments(reader.getElementText());
+
+			reader.nextTag();//customValues
+			while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
+				RedmineCustomValue customValue = readCurrentTagAsCustomValue(reader);
+				if (customValue!=null) {
+					timeEntry.addCustomValue(customValue);
+				}
+			}
+			
+		} finally {
+			skipToEndTag("timeEntry", reader);
+		}
+		return timeEntry;
+	}
+
+	protected RedmineCustomValue readCurrentTagAsCustomValue(XMLStreamReader reader) throws XMLStreamException {
+		RedmineCustomValue customValue = null;
+		try {
+			int customFieldId = Integer.parseInt(reader.getAttributeValue(NS_PREFIX, "customFieldId"));
+			String value = reader.getElementText();
+			
+			customValue = new RedmineCustomValue();
+			customValue.setCustomFieldId(customFieldId);
+			customValue.setValue(value);
+		} finally {
+//			skipToEndTag("customValue", reader);
+		}
+		return customValue;
 	}
 
 	protected RedmineTracker readCurrentTagAsTracker(XMLStreamReader reader) throws XMLStreamException {

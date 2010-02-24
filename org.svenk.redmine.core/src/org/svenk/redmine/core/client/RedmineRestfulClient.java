@@ -35,6 +35,8 @@ import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.svenk.redmine.core.IRedmineConstants;
 import org.svenk.redmine.core.client.container.Version;
 import org.svenk.redmine.core.exception.RedmineException;
+import org.svenk.redmine.core.model.RedmineActivity;
+import org.svenk.redmine.core.model.RedmineCustomField;
 import org.svenk.redmine.core.model.RedminePriority;
 import org.svenk.redmine.core.model.RedmineTicket;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
@@ -51,6 +53,10 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 	protected final static String PATH_GET_PRIORITIES = "/mylyn/priorities";
 	
 	protected final static String PATH_GET_ISSUE_STATUS = "/mylyn/issuestatus";
+
+	protected final static String PATH_GET_ACTIVITIES = "/mylyn/activities";
+
+	protected final static String PATH_GET_CUSTOM_FIELDS = "/mylyn/customfields";
 	
 	protected final static String PATH_GET_TICKET = "/mylyn/issue/" + PLACEHOLDER;
 
@@ -76,6 +82,10 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 	private IRedmineResponseParser<List<RedminePriority>> prioritiesParser;
 	
 	private IRedmineResponseParser<List<RedmineTicketStatus>> ticketStatusParser;
+
+	private IRedmineResponseParser<List<RedmineActivity>> activitiesParser;
+
+	private IRedmineResponseParser<List<RedmineCustomField>> customFieldsParser;
 
 	public RedmineRestfulClient(AbstractWebLocation location, RedmineClientData clientData, TaskRepository repository) {
 		super(location, clientData, repository);
@@ -161,6 +171,7 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 
 	@Override
 	public boolean supportStartDueDate() {
+		//TODO replace like vRedmine.compareTo(Release.ZEROEIGHTSEVEN
 		return wsVersion >= IRedmineConstants.PLUGIN_VERSION_2_6;
 	}
 
@@ -169,12 +180,18 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 		return true;
 	}
 
+	@Override
+	public boolean supportTimeEntries() {
+		//TODO replace like vRedmine.compareTo(Release.ZEROEIGHTSEVEN
+		return wsVersion >= IRedmineConstants.PLUGIN_VERSION_2_6;
+	}
+
 	public synchronized void updateAttributes(boolean force, IProgressMonitor monitor) throws RedmineException {
 		if (!force && hasAttributes()) {
 			return;
 		}
 
-		monitor.beginTask(Messages.RedmineRestfulClient_UPDATING_ATTRIBUTES, 3);
+		monitor.beginTask(Messages.RedmineRestfulClient_UPDATING_ATTRIBUTES, supportTimeEntries() ? 5 : 3);
 
 		GetMethod method = new GetMethod(PATH_GET_PROJECTS);
 		data.projects.clear();
@@ -191,7 +208,7 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 		if (monitor.isCanceled()) {
 			throw new OperationCanceledException();
 		}
-		
+
 		method = new GetMethod(PATH_GET_ISSUE_STATUS);
 		data.statuses.clear();
 		data.statuses.addAll(executeMethod(method, ticketStatusParser, monitor));
@@ -200,6 +217,24 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 			throw new OperationCanceledException();
 		}
 
+		if (supportTimeEntries()) {
+			method = new GetMethod(PATH_GET_ACTIVITIES);
+			data.activities.clear();
+			data.activities.addAll(executeMethod(method, activitiesParser, monitor));
+			monitor.worked(1);
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
+			
+			method = new GetMethod(PATH_GET_CUSTOM_FIELDS);
+			data.customFields.clear();
+			data.customFields.addAll(executeMethod(method, customFieldsParser, monitor));
+			monitor.worked(1);
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
+		}
+			
 		data.lastupdate=new Date().getTime();
 	}
 	
@@ -256,6 +291,18 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 		ticketStatusParser = new IRedmineResponseParser<List<RedmineTicketStatus>>() {
 			public List<RedmineTicketStatus> parseResponse(InputStream input, int sc) throws RedmineException {
 				return reader.readTicketStatuses(input);
+			}
+		};
+
+		activitiesParser = new IRedmineResponseParser<List<RedmineActivity>>() {
+			public List<RedmineActivity> parseResponse(InputStream input, int sc) throws RedmineException {
+				return reader.readActivities(input);
+			}
+		};
+
+		customFieldsParser = new IRedmineResponseParser<List<RedmineCustomField>>() {
+			public List<RedmineCustomField> parseResponse(InputStream input, int sc) throws RedmineException {
+				return reader.readCustomFields(input);
 			}
 		};
 	}

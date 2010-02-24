@@ -27,6 +27,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.svenk.redmine.core.accesscontrol.internal.RedmineAcl;
 import org.svenk.redmine.core.model.RedmineAttachment;
 import org.svenk.redmine.core.model.RedmineCustomValue;
 import org.svenk.redmine.core.model.RedmineTicket;
@@ -146,6 +147,9 @@ public class RedmineRestfulStaxReaderWS26Ticket extends TestCase {
 	}
 
 	protected void validateTicket3TimeEntries(RedmineTicket ticket) {
+		assertTrue(ticket.getRight(RedmineAcl.TIMEENTRY_VIEW));
+		assertFalse(ticket.getRight(RedmineAcl.TIMEENTRY_NEW));
+		
 		RedmineTimeEntry[] timeEntries = ticket.getTimeEntries();
 		assertNotNull(timeEntries);
 		assertEquals(1, timeEntries.length);

@@ -20,9 +20,10 @@
  *******************************************************************************/
 package org.svenk.redmine.core;
 
+import static org.svenk.redmine.core.IRedmineConstants.TASK_ATTRIBUTE_TIMEENTRY_ACTIVITY;
 import static org.svenk.redmine.core.IRedmineConstants.TASK_ATTRIBUTE_TIMEENTRY_COMMENTS;
 import static org.svenk.redmine.core.IRedmineConstants.TASK_ATTRIBUTE_TIMEENTRY_HOURS;
-import static org.svenk.redmine.core.IRedmineConstants.TASK_ATTRIBUTE_TIMEENTRY_ACTIVITY;
+import static org.svenk.redmine.core.IRedmineConstants.TASK_ATTRIBUTE_TIMEENTRY_TOTAL;
 
 import java.util.EnumSet;
 
@@ -32,27 +33,28 @@ import org.svenk.redmine.core.model.RedmineTicket.Key;
 
 public enum RedmineAttribute {
 
-	ID(Key.ID, "<used by search engine>", null, TaskAttribute.TYPE_INTEGER, Flag.HIDDEN),
+	ID(Key.ID, "<used by search engine>", null, TaskAttribute.TYPE_INTEGER, Flag.HIDDEN, Flag.READ_ONLY),
 	SUMMARY(Key.SUBJECT, "Summary:", TaskAttribute.SUMMARY, TaskAttribute.TYPE_SHORT_TEXT, Flag.HIDDEN, Flag.REQUIRED),
-	REPORTER(Key.AUTHOR, "Reporter:", TaskAttribute.USER_REPORTER, TaskAttribute.TYPE_PERSON),
+	REPORTER(Key.AUTHOR, "Reporter:", TaskAttribute.USER_REPORTER, TaskAttribute.TYPE_PERSON, Flag.READ_ONLY),
 	DESCRIPTION(Key.DESCRIPTION, "Description:", TaskAttribute.DESCRIPTION, TaskAttribute.TYPE_LONG_RICH_TEXT, Flag.HIDDEN, Flag.REQUIRED),
 	ASSIGNED_TO(Key.ASSIGNED_TO, "Assigned To:", TaskAttribute.USER_ASSIGNED, TaskAttribute.TYPE_SINGLE_SELECT),
-	DATE_SUBMITTED(Key.CREATED_ON, "Submitted:", TaskAttribute.DATE_CREATION, TaskAttribute.TYPE_DATE, Flag.HIDDEN),
-	DATE_UPDATED(Key.UPDATED_ON, "Last Modification:", TaskAttribute.DATE_MODIFICATION, TaskAttribute.TYPE_DATE, Flag.HIDDEN),
+	DATE_SUBMITTED(Key.CREATED_ON, "Submitted:", TaskAttribute.DATE_CREATION, TaskAttribute.TYPE_DATE, Flag.HIDDEN, Flag.READ_ONLY),
+	DATE_UPDATED(Key.UPDATED_ON, "Last Modification:", TaskAttribute.DATE_MODIFICATION, TaskAttribute.TYPE_DATE, Flag.HIDDEN, Flag.READ_ONLY),
 	DATE_START(Key.START_DATE, "Start Date:", RedmineAttribute.TASK_KEY_STARTDATE, TaskAttribute.TYPE_DATE, Flag.HIDDEN),
 	DATE_DUE(Key.DUE_DATE, "Due Date:", TaskAttribute.DATE_DUE, TaskAttribute.TYPE_DATE, Flag.HIDDEN),
-	PROJECT(Key.PROJECT, "Project:", TaskAttribute.PRODUCT, TaskAttribute.TYPE_SHORT_TEXT, Flag.REQUIRED),
+	PROJECT(Key.PROJECT, "Project:", TaskAttribute.PRODUCT, TaskAttribute.TYPE_SHORT_TEXT, Flag.REQUIRED, Flag.READ_ONLY),
 	PRIORITY(Key.PRIORITY, "Priority:", TaskAttribute.PRIORITY, TaskAttribute.TYPE_SINGLE_SELECT, Flag.HIDDEN, Flag.REQUIRED),
 	CATEGORY(Key.CATEGORY, "Category:", RedmineAttribute.TASK_KEY_CATEGORY, TaskAttribute.TYPE_SINGLE_SELECT),
 	VERSION(Key.VERSION, "Target version:", RedmineAttribute.TASK_KEY_VERSION, TaskAttribute.TYPE_SINGLE_SELECT),
-	TRACKER(Key.TRACKER, "Tracker:", RedmineAttribute.TASK_KEY_TRACKER, TaskAttribute.TYPE_SINGLE_SELECT, Flag.REQUIRED),
+	TRACKER(Key.TRACKER, "Tracker:", RedmineAttribute.TASK_KEY_TRACKER, TaskAttribute.TYPE_SINGLE_SELECT, Flag.REQUIRED, Flag.READ_ONLY),
 	STATUS(Key.STATUS, "Status:", TaskAttribute.STATUS, TaskAttribute.TYPE_SINGLE_SELECT, Flag.REQUIRED),
 	COMMENT(Key.COMMENT, "Comment: ", TaskAttribute.COMMENT_NEW, TaskAttribute.TYPE_LONG_RICH_TEXT, Flag.HIDDEN),
 	PROGRESS(Key.DONE_RATIO, "Done ratio: ", RedmineAttribute.TASK_KEY_PROGRESS, TaskAttribute.TYPE_SINGLE_SELECT),
 	ESTIMATED(Key.ESTIMATED_HOURS, "Estimated hours: ", RedmineAttribute.TASK_KEY_ESTIMATE, IRedmineConstants.EDITOR_TYPE_ESTIMATED, Flag.HIDDEN),
 	RELATION(Key.RELATIONSHIPS, "Relationship", null, RedmineAttribute.TASK_KEY_RELATION, Flag.HIDDEN),
 	
-	TIME_ENTRY_HOURS(Key.TIME_ENTRY_HOURS, "Spent time (Hours):", TASK_ATTRIBUTE_TIMEENTRY_HOURS, TaskAttribute.TYPE_SHORT_TEXT, Flag.HIDDEN),
+	TIME_ENTRY_TOTAL(Key.TIME_ENTRY_TOTAL, "Total (hours):", TASK_ATTRIBUTE_TIMEENTRY_TOTAL, TaskAttribute.TYPE_SHORT_TEXT, Flag.HIDDEN, Flag.READ_ONLY),
+	TIME_ENTRY_HOURS(Key.TIME_ENTRY_HOURS, "Spent time (hours):", TASK_ATTRIBUTE_TIMEENTRY_HOURS, TaskAttribute.TYPE_SHORT_TEXT, Flag.HIDDEN),
 	TIME_ENTRY_ACTIVITY(Key.TIME_ENTRY_ACTIVITY, "Activity:", TASK_ATTRIBUTE_TIMEENTRY_ACTIVITY, TaskAttribute.TYPE_SINGLE_SELECT, Flag.HIDDEN),
 	TIME_ENTRY_COMMENTS(Key.TIME_ENTRY_COMMENTS, "Comment:", TASK_ATTRIBUTE_TIMEENTRY_COMMENTS, TaskAttribute.TYPE_LONG_TEXT, Flag.HIDDEN)
 	; 
@@ -94,9 +96,6 @@ public enum RedmineAttribute {
 		this.type = type;
 		
 		this.flags = flags.length==0 || flags[0]==null ? EnumSet.noneOf(Flag.class) : EnumSet.of(flags [0], flags);
-		if (key.isReadonly() && !this.flags.contains(Flag.READ_ONLY)) {
-			this.flags.add(Flag.READ_ONLY);
-		}
 	}
 	
 	RedmineAttribute(Key key, String prettyName, String taskKey, String type) {		
