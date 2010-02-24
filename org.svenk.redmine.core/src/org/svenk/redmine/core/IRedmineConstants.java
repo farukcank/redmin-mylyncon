@@ -61,8 +61,7 @@ public interface IRedmineConstants {
 	public final static String CLIENT_FIELD_ISSUE_ESTIMATED = "issue[estimated_hours]";
 	public final static String CLIENT_FIELD_ISSUE_STARTDATE = "issue[start_date]";
 	public final static String CLIENT_FIELD_ISSUE_ENDDATE = "issue[due_date]";
-	public final static String CLIENT_FIELD_ISSUE_CUSTOM_R07E = "custom_fields[%d]";
-	public final static String CLIENT_FIELD_ISSUE_CUSTOM_R08L = "issue[custom_field_values][%d]";
+	public final static String CLIENT_FIELD_ISSUE_CUSTOM = "issue[custom_field_values][%d]";
 	public final static String CLIENT_FIELD_ISSUE_FIXEDVERSION = "fixed_version";
 	public final static String CLIENT_FIELD_ISSUE_REFERENCE_ASSIGNED = "issue[assigned_to_id]";
 	public final static String CLIENT_FIELD_ISSUE_REFERENCE_PROJECT = "issue[project_id]";

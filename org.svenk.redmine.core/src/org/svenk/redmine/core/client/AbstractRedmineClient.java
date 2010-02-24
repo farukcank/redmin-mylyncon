@@ -87,8 +87,6 @@ import org.svenk.redmine.core.model.RedmineTicket.Key;
 
 abstract public class AbstractRedmineClient implements IRedmineClient {
 
-	protected final static double REDMINE_VERSION_7 = 0.7D;
-
 	protected final static double REDMINE_VERSION_8 = 0.8D;
 
 	protected final static double REDMINE_VERSION_9 = 0.9D;
@@ -154,7 +152,7 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	
 	public String checkClientConnection(IProgressMonitor monitor) throws RedmineException {
 		String version = checkClientVersion(monitor);
-		if (!(version.startsWith(Double.toString(REDMINE_VERSION_7)) || version.startsWith(Double.toString(REDMINE_VERSION_8)) || version.startsWith(Double.toString(REDMINE_VERSION_9)))) {
+		if (!(version.startsWith(Double.toString(REDMINE_VERSION_8)) || version.startsWith(Double.toString(REDMINE_VERSION_9)))) {
 			throw new RedmineException(Messages.AbstractRedmineClient_REQUIRED_REDMINE_VERSION);
 		}
 		return version;

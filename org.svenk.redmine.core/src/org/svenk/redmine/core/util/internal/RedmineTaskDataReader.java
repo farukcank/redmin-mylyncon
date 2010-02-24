@@ -57,7 +57,7 @@ public class RedmineTaskDataReader {
 					String key;
 					int len;
 					if(attributeId.startsWith(CustomType.IssueCustomField.taskKeyPrefix)) {
-						key = IRedmineConstants.CLIENT_FIELD_ISSUE_CUSTOM_R08L;
+						key = IRedmineConstants.CLIENT_FIELD_ISSUE_CUSTOM;
 						len = CustomType.IssueCustomField.taskKeyPrefix.length();
 					} else if (attributeId.startsWith(CustomType.TimeEntryCustomField.taskKeyPrefix)) {
 						key = IRedmineConstants.CLIENT_FIELD_TIMEENTRY_CF;

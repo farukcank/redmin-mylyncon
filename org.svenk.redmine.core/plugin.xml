@@ -9,12 +9,5 @@
             class="org.svenk.redmine.core.client.RedmineRestfulClient">
       </clientImplementation>
    </extension>
-   <extension
-         name="XML-RPC (Redmine 0.7 &amp; 0.8, requires ActionWebService, EOL)"
-         point="org.svenk.redmine.core.clientInterface">
-      <clientImplementation
-            class="org.svenk.redmine.core.client.RedmineXmlRpcClient">
-      </clientImplementation>
-   </extension>
 
 </plugin>

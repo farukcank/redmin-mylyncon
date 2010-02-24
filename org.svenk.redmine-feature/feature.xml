@@ -65,21 +65,19 @@ Java and all Java-based trademarks are trademarks of Sun Microsystems, Inc. in t
 
    <requires>
       <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.mylyn.tasks.core" version="3.1.0" match="compatible"/>
-      <import plugin="org.eclipse.mylyn.commons.net" version="3.1.0" match="compatible"/>
-      <import plugin="org.apache.xmlrpc" version="3.0.0"/>
-      <import plugin="org.eclipse.mylyn.commons.core" version="3.1.0" match="compatible"/>
-      <import plugin="org.svenk.redmine.dependency" version="3.1.0" match="greaterOrEqual"/>
+      <import plugin="javax.xml.stream" version="1.0.1" match="greaterOrEqual"/>
       <import plugin="javax.xml.bind"/>
-      <import plugin="org.eclipse.mylyn.tasks.ui" version="3.1.0" match="compatible"/>
       <import plugin="org.eclipse.jface"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.search"/>
-      <import plugin="org.eclipse.mylyn.monitor.core" version="3.1.0" match="compatible"/>
       <import plugin="org.eclipse.ui.forms"/>
-      <import plugin="org.svenk.redmine.core" version="3.1.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.jface.text"/>
-      <import plugin="javax.xml.stream" version="1.0.1" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.mylyn.tasks.core" version="3.2.0" match="compatible"/>
+      <import plugin="org.eclipse.mylyn.commons.net" version="3.2.0" match="compatible"/>
+      <import plugin="org.eclipse.mylyn.commons.core" version="3.2.0" match="compatible"/>
+      <import plugin="org.eclipse.mylyn.tasks.ui" version="3.2.0" match="compatible"/>
+      <import plugin="org.eclipse.mylyn.monitor.core" version="3.2.0" match="compatible"/>
+      <import plugin="org.eclipse.mylyn.commons.ui" version="3.2.0" match="compatible"/>
    </requires>
 
    <plugin
