@@ -91,6 +91,8 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 	protected Set<TaskEditorPartDescriptor> createPartDescriptors() {
 		Set<TaskEditorPartDescriptor> descriptors = super.createPartDescriptors();
 
+		TaskAttribute rootAttribute = getModel().getTaskData().getRoot();
+		
 		//TODO change ID
 		descriptors.add(new TaskEditorPartDescriptor("ID-CHANGE-ME") {
 			@Override
@@ -99,21 +101,25 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 			}
 		}.setPath(PATH_ATTRIBUTES));
 
-		//TODO change ID
-		descriptors.add(new TaskEditorPartDescriptor("ID-CHANGE-ME2") {
-			@Override
-			public AbstractTaskEditorPart createPart() {
-				return new RedmineTimeEntryEditorPart();
-			}
-		}.setPath(PATH_COMMENTS));
+		if (rootAttribute.getAttribute(RedmineAttribute.TIME_ENTRY_TOTAL.getRedmineKey())!=null) {
+			//TODO change ID
+			descriptors.add(new TaskEditorPartDescriptor("ID-CHANGE-ME2") {
+				@Override
+				public AbstractTaskEditorPart createPart() {
+					return new RedmineTimeEntryEditorPart();
+				}
+			}.setPath(PATH_COMMENTS));
+		}
 
-		//TODO change ID
-		descriptors.add(new TaskEditorPartDescriptor("ID-CHANGE-ME3") {
-			@Override
-			public AbstractTaskEditorPart createPart() {
-				return new RedmineNewTimeEntryEditorPart();
-			}
-		}.setPath(PATH_COMMENTS));
+		if (rootAttribute.getAttribute(RedmineAttribute.TIME_ENTRY_HOURS.getRedmineKey())!=null) {
+			//TODO change ID
+			descriptors.add(new TaskEditorPartDescriptor("ID-CHANGE-ME3") {
+				@Override
+				public AbstractTaskEditorPart createPart() {
+					return new RedmineNewTimeEntryEditorPart();
+				}
+			}.setPath(PATH_COMMENTS));
+		}
 		
 		return descriptors;
 	}

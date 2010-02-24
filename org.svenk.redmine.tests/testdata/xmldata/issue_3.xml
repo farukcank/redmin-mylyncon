@@ -70,7 +70,7 @@
   </attachments>
   <issueRelations>
   </issueRelations>
-  <timeEntries viewAllowed="true" newAllowed="true">
+  <timeEntries viewAllowed="true" newAllowed="false">
     <sum>1.0</sum>
     <timeEntry editAllowed="true" id="3">
       <hours>1.0</hours>

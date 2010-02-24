@@ -33,6 +33,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.svenk.redmine.core.accesscontrol.internal.RedmineAcl;
 import org.svenk.redmine.core.client.container.Version;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineInputParserException;
@@ -430,7 +431,8 @@ public class RedmineRestfulStaxReader {
 							}
 						}
 					} else if (reader.getLocalName().equals("timeEntries")) {
-						//TODO AccessControl
+						ticket.putRight(RedmineAcl.TIMEENTRY_VIEW, Boolean.parseBoolean(reader.getAttributeValue(NS_PREFIX, "viewAllowed")));
+						ticket.putRight(RedmineAcl.TIMEENTRY_NEW, Boolean.parseBoolean(reader.getAttributeValue(NS_PREFIX, "newAllowed")));
 						
 						reader.nextTag();//sum
 						ticket.putBuiltinValue(Key.TIME_ENTRY_TOTAL, reader.getElementText());

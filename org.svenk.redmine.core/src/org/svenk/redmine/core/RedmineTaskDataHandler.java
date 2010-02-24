@@ -42,6 +42,7 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskAttributeMapper;
 import org.eclipse.mylyn.tasks.core.data.TaskCommentMapper;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
+import org.svenk.redmine.core.accesscontrol.internal.RedmineAcl;
 import org.svenk.redmine.core.client.RedmineClientData;
 import org.svenk.redmine.core.client.RedmineProjectData;
 import org.svenk.redmine.core.data.RedmineTaskTimeEntryMapper;
@@ -213,7 +214,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 			}
 		}
 
-		if (client.supportTimeEntries()) {
+		if (client.supportTimeEntries() && ticket.getRight(RedmineAcl.TIMEENTRY_VIEW)) {
 			RedmineTimeEntry[] timeEntries = ticket.getTimeEntries();
 			if(timeEntries != null) {
 				for (RedmineTimeEntry timeEntry : timeEntries) {
@@ -405,7 +406,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 			createAttribute(data, RedmineAttribute.STATUS, ticket.getStatuses(), false);
 			createAttribute(data, RedmineAttribute.RELATION, ticket.getRelations(), false);
 			
-			if (client.supportTimeEntries()) {
+			if (client.supportTimeEntries() && ticket.getRight(RedmineAcl.TIMEENTRY_VIEW)) {
 				createAttribute(data, RedmineAttribute.TIME_ENTRY_TOTAL);
 			}
 		} else {
@@ -421,7 +422,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		createAttribute(data, RedmineAttribute.PROGRESS, RedmineTicketProgress.availableValues(), false);
 
 		//Attributes for new a TimeEntry
-		if (client.supportTimeEntries()) {
+		if (client.supportTimeEntries() && ticket.getRight(RedmineAcl.TIMEENTRY_NEW)) {
 			createAttribute(data, RedmineAttribute.TIME_ENTRY_HOURS);
 			createAttribute(data, RedmineAttribute.TIME_ENTRY_ACTIVITY, client.getClientData().getActivities(), false);
 			createAttribute(data, RedmineAttribute.TIME_ENTRY_COMMENTS);

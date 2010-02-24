@@ -48,6 +48,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.svenk.redmine.core.accesscontrol.internal.RedmineAcl;
+
 public class RedmineTicket {
 
 	public enum Key {
@@ -77,15 +79,6 @@ public class RedmineTicket {
 		TIME_ENTRY_ACTIVITY(CLIENT_FIELD_TIMEENTRY_ACTIVITY)
 		
 		;
-
-//		public static Key fromKey(String name) {
-//			for (Key key : Key.values()) {
-//				if (key.getKey().equals(name)) {
-//					return key;
-//				}
-//			}
-//			return null;
-//		}
 
 		private String key;
 
@@ -144,6 +137,7 @@ public class RedmineTicket {
 
 	private List<RedmineTicketRelation> relations;
 	
+	private Map<RedmineAcl, Boolean> accesscontrol = new HashMap<RedmineAcl, Boolean>(3);
 
 	public RedmineTicket() {
 	}
@@ -193,6 +187,13 @@ public class RedmineTicket {
 		return Collections.unmodifiableMap(valueByCustomFieldId);
 	}
 
+	public void putRight(RedmineAcl right, boolean value) {
+		accesscontrol.put(right, value);
+	}
+	
+	public boolean getRight(RedmineAcl right) {
+		return accesscontrol.containsKey(right) && accesscontrol.get(right);
+	}
 
 
 	public int getId() {
