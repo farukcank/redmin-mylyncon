@@ -52,15 +52,11 @@ public class RedmineAbstractClientConcurrancyTest extends TestCase {
 	
 	private final static String TEST_STRING = "123456";
 	
-	private ClientTestImpl client;
-	
 	private HttpMethod firstMethod;
 	
 	private HttpMethod secondMethod;
 	
 	private AbstractWebLocation location;
-	
-	private RedmineClientData clientData;
 	
 	private TaskRepository repository;
 	
@@ -187,19 +183,6 @@ public class RedmineAbstractClientConcurrancyTest extends TestCase {
 			// TODO Auto-generated method stub
 			
 		}
-
-		@Override
-		public boolean supportServersideStoredQueries() {
-			// TODO Auto-generated method stub
-			return false;
-		}
-
-		@Override
-		public boolean supportTaskRelations() {
-			// TODO Auto-generated method stub
-			return false;
-		}
-
 		@Override
 		public void updateAttributes(boolean force, IProgressMonitor monitor)
 				throws RedmineException {
