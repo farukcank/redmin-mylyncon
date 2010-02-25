@@ -59,10 +59,6 @@ public boolean hasAttributes();
 	
 	public void refreshRepositorySettings(TaskRepository repository);
 	
-	public boolean supportServersideStoredQueries();
-
-	public boolean supportTaskRelations();
-	
 	public boolean supportStartDueDate();
 
 	public boolean supportTimeEntries();

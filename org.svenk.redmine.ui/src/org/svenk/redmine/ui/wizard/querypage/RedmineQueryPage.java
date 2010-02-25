@@ -173,13 +173,11 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		projectViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		projectViewer.addSelectionChangedListener(new ProjectSelectionListener());
 
-		if (client.supportServersideStoredQueries()) {
-			storedQueryViewer = new ComboViewer(pageComposite, SWT.READ_ONLY);
-			storedQueryViewer.setContentProvider(new RedmineContentProvider(QUERY_SELECT_TITLE));
-			storedQueryViewer.setLabelProvider(new RedmineLabelProvider());
-			storedQueryViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			storedQueryViewer.addSelectionChangedListener(new StoredQuerySelectionListener());
-		}
+		storedQueryViewer = new ComboViewer(pageComposite, SWT.READ_ONLY);
+		storedQueryViewer.setContentProvider(new RedmineContentProvider(QUERY_SELECT_TITLE));
+		storedQueryViewer.setLabelProvider(new RedmineLabelProvider());
+		storedQueryViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		storedQueryViewer.addSelectionChangedListener(new StoredQuerySelectionListener());
 
 		settingsFolder = new TabFolder(pageComposite, SWT.NONE);
 		settingsFolder.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -190,14 +188,12 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		commonComposite.setLayout(layout);
 		mainItem.setControl(commonComposite);
 		
-		if (client.supportServersideStoredQueries()) {
-			final TabItem customItem = new TabItem(settingsFolder, SWT.NONE);
-			customItem.setText(TAB_CUSTOM);
+		final TabItem customItem = new TabItem(settingsFolder, SWT.NONE);
+		customItem.setText(TAB_CUSTOM);
 
-			customComposite = new Composite(settingsFolder, SWT.NONE);
-			customComposite.setLayout(layout);
-			customItem.setControl(customComposite);
-		}
+		customComposite = new Composite(settingsFolder, SWT.NONE);
+		customComposite.setLayout(layout);
+		customItem.setControl(customComposite);
 
 		createListGroup(commonComposite);
 		createTextGroup(commonComposite);
@@ -330,10 +326,8 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 						restoreQuery(query);
 					} else {
 						projectViewer.setSelection(new StructuredSelection(PROJECT_SELECT_TITLE));
-						if (client.supportServersideStoredQueries()) {
-							storedQueryViewer.setInput(new String[]{QUERY_SELECT_TITLE});
-							storedQueryViewer.setSelection(new StructuredSelection(QUERY_SELECT_TITLE));
-						}
+						storedQueryViewer.setInput(new String[]{QUERY_SELECT_TITLE});
+						storedQueryViewer.setSelection(new StructuredSelection(QUERY_SELECT_TITLE));
 					}
 				}
 			});
@@ -389,10 +383,8 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	}
 
 	protected void updateProjectAttributes(RedmineProjectData projectData) {
-		if (client.supportServersideStoredQueries()) {
-			/* Stored queries */
-			storedQueryViewer.setInput(projectData.getStoredQueries());
-		}
+		/* Stored queries */
+		storedQueryViewer.setInput(projectData.getStoredQueries());
 		
 		/* Author, AssignedTo */
 		ListViewer list = lstSearchValues.get(SearchField.ASSIGNED_TO);
@@ -541,14 +533,12 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		search.setProject(projectData.getProject());
 		
 
-		if (client.supportServersideStoredQueries()) {
-			String storedQueryIdString = query.getAttribute(RedmineSearch.STORED_QUERY_ID);
-			//TODO handle NumberFormatException
-			int storedQueryId = (storedQueryIdString==null) ? 0 : Integer.parseInt(storedQueryIdString);
-			search.setStoredQueryId(storedQueryId);
-			RedmineStoredQuery storedQuery = (storedQueryId>0) ? projectData.getStoredQuery(storedQueryId) : null;
-			storedQueryViewer.setSelection(new StructuredSelection(storedQuery==null ? QUERY_SELECT_TITLE : storedQuery));
-		}
+		String storedQueryIdString = query.getAttribute(RedmineSearch.STORED_QUERY_ID);
+		//TODO handle NumberFormatException
+		int storedQueryId = (storedQueryIdString==null) ? 0 : Integer.parseInt(storedQueryIdString);
+		search.setStoredQueryId(storedQueryId);
+		RedmineStoredQuery storedQuery = (storedQueryId>0) ? projectData.getStoredQuery(storedQueryId) : null;
+		storedQueryViewer.setSelection(new StructuredSelection(storedQuery==null ? QUERY_SELECT_TITLE : storedQuery));
 		
 		restoreListValues(projectData, search, searchOperators, lstSearchValues);
 		restoreTextValues(projectData, search, searchOperators, txtSearchValues);
@@ -705,11 +695,9 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		RedmineSearch search = new RedmineSearch(getTaskRepository().getRepositoryUrl());
 		search.setProject(projectData.getProject());
 		
-		if (client.supportServersideStoredQueries()) {
-			RedmineTicketAttribute storedQuery = getFirstSelectedEntry(storedQueryViewer);
-			if (storedQuery != null) {
-				search.setStoredQueryId(storedQuery.getValue());
-			}
+		RedmineTicketAttribute storedQuery = getFirstSelectedEntry(storedQueryViewer);
+		if (storedQuery != null) {
+			search.setStoredQueryId(storedQuery.getValue());
 		}
 		
 		buildListValueSearchPart(search, searchOperators, lstSearchValues);

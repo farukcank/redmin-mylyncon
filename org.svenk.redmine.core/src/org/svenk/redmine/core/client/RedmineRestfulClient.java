@@ -161,23 +161,10 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 		}
 	}
 
-	public boolean supportServersideStoredQueries() {
-		return true;
-	}
-
-	public boolean supportTaskRelations() {
-		return true;
-	}
-
 	@Override
 	public boolean supportStartDueDate() {
 		//TODO replace like vRedmine.compareTo(Release.ZEROEIGHTSEVEN
 		return wsVersion >= IRedmineConstants.PLUGIN_VERSION_2_6;
-	}
-
-	@Override
-	protected boolean supportAdditionalHttpAuth() {
-		return true;
 	}
 
 	@Override

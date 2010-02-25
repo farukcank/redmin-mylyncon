@@ -51,6 +51,10 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 	private final static String REQUIRED_MESSAGE_SUMMARY = "Please enter a subject before  submitting";
 	private final static String REQUIRED_MESSAGE_DESCRIPTION = "Please enter a description before submitting";
 	
+	private final static String TASK_EDITOR_PART_PLANNING = "org.svenk.redmine.ui.editor.part.planning";
+	private final static String TASK_EDITOR_PART_TIMEENTRIES = "org.svenk.redmine.ui.editor.part.timeentries";
+	private final static String TASK_EDITOR_PART_NEWTIMEENTRY = "org.svenk.redmine.ui.editor.part.newtimeentry";
+	
 //	private final Map<TaskAttribute, AbstractAttributeEditor> attributeEditorMap;
 
 	private RedmineTaskDataValidator validator;
@@ -93,8 +97,7 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 
 		TaskAttribute rootAttribute = getModel().getTaskData().getRoot();
 		
-		//TODO change ID
-		descriptors.add(new TaskEditorPartDescriptor("ID-CHANGE-ME") {
+		descriptors.add(new TaskEditorPartDescriptor(TASK_EDITOR_PART_PLANNING) {
 			@Override
 			public AbstractTaskEditorPart createPart() {
 				return new RedminePlanningEditorPart();
@@ -103,7 +106,7 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 
 		if (rootAttribute.getAttribute(RedmineAttribute.TIME_ENTRY_TOTAL.getRedmineKey())!=null) {
 			//TODO change ID
-			descriptors.add(new TaskEditorPartDescriptor("ID-CHANGE-ME2") {
+			descriptors.add(new TaskEditorPartDescriptor(TASK_EDITOR_PART_TIMEENTRIES) {
 				@Override
 				public AbstractTaskEditorPart createPart() {
 					return new RedmineTimeEntryEditorPart();
@@ -113,7 +116,7 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 
 		if (!getModel().getTask().isCompleted() && rootAttribute.getAttribute(RedmineAttribute.TIME_ENTRY_HOURS.getRedmineKey())!=null) {
 			//TODO change ID
-			descriptors.add(new TaskEditorPartDescriptor("ID-CHANGE-ME3") {
+			descriptors.add(new TaskEditorPartDescriptor(TASK_EDITOR_PART_NEWTIMEENTRY) {
 				@Override
 				public AbstractTaskEditorPart createPart() {
 					return new RedmineNewTimeEntryEditorPart();

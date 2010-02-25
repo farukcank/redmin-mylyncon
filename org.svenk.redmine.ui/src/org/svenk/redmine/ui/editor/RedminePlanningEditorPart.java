@@ -54,7 +54,7 @@ public class RedminePlanningEditorPart extends AbstractTaskEditorPart {
 	
 	public RedminePlanningEditorPart() {
 		super();
-		setPartName("Planning");
+		setPartName(Messages.RedminePlanningEditorPart_PLANNING_SECTION_TITLE);
 	}
 
 	@Override
@@ -122,7 +122,7 @@ public class RedminePlanningEditorPart extends AbstractTaskEditorPart {
 		if(getModel().getChangedAttributes().contains(attribute)) {
 			String dueValue = attribute.getValue();
 
-			if (dueValue.equals("")) {
+			if (dueValue.equals("")) { //$NON-NLS-1$
 				task.setDueDate(null);
 			} else {
 				task.setDueDate(RedmineUtil.parseDate(dueValue));
@@ -135,19 +135,15 @@ public class RedminePlanningEditorPart extends AbstractTaskEditorPart {
 	private void initialize() {
 		hasIncoming = false;
 
-		if (modelListener==null) {
-			modelListener = new TaskDataModelListener() {
-				@Override
-				public void attributeChanged(TaskDataModelEvent event) {
-//					RedmineAttribute redmineAttribute = RedmineAttribute.fromRedmineKey(event.getTaskAttribute().getId());
-//					if (redmineAttribute!=null && PLANNING_ATTRIBUTES.contains(redmineAttribute)) {
-					if (RedmineAttribute.DATE_DUE.getRedmineKey().equals(event.getTaskAttribute().getId())) {						
-						RedminePlanningEditorPart.this.markDirty();
-					}
+		modelListener = new TaskDataModelListener() {
+			@Override
+			public void attributeChanged(TaskDataModelEvent event) {
+				if (RedmineAttribute.DATE_DUE.getRedmineKey().equals(event.getTaskAttribute().getId())) {						
+					RedminePlanningEditorPart.this.markDirty();
 				}
-			};
-			getModel().addModelListener(modelListener);
-		}
+			}
+		};
+		getModel().addModelListener(modelListener);
 
 		TaskAttribute rootAttribute = getTaskData().getRoot();
 		for (RedmineAttribute redmineAttribute : PLANNING_ATTRIBUTES) {
@@ -157,6 +153,12 @@ public class RedminePlanningEditorPart extends AbstractTaskEditorPart {
 				break;
 			}
 		}
+	}
+
+	@Override
+	public void dispose() {
+		getModel().removeModelListener(modelListener);
+		super.dispose();
 	}
 
 	private ITask getTask() {

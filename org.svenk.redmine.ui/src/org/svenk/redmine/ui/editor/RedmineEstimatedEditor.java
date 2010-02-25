@@ -85,7 +85,7 @@ public class RedmineEstimatedEditor extends AbstractAttributeEditor {
 			
 			ImageHyperlink clearEstimated = toolkit.createImageHyperlink(composite, SWT.NONE);
 			clearEstimated.setImage(Images.getImage(Images.FIND_CLEAR));
-			clearEstimated.setToolTipText("Clear");
+			clearEstimated.setToolTipText(Messages.RedmineEstimatedEditor_CLEAR);
 			clearEstimated.addHyperlinkListener(new HyperlinkAdapter() {
 				@Override
 				public void linkActivated(HyperlinkEvent e) {
@@ -109,7 +109,7 @@ public class RedmineEstimatedEditor extends AbstractAttributeEditor {
 				estimatedHours = Float.valueOf(getTaskAttribute().getValue());
 				estimatedHours *= 1e2;
 			} catch (NumberFormatException e) {
-				IStatus status = RedmineCorePlugin.toStatus(e, null, "INVALID_ESTIMATED_HOURS {0}", getTaskAttribute().getValue());
+				IStatus status = RedmineCorePlugin.toStatus(e, null, Messages.RedmineEstimatedEditor_INVALID_HOURS_FORMAT, getTaskAttribute().getValue());
 				StatusHandler.log(status);
 			}
 		}
@@ -117,7 +117,7 @@ public class RedmineEstimatedEditor extends AbstractAttributeEditor {
 	}
 
 	private void setValue(int val) {
-		getTaskAttribute().setValue("" + (((float)(val))*1e-2));
+		getTaskAttribute().setValue("" + (((float)(val))*1e-2)); //$NON-NLS-1$
 		attributeChanged();
 	}
 

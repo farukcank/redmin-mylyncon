@@ -48,7 +48,7 @@ public class RedmineNewTimeEntryEditorPart extends AbstractTaskEditorPart {
 	
 	public RedmineNewTimeEntryEditorPart() {
 		super();
-		setPartName("New Time Entry");
+		setPartName(Messages.RedmineNewTimeEntryEditorPart_TIME_ENTRY_NEW_SECTION_TITLE);
 		setExpandVertically(true);
 	}
 
@@ -133,27 +133,20 @@ public class RedmineNewTimeEntryEditorPart extends AbstractTaskEditorPart {
 	}
 
 	private void initialize() {
-		if (modelListener==null) {
-			modelListener = new TaskDataModelListener() {
-				@Override
-				public void attributeChanged(TaskDataModelEvent event) {
-					if(attributeList.contains(event.getTaskAttribute().getId())) {
-						markDirty();
-					}
+		modelListener = new TaskDataModelListener() {
+			@Override
+			public void attributeChanged(TaskDataModelEvent event) {
+				if(attributeList.contains(event.getTaskAttribute().getId())) {
+					markDirty();
 				}
-			};
-			getModel().addModelListener(modelListener);
-		}
-
+			}
+		};
+		getModel().addModelListener(modelListener);
 	}
 	
 	@Override
 	public void dispose() {
-		if (modelListener!=null) {
-			getModel().removeModelListener(modelListener);
-			modelListener = null;
-		}
-		
+		getModel().removeModelListener(modelListener);
 		super.dispose();
 	}
 	

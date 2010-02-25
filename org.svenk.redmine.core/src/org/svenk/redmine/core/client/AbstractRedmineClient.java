@@ -169,10 +169,6 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		return false;
 	}
 
-	protected boolean supportAdditionalHttpAuth() {
-		return false;
-	}
-	
 	public boolean supportTimeEntries() {
 		return false;
 	}
