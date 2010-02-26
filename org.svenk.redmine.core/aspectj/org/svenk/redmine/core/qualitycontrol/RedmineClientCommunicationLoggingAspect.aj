@@ -107,7 +107,7 @@ public privileged aspect RedmineClientCommunicationLoggingAspect {
 					ByteArrayOutputStream tmpOut = new ByteArrayOutputStream();
 					postMethod.getRequestEntity().writeRequest(tmpOut);
 					writer.println("");
-					writer.println(tmpOut.toByteArray());
+					writer.println(new String(tmpOut.toByteArray()));
 				} catch (IOException e) {
 					writer.println("not available");
 				}
