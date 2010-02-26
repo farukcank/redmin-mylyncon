@@ -41,6 +41,7 @@ import org.eclipse.mylyn.commons.net.WebUtil;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.junit.Assert;
 import org.svenk.redmine.core.RedmineCorePlugin;
+import org.svenk.redmine.core.client.container.Version;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.RedmineTicket;
 
@@ -143,7 +144,7 @@ public class RedmineAbstractClientConcurrancyTest extends TestCase {
 		/* */
 		
 		@Override
-		protected String checkClientVersion(IProgressMonitor monitor)
+		protected Version checkClientVersion(IProgressMonitor monitor)
 				throws RedmineException {
 			// TODO Auto-generated method stub
 			return null;

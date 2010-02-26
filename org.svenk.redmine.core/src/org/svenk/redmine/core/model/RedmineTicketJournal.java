@@ -30,9 +30,6 @@ public class RedmineTicketJournal {
 	
 	private Date created;
 
-	//TODO Nach XmlRpc Umbau entfernen
-	private int authorId;
-	
 	private String authorName;
 	
 	private boolean editable;
@@ -59,10 +56,6 @@ public class RedmineTicketJournal {
 
 	public void setCreated(Date created) {
 		this.created = created;
-	}
-
-	public void setAuthorId(int authorId) {
-		this.authorId = authorId;
 	}
 
 	public String getAuthorName() {

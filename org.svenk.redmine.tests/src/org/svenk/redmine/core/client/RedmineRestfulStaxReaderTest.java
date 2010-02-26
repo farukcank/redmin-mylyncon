@@ -22,6 +22,7 @@ package org.svenk.redmine.core.client;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -141,10 +142,14 @@ public class RedmineRestfulStaxReaderTest extends TestCase {
 		assertNotNull(version.redmine);
 		assertEquals(0, version.redmine.major);
 		assertEquals(8, version.redmine.minor);
+		assertEquals(3, version.redmine.tiny);
+		assertEquals("0.8.3.stable.2671", version.redmine.version);
 		
 		assertNotNull(version.plugin);
 		assertEquals(2, version.plugin.major);
-		assertEquals(5, version.plugin.minor);
+		assertEquals(6, version.plugin.minor);
+		assertEquals(3, version.plugin.tiny);
+		assertEquals("2.6.3.trunk.235", version.plugin.version);
 		
 		in.close();
 	}

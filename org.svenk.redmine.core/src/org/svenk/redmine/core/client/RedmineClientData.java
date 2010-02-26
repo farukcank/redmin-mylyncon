@@ -32,7 +32,6 @@ import org.svenk.redmine.core.model.RedmineMember;
 import org.svenk.redmine.core.model.RedminePriority;
 import org.svenk.redmine.core.model.RedmineTicketStatus;
 import org.svenk.redmine.core.model.RedmineCustomField.CustomType;
-import org.svenk.redmine.core.model.RedmineCustomField.FieldType;
 
 public class RedmineClientData implements Serializable {
 	

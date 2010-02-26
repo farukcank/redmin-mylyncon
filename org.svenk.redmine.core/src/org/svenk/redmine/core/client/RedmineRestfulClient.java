@@ -32,8 +32,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
-import org.svenk.redmine.core.IRedmineConstants;
 import org.svenk.redmine.core.client.container.Version;
+import org.svenk.redmine.core.client.container.Version.Release;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.RedmineActivity;
 import org.svenk.redmine.core.model.RedmineCustomField;
@@ -67,7 +67,7 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 	protected final static String PATH_GET_CHANGED_TICKETS = "/mylyn/" + PLACEHOLDER + "/updatedsince";
 	protected final static String PATH_GET_CHANGED_TICKETS_PARAM = "unixtime";
 
-	private double wsVersion = 0D;
+	private Version.Plugin vPlugin;
 	
 	private IRedmineResponseParser<Version> versionParser;
 
@@ -96,27 +96,14 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 	public void refreshRepositorySettings(TaskRepository repository) {
 		super.refreshRepositorySettings(repository);
 		if (!repository.getVersion().equals(TaskRepository.NO_VERSION_SPECIFIED)) {
-			wsVersion = getWsVersion(repository.getVersion());
+			vPlugin = Version.Plugin.fromString(repository.getVersion());
 		}
 	}
 
-	//TODO VersionsString gegen Model austauchen !!!
-	private double getWsVersion(String version) {
-		double v = 0D;
-		int pos = version.lastIndexOf('v');
-		if (pos>0 && version.length()>pos) {
-			v = Double.parseDouble(version.substring(pos+1));
-		}
-		return v;
-	} 
-
 	@Override
-	protected String checkClientVersion(IProgressMonitor monitor) throws RedmineException {
+	protected Version checkClientVersion(IProgressMonitor monitor) throws RedmineException {
 		GetMethod method = new GetMethod(PATH_GET_VERSION);
-
-		Version version = executeMethod(method, versionParser, monitor);
-		String v = version.redmine.version + "v" + version.plugin.major + "." + version.plugin.minor;
-		return v;
+		return executeMethod(method, versionParser, monitor);
 	}
 
 	public List<Integer> getChangedTicketId(Integer projectId, Date changedSince, IProgressMonitor monitor) throws RedmineException {
@@ -163,14 +150,12 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 
 	@Override
 	public boolean supportStartDueDate() {
-		//TODO replace like vRedmine.compareTo(Release.ZEROEIGHTSEVEN
-		return wsVersion >= IRedmineConstants.PLUGIN_VERSION_2_6;
+		return vPlugin.compareTo(Release.WS_TWOSIX)>=0;
 	}
 
 	@Override
 	public boolean supportTimeEntries() {
-		//TODO replace like vRedmine.compareTo(Release.ZEROEIGHTSEVEN
-		return wsVersion >= IRedmineConstants.PLUGIN_VERSION_2_6;
+		return vPlugin.compareTo(Release.WS_TWOSIX)>=0;
 	}
 
 	public synchronized void updateAttributes(boolean force, IProgressMonitor monitor) throws RedmineException {

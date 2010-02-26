@@ -77,6 +77,7 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttachmentPartSource;
 import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.client.container.Version;
+import org.svenk.redmine.core.client.container.Version.Release;
 import org.svenk.redmine.core.exception.RedmineAuthenticationException;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
@@ -87,10 +88,6 @@ import org.svenk.redmine.core.model.RedmineTicket.Key;
 
 abstract public class AbstractRedmineClient implements IRedmineClient {
 
-	protected final static double REDMINE_VERSION_8 = 0.8D;
-
-	protected final static double REDMINE_VERSION_9 = 0.9D;
-	
 	protected final static String HEADER_STATUS = "status"; //$NON-NLS-1$
 
 	protected final static String HEADER_REDIRECT = "location"; //$NON-NLS-1$
@@ -108,9 +105,6 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	protected RedmineResponseReader responseReader;
 	
 	protected String characterEncoding;
-	
-	//TODO replace completely against vRedmine
-	protected double redmineVersion = 0D;
 	
 	protected Version.Redmine vRedmine;
 	
@@ -144,26 +138,18 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 			this.characterEncoding = repository.getCharacterEncoding();
 			this.httpClient.getParams().setContentCharset(characterEncoding);
 		}
-		if (!repository.getVersion().equals(TaskRepository.NO_VERSION_SPECIFIED)) {
-			redmineVersion = getRedmineVersion(repository.getVersion());
-		}
 		vRedmine = Version.Redmine.fromString(repository.getVersion());
 	}
 	
 	public String checkClientConnection(IProgressMonitor monitor) throws RedmineException {
-		String version = checkClientVersion(monitor);
-		if (!(version.startsWith(Double.toString(REDMINE_VERSION_8)) || version.startsWith(Double.toString(REDMINE_VERSION_9)))) {
+		Version version = checkClientVersion(monitor);
+		if (version.redmine.compareTo(Release.ZEROEIGHT)<0) {
 			throw new RedmineException(Messages.AbstractRedmineClient_REQUIRED_REDMINE_VERSION);
 		}
-		return version;
+		return version.redmine.version  + "v" + version.plugin.version;
 	}
 	
-	abstract protected String checkClientVersion(IProgressMonitor monitor) throws RedmineException;
-	
-	private double getRedmineVersion(String version) {
-		int pos = version.indexOf('.', version.indexOf('.')+1);
-		return Double.parseDouble(version.substring(0, pos));
-	}
+	abstract protected Version checkClientVersion(IProgressMonitor monitor) throws RedmineException;
 	
 	public boolean supportStartDueDate() {
 		return false;
@@ -318,12 +304,6 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 			if (statusHeader != null) {
 				msg += " : " + statusHeader.getValue().replace(""+HttpStatus.SC_INTERNAL_SERVER_ERROR, "").trim(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
-			
-//			try {
-//				System.out.println(new String(method.getResponseBody()));
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
 			
 			throw new RedmineRemoteException(msg);
 		}

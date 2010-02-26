@@ -35,6 +35,8 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.svenk.redmine.core.accesscontrol.internal.RedmineAcl;
 import org.svenk.redmine.core.client.container.Version;
+import org.svenk.redmine.core.client.container.Version.Plugin;
+import org.svenk.redmine.core.client.container.Version.Redmine;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineInputParserException;
 import org.svenk.redmine.core.model.RedmineActivity;
@@ -282,17 +284,10 @@ public class RedmineRestfulStaxReader {
 			version = new Version();
 			
 			reader.nextTag(); //plugin
-			version.plugin = new Version.Plugin();
-			version.plugin.major = Integer.parseInt(reader.getAttributeValue(NS_PREFIX, "major"));
-			version.plugin.minor = Integer.parseInt(reader.getAttributeValue(NS_PREFIX, "minor"));
-			version.plugin.version = reader.getElementText().trim();
+			version.plugin = Plugin.fromString(reader.getElementText().trim());
 			
-			reader.nextTag(); //plugin
-			version.redmine = new Version.Redmine();
-			version.redmine.version = reader.getElementText().trim();
-			String[] parts = version.redmine.version.split("\\.");
-			version.redmine.major = Integer.parseInt(parts[0]);
-			version.redmine.minor = Integer.parseInt(parts[1]);
+			reader.nextTag(); //redmine
+			version.redmine = Redmine.fromString(reader.getElementText().trim());
 
 		} catch (XMLStreamException e) {
 			throw new RedmineException(e.getMessage(), e);

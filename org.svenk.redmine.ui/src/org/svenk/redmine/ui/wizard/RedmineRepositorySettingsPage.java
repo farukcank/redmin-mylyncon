@@ -157,6 +157,13 @@ public class RedmineRepositorySettingsPage extends
 			if(clientImplViewer.getCombo().getSelectionIndex()==0) {
 				clientImplClassName=null;
 			}
+		} else if (extPoint.getExtensions().length==1) {
+			//select first implementation, if only this one exists
+			Class<? extends IRedmineClient> clazz = implementationFromExtension(extPoint.getExtensions()[0]);
+			if(clazz!=null) {
+				clientImplClassName = clazz.getName();
+				clientImplViewer.getCombo().select(1);
+			}
 		}
 		
 	}

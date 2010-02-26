@@ -26,9 +26,6 @@ public class RedmineAttachment {
 
 	private int id;
 	
-	//TODO Nach XmlRpc Umbau entfernen
-	private int authorId;
-	
 	private String authorName;
 	
 	private Date created;
@@ -53,10 +50,6 @@ public class RedmineAttachment {
 
 	private void setId(int id) {
 		this.id = id;
-	}
-
-	public void setAuthorId(int authorId) {
-		this.authorId = authorId;
 	}
 
 	public String getAuthorName() {

@@ -269,7 +269,7 @@ public class RedmineTimeEntryEditorPart extends AbstractTaskEditorPart {
 			attributeEditor.createControl(titleComposite, toolkit);
 			attributeEditor.getLabelControl().setBackground(bgColor);
 			editorToolkit.adapt(attributeEditor);
-
+			
 			//Activity
 			attributeEditor = createAttributeEditor(RedmineTaskTimeEntryMapper.getActivityAttribute(attribute));
 			attributeEditor.createLabelControl(titleComposite, toolkit);
