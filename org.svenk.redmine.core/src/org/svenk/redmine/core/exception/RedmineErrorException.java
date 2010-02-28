@@ -20,27 +20,21 @@
  *******************************************************************************/
 package org.svenk.redmine.core.exception;
 
-public class RedmineBugException extends RedmineException {
+public class RedmineErrorException extends RedmineException {
 
 	private static final long serialVersionUID = 1L;
 
-	public RedmineBugException() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-
-	public RedmineBugException(String message, Throwable cause) {
+	public RedmineErrorException(String message, Throwable cause) {
 		super(message, cause);
-		// TODO Auto-generated constructor stub
 	}
 
-	public RedmineBugException(String message) {
-		super(message);
-		// TODO Auto-generated constructor stub
+	public RedmineErrorException(String message) {
+		this(message, createCause(message));
 	}
-
-	public RedmineBugException(Throwable cause) {
-		super(cause);
-		// TODO Auto-generated constructor stub
+	
+	private static Throwable createCause(String message) {
+		Throwable t = new Throwable(message);
+		t.setStackTrace(Thread.currentThread().getStackTrace());
+		return t;
 	}
 }

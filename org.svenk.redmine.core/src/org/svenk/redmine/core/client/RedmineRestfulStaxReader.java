@@ -37,6 +37,7 @@ import org.svenk.redmine.core.accesscontrol.internal.RedmineAcl;
 import org.svenk.redmine.core.client.container.Version;
 import org.svenk.redmine.core.client.container.Version.Plugin;
 import org.svenk.redmine.core.client.container.Version.Redmine;
+import org.svenk.redmine.core.exception.RedmineErrorException;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineInputParserException;
 import org.svenk.redmine.core.model.RedmineActivity;
@@ -83,7 +84,7 @@ public class RedmineRestfulStaxReader {
 			reader.nextTag();
 			ticket = readCurrentTagAsTicket(reader);
 		} catch (XMLStreamException e) {
-			throw new RedmineException(e.getMessage(), e);
+			throw new RedmineErrorException("An error ocurred during the parsing of ticket", e);
 		}
 
 		return ticket;
@@ -103,7 +104,7 @@ public class RedmineRestfulStaxReader {
 				}
 			}
 		} catch (XMLStreamException e) {
-			throw new RedmineException(e.getMessage(), e);
+			throw new RedmineErrorException("An error ocurred during the parsing of tickets", e);
 		}
 		
 		return tickets;
@@ -125,7 +126,7 @@ public class RedmineRestfulStaxReader {
 			}
 			
 		} catch (XMLStreamException e) {
-			throw new RedmineException(e.getMessage(), e);
+			throw new RedmineErrorException("An error ocurred during the parsing of updated tickets", e);
 		}
 
 		return list;
@@ -161,7 +162,7 @@ public class RedmineRestfulStaxReader {
 			}
 			
 		} catch (XMLStreamException e) {
-			throw new RedmineException(e.getMessage(), e);
+			throw new RedmineErrorException("An error ocurred during the parsing of status", e);
 		}
 
 		return list;
@@ -194,7 +195,7 @@ public class RedmineRestfulStaxReader {
 			}
 			
 		} catch (XMLStreamException e) {
-			throw new RedmineException(e.getMessage(), e);
+			throw new RedmineErrorException("An error ocurred during the parsing of priorities", e);
 		}
 
 		return list;
@@ -227,7 +228,7 @@ public class RedmineRestfulStaxReader {
 			}
 			
 		} catch (XMLStreamException e) {
-			throw new RedmineException(e.getMessage(), e);
+			throw new RedmineErrorException("An error ocurred during the parsing of activities", e);
 		}
 		
 		return list;
@@ -247,7 +248,7 @@ public class RedmineRestfulStaxReader {
 				}
 			}
 		} catch (XMLStreamException e) {
-			throw new RedmineException(e.getMessage(), e);
+			throw new RedmineErrorException("An error ocurred during the parsing of customfields", e);
 		}
 		
 		return list;
@@ -267,7 +268,7 @@ public class RedmineRestfulStaxReader {
 				}
 			}
 		} catch (XMLStreamException e) {
-			throw new RedmineException(e.getMessage(), e);
+			throw new RedmineErrorException("An error ocurred during the parsing of projects", e);
 		}
 		
 		return projects;
@@ -290,7 +291,7 @@ public class RedmineRestfulStaxReader {
 			version.redmine = Redmine.fromString(reader.getElementText().trim());
 
 		} catch (XMLStreamException e) {
-			throw new RedmineException(e.getMessage(), e);
+			throw new RedmineErrorException("An error ocurred during the parsing of versions", e);
 		}
 
 		return version;
@@ -374,6 +375,9 @@ public class RedmineRestfulStaxReader {
 				skipToEndTag("project", reader);
 			}
 		}
+reader.nextTag();
+reader.nextTag();
+
 		return data;
 	}
 

@@ -79,6 +79,7 @@ import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.client.container.Version;
 import org.svenk.redmine.core.client.container.Version.Release;
 import org.svenk.redmine.core.exception.RedmineAuthenticationException;
+import org.svenk.redmine.core.exception.RedmineErrorException;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.exception.RedmineRemoteException;
 import org.svenk.redmine.core.exception.RedmineStatusException;
@@ -272,6 +273,10 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 					throw new RedmineStatusException(status);
 				}
 			}
+		}catch (RedmineErrorException e) {
+			IStatus status = RedmineCorePlugin.toStatus(e, null);
+			StatusHandler.fail(status);
+			throw new RedmineStatusException(status);
 		}catch (IOException e) {
 			IStatus status = RedmineCorePlugin.toStatus(e, null);
 			StatusHandler.log(status);
