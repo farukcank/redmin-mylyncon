@@ -253,4 +253,8 @@ public class RedmineCustomField implements Serializable, IRedmineQueryField {
 	public String getLabel() {
 		return getName();
 	}
+	
+	public boolean crossProjectUsable() {
+		return false;
+	}
 }

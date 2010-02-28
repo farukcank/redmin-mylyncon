@@ -21,15 +21,12 @@
 package org.svenk.redmine.ui.wizard;
 
 import org.eclipse.jface.viewers.LabelProvider;
-import org.svenk.redmine.core.client.RedmineProjectData;
 import org.svenk.redmine.core.model.RedmineTicketAttribute;
 
 public class RedmineLabelProvider extends LabelProvider {
 	@Override
 	public String getText(Object element) {
-		if (element instanceof RedmineProjectData) {
-			return ((RedmineProjectData)element).getProject().getName();
-		} else if (element instanceof RedmineTicketAttribute) {
+		if (element instanceof RedmineTicketAttribute) {
 			return ((RedmineTicketAttribute)element).getName();
 		}
 		return super.getText(element);
