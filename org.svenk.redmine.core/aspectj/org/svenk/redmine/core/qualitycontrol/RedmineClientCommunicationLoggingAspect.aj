@@ -41,6 +41,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.mylyn.commons.core.StatusHandler;
 import org.eclipse.mylyn.commons.net.WebUtil;
+import org.svenk.redmine.core.IRedmineConstants;
 import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.client.AbstractRedmineClient;
 
@@ -99,7 +100,11 @@ public privileged aspect RedmineClientCommunicationLoggingAspect {
 			if (postMethod.getParameters().length>=1) {
 				writer.println(" Post-Params : ");
 				for (NameValuePair nvp : postMethod.getParameters()) {
-					writer.println("  " + nvp.getName() + " : " + nvp.getValue());
+					if (nvp.getName().equals(IRedmineConstants.CLIENT_FIELD_CREDENTIALS_PASSWORD)) {
+						writer.println("  " + nvp.getName() + " : XXXXXX");
+					} else {
+						writer.println("  " + nvp.getName() + " : " + nvp.getValue());
+					}
 				}
 			} else if (postMethod.getRequestEntity()!=null) {
 				writer.print(" Post-Request-Entity : ");

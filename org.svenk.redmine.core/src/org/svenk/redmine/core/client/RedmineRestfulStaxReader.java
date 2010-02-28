@@ -375,8 +375,6 @@ public class RedmineRestfulStaxReader {
 				skipToEndTag("project", reader);
 			}
 		}
-reader.nextTag();
-reader.nextTag();
 
 		return data;
 	}
@@ -430,16 +428,19 @@ reader.nextTag();
 							}
 						}
 					} else if (reader.getLocalName().equals("timeEntries")) {
-						ticket.putRight(RedmineAcl.TIMEENTRY_VIEW, Boolean.parseBoolean(reader.getAttributeValue(NS_PREFIX, "viewAllowed")));
+						boolean viewAllowed = Boolean.parseBoolean(reader.getAttributeValue(NS_PREFIX, "viewAllowed"));
+						ticket.putRight(RedmineAcl.TIMEENTRY_VIEW, viewAllowed);
 						ticket.putRight(RedmineAcl.TIMEENTRY_NEW, Boolean.parseBoolean(reader.getAttributeValue(NS_PREFIX, "newAllowed")));
 						
-						reader.nextTag();//sum
-						ticket.putBuiltinValue(Key.TIME_ENTRY_TOTAL, reader.getElementText());
-
-						while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
-							RedmineTimeEntry timeEntry = readCurrentTagAsTimeEntry(reader);
-							if (timeEntry!=null) {
-								ticket.addTimeEntry(timeEntry);
+						if (viewAllowed) {
+							reader.nextTag();//sum
+							ticket.putBuiltinValue(Key.TIME_ENTRY_TOTAL, reader.getElementText());
+	
+							while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
+								RedmineTimeEntry timeEntry = readCurrentTagAsTimeEntry(reader);
+								if (timeEntry!=null) {
+									ticket.addTimeEntry(timeEntry);
+								}
 							}
 						}
 					} else {
