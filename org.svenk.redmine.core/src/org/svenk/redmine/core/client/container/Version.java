@@ -49,7 +49,7 @@ public class Version {
 						}
 					} catch (NumberFormatException e) {
 						p = null;
-						StatusHandler.log(RedmineCorePlugin.toStatus(e, null, e.getMessage()));
+						StatusHandler.fail(RedmineCorePlugin.toStatus(e, null, e.getMessage()));
 					}
 				}
 			} else {
@@ -90,7 +90,7 @@ public class Version {
 					version.version = globalVersionString;
 					return version;
 				} catch (Exception e) {
-					StatusHandler.log(RedmineCorePlugin.toStatus(e, null, e.getMessage()));
+					StatusHandler.fail(RedmineCorePlugin.toStatus(e, null, e.getMessage()));
 				}
 			}
 			return null;
