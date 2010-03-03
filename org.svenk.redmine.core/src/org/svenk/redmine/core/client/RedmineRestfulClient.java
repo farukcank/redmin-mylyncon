@@ -93,8 +93,8 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 		createResponseParsers();
 	}
 
-	public void refreshRepositorySettings(TaskRepository repository) {
-		super.refreshRepositorySettings(repository);
+	public void refreshRepositorySettings(TaskRepository repository, AbstractWebLocation location) {
+		super.refreshRepositorySettings(repository, location);
 		if (!repository.getVersion().equals(TaskRepository.NO_VERSION_SPECIFIED)) {
 			vPlugin = Version.Plugin.fromString(repository.getVersion());
 		}

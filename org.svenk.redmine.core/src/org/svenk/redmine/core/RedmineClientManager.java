@@ -46,8 +46,8 @@ public class RedmineClientManager implements IRepositoryListener {
 
 	private Map<String, RedmineClientData> dataByUrl = new HashMap<String, RedmineClientData>();
 
-	private TaskRepositoryLocationFactory taskRepositoryLocationFactory;
-	
+	protected TaskRepositoryLocationFactory repositoryLocationFactory = new TaskRepositoryLocationFactory();
+
 	private File cacheFile;
 	
 	public RedmineClientManager(File cacheFile) {
@@ -55,59 +55,55 @@ public class RedmineClientManager implements IRepositoryListener {
 		readCache();
 	}
 	
-	public synchronized IRedmineClient getRedmineClient(TaskRepository taskRepository) throws RedmineException {
+	public IRedmineClient getRedmineClient(TaskRepository taskRepository) throws RedmineException {
 		String repositoryUrl = taskRepository.getRepositoryUrl();
-		IRedmineClient client = clientByUrl.get(repositoryUrl);
-		if (client == null || !client.getClass().getName().equals(taskRepository.getProperty(RedmineClientFactory.CLIENT_IMPLEMENTATION_CLASS))) {
-			AbstractWebLocation location = taskRepositoryLocationFactory.createWebLocation(taskRepository);
-			
-			RedmineClientData data = dataByUrl.get(repositoryUrl);
-			if (data==null) {
-				data = new RedmineClientData();
-				dataByUrl.put(repositoryUrl, data);
+
+		synchronized (clientByUrl) {
+			IRedmineClient client = clientByUrl.get(repositoryUrl);
+			if (client == null || !client.getClass().getName().equals(taskRepository.getProperty(RedmineClientFactory.CLIENT_IMPLEMENTATION_CLASS))) {
+				
+				RedmineClientData data = dataByUrl.get(repositoryUrl);
+				if (data==null) {
+					data = new RedmineClientData();
+					dataByUrl.put(repositoryUrl, data);
+				}
+				
+				client = RedmineClientFactory.createClient(taskRepository, data);
+				clientByUrl.put(taskRepository.getRepositoryUrl(), client);
 			}
-			
-			client = RedmineClientFactory.createClient(location, data, taskRepository);
-			clientByUrl.put(taskRepository.getRepositoryUrl(), client);
+			return client;
 		}
-		return client;
 	}
 	
 	public RedmineClientData getClientData(TaskRepository taskRepository) {
 		return dataByUrl.get(taskRepository.getRepositoryUrl());
 	}
 	
-	public TaskRepositoryLocationFactory getTaskRepositoryLocationFactory() {
-		return taskRepositoryLocationFactory;
-	}
-
-	public void setTaskRepositoryLocationFactory(
-			TaskRepositoryLocationFactory taskRepositoryLocationFactory) {
-		this.taskRepositoryLocationFactory = taskRepositoryLocationFactory;
-	}
-
 	public void repositoryAdded(TaskRepository repository) {
-		IRedmineClient client = clientByUrl.get(repository.getRepositoryUrl());
-		if (client!=null) {
-			client.refreshRepositorySettings(repository);
-		}
 	}
 
 	public void repositoryRemoved(TaskRepository repository) {
-		clientByUrl.remove(repository.getRepositoryUrl());
-		dataByUrl.remove(repository.getRepositoryUrl());
+		synchronized (clientByUrl) {
+			clientByUrl.remove(repository.getRepositoryUrl());
+			dataByUrl.remove(repository.getRepositoryUrl());
+		}
 	}
 
 	public void repositorySettingsChanged(TaskRepository repository) {
-		IRedmineClient client = clientByUrl.get(repository.getRepositoryUrl());
-		if (client!=null) {
-			client.refreshRepositorySettings(repository);
+		synchronized (clientByUrl) {
+			IRedmineClient client = clientByUrl.get(repository.getRepositoryUrl());
+			if (client!=null) {
+				AbstractWebLocation location = repositoryLocationFactory.createWebLocation(repository);
+				client.refreshRepositorySettings(repository, location);
+			}
 		}
 	}
 
 	public void repositoryUrlChanged(TaskRepository repository, String oldUrl) {
-		clientByUrl.put(repository.getRepositoryUrl(), clientByUrl.remove(oldUrl));
-		dataByUrl.put(repository.getRepositoryUrl(), dataByUrl.remove(oldUrl));
+		synchronized (clientByUrl) {
+			clientByUrl.put(repository.getRepositoryUrl(), clientByUrl.remove(oldUrl));
+			dataByUrl.put(repository.getRepositoryUrl(), dataByUrl.remove(oldUrl));
+		}
 	}
 	
 	private void readCache() {

@@ -111,35 +111,36 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 	
 	protected RedmineTicket.Key attributeKeys[] = new RedmineTicket.Key[]{Key.ASSIGNED_TO, Key.PRIORITY, Key.VERSION, Key.CATEGORY, Key.STATUS, Key.TRACKER};
 	
-	protected final TaskRepository repository;
+	protected TaskRepository repository;
 	
 	private IRedmineResponseParser<String> submitErrorParser;
 
 	private IRedmineResponseParser<InputStream> attachmentParser;
 	
 	public AbstractRedmineClient(AbstractWebLocation location, RedmineClientData clientData, TaskRepository repository) {
-		this.location = location;
 		this.data = clientData;
-		this.characterEncoding = repository.getCharacterEncoding();
 		
 		MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
 		this.httpClient = new HttpClient(connectionManager);
-		
-		this.httpClient.getParams().setContentCharset(characterEncoding);
 		this.httpClient.getParams().setCookiePolicy(CookiePolicy.RFC_2109);
 		
-		this.repository = repository;
-		refreshRepositorySettings(repository);
+		refreshRepositorySettings(repository, location);
 		
 		createResponseParsers();
 	}
 
-	public void refreshRepositorySettings(TaskRepository repository) {
-		if (!this.characterEncoding.equals(repository.getCharacterEncoding())) {
+	public void refreshRepositorySettings(TaskRepository repository, AbstractWebLocation location) {
+		this.location = location;
+		this.repository = repository;
+		
+		if (this.characterEncoding==null || !this.characterEncoding.equals(repository.getCharacterEncoding())) {
 			this.characterEncoding = repository.getCharacterEncoding();
 			this.httpClient.getParams().setContentCharset(characterEncoding);
 		}
-		vRedmine = Version.Redmine.fromString(repository.getVersion());
+		
+		if (!repository.getVersion().equals(TaskRepository.NO_VERSION_SPECIFIED)) {
+			vRedmine = Version.Redmine.fromString(repository.getVersion());
+		}
 	}
 	
 	public String checkClientConnection(IProgressMonitor monitor) throws RedmineException {

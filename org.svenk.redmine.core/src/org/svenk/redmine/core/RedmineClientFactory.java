@@ -24,6 +24,7 @@ import java.lang.reflect.Constructor;
 
 import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
+import org.eclipse.mylyn.tasks.core.TaskRepositoryLocationFactory;
 import org.svenk.redmine.core.client.RedmineClientData;
 import org.svenk.redmine.core.exception.RedmineException;
 
@@ -33,8 +34,15 @@ public class RedmineClientFactory {
 	
 	public final static String CONFIGURATION_MISMATCH = "Configuration mismatch - update your Repository-Settings";
 	
-	public static IRedmineClient createClient(AbstractWebLocation location, RedmineClientData clientData, TaskRepository repository) throws RedmineException {
+	protected static TaskRepositoryLocationFactory repositoryLocationFactory = new TaskRepositoryLocationFactory();
+	
+	public static IRedmineClient createClient(TaskRepository repository, RedmineClientData clientData) throws RedmineException {
 		try {
+			AbstractWebLocation location = repositoryLocationFactory.createWebLocation(repository);
+			if(clientData==null) {
+				clientData = new RedmineClientData();
+			}
+			
 			Class<?> clazz = Class.forName(repository.getProperty(CLIENT_IMPLEMENTATION_CLASS));
 			Constructor<?> constr = clazz.getConstructor(AbstractWebLocation.class, RedmineClientData.class, TaskRepository.class);
 			IRedmineClient client = (IRedmineClient) constr.newInstance(location, clientData, repository);

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentSource;
 import org.svenk.redmine.core.client.RedmineClientData;
@@ -57,7 +58,7 @@ public boolean hasAttributes();
 	
 	public String checkClientConnection(IProgressMonitor monitor) throws RedmineException;
 	
-	public void refreshRepositorySettings(TaskRepository repository);
+	public void refreshRepositorySettings(TaskRepository repository, AbstractWebLocation location);
 	
 	public boolean supportStartDueDate();
 

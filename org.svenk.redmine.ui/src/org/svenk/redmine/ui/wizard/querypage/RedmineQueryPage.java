@@ -30,6 +30,7 @@ import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -40,6 +41,7 @@ import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.mylyn.commons.core.StatusHandler;
 import org.eclipse.mylyn.tasks.core.IRepositoryQuery;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
@@ -135,7 +137,10 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		RedmineRepositoryConnector connector = (RedmineRepositoryConnector) TasksUi.getRepositoryManager().getRepositoryConnector(RedmineCorePlugin.REPOSITORY_KIND);
 		try {
 			client = connector.getClientManager().getRedmineClient(getTaskRepository());
-		} catch (RedmineException e) {}
+		} catch (RedmineException e) {
+			IStatus status = RedmineCorePlugin.toStatus(e, repository);
+			StatusHandler.fail(status);
+		}
 		Assert.isNotNull(client);
 
 		setTitle(TITLE);

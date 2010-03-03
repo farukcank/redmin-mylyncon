@@ -44,7 +44,6 @@ import org.eclipse.mylyn.tasks.core.AbstractRepositoryConnector;
 import org.eclipse.mylyn.tasks.core.IRepositoryQuery;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
-import org.eclipse.mylyn.tasks.core.TaskRepositoryLocationFactory;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentHandler;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskDataHandler;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
@@ -74,8 +73,6 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 	private final static String CLIENT_LABEL = "Redmine (supports redmine 0.8 and 0.9 with mylyn plugin)";
 	
 	private final static Pattern TASK_ID_FROM_TASK_URL = Pattern.compile(IRedmineConstants.REDMINE_URL_TICKET + "(\\d+)");
-
-	private TaskRepositoryLocationFactory taskRepositoryLocationFactory;
 
 	@Override
 	public boolean canQuery(TaskRepository repository) {
@@ -427,7 +424,6 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 			IPath path = RedmineCorePlugin.getDefault().getRepostioryAttributeCachePath();
 			clientManager = new RedmineClientManager(path.toFile());
 		}
-		clientManager.setTaskRepositoryLocationFactory(taskRepositoryLocationFactory);
 		return clientManager;
 	}
 
@@ -437,12 +433,6 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 		}
 	}
 	
-	public void setTaskRepositoryLocationFactory(TaskRepositoryLocationFactory factory) {
-		this.taskRepositoryLocationFactory = factory;
-		if (clientManager != null) {
-			clientManager.setTaskRepositoryLocationFactory(factory);
-		}
-	}
 	@Override
 	public boolean canSynchronizeTask(TaskRepository taskRepository, ITask task) {
 		return true;

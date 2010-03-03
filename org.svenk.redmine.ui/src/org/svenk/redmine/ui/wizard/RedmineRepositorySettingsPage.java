@@ -172,6 +172,7 @@ public class RedmineRepositorySettingsPage extends
 	public void applyTo(TaskRepository repository) {
 		super.applyTo(repository);
 		repository.setProperty(RedmineClientFactory.CLIENT_IMPLEMENTATION_CLASS, clientImplClassName);
+		repository.setVersion(version);
 	}
 	
 	@Override
@@ -185,11 +186,9 @@ public class RedmineRepositorySettingsPage extends
 				
 				repository.setProperty(RedmineClientFactory.CLIENT_IMPLEMENTATION_CLASS, RedmineRepositorySettingsPage.this.clientImplClassName);
 				
-				RedmineRepositoryConnector connector = (RedmineRepositoryConnector)TasksUi.getRepositoryManager().getRepositoryConnector(RedmineCorePlugin.REPOSITORY_KIND);
 				try {
-					IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
+					IRedmineClient client = RedmineClientFactory.createClient(repository, null);
 					RedmineRepositorySettingsPage.this.version = client.checkClientConnection(monitor);
-					repository.setVersion(RedmineRepositorySettingsPage.this.version);
 				} catch (RedmineException e) {
 					throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
 				}

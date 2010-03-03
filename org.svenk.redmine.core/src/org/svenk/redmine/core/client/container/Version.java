@@ -117,6 +117,11 @@ public class Version {
 			}
 			return 0;
 		}
+		
+		@Override
+		public String toString() {
+			return String.format("%d.%d.%d", major, minor, tiny);
+		}
 
 	}
 
