@@ -6,7 +6,9 @@
          name="RESTful (since Redmine 0.8)"
          point="org.svenk.redmine.core.clientInterface">
       <clientImplementation
-            class="org.svenk.redmine.core.client.RedmineRestfulClient">
+            class="org.svenk.redmine.core.client.RedmineRestfulClient"
+            vPlugin="2.6.2"
+            vRedmine="0.8.6">
       </clientImplementation>
    </extension>
 

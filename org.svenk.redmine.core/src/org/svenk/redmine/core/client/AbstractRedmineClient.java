@@ -77,7 +77,6 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttachmentPartSource;
 import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.client.container.Version;
-import org.svenk.redmine.core.client.container.Version.Release;
 import org.svenk.redmine.core.exception.RedmineAuthenticationException;
 import org.svenk.redmine.core.exception.RedmineErrorException;
 import org.svenk.redmine.core.exception.RedmineException;
@@ -143,12 +142,8 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		}
 	}
 	
-	public String checkClientConnection(IProgressMonitor monitor) throws RedmineException {
-		Version version = checkClientVersion(monitor);
-		if (version.redmine.compareTo(Release.ZEROEIGHT)<0) {
-			throw new RedmineException(Messages.AbstractRedmineClient_REQUIRED_REDMINE_VERSION);
-		}
-		return version.redmine.version  + "v" + version.plugin.version;
+	public Version checkClientConnection(IProgressMonitor monitor) throws RedmineException {
+		return checkClientVersion(monitor);
 	}
 	
 	abstract protected Version checkClientVersion(IProgressMonitor monitor) throws RedmineException;

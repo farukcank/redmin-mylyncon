@@ -59,6 +59,20 @@
                </appinfo>
             </annotation>
          </attribute>
+         <attribute name="vRedmine" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="vPlugin" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

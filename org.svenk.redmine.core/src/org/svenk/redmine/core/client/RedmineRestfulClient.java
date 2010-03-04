@@ -150,12 +150,12 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 
 	@Override
 	public boolean supportStartDueDate() {
-		return vPlugin!=null && vPlugin.compareTo(Release.WS_TWOSIX)>=0;
+		return vPlugin!=null && vPlugin.compareTo(Release.PLUGIN_2_6)>=0;
 	}
 
 	@Override
 	public boolean supportTimeEntries() {
-		return vPlugin!=null && vPlugin.compareTo(Release.WS_TWOSIX)>=0;
+		return vPlugin!=null && vPlugin.compareTo(Release.PLUGIN_2_6)>=0;
 	}
 
 	public synchronized void updateAttributes(boolean force, IProgressMonitor monitor) throws RedmineException {

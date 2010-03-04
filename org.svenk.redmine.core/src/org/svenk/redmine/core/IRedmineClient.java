@@ -30,6 +30,7 @@ import org.eclipse.mylyn.commons.net.AbstractWebLocation;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentSource;
 import org.svenk.redmine.core.client.RedmineClientData;
+import org.svenk.redmine.core.client.container.Version;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.RedmineTicket;
 
@@ -56,7 +57,7 @@ public boolean hasAttributes();
 
 	public void uploadAttachment(int ticketId, String fileName, String comment, String description, AbstractTaskAttachmentSource source, IProgressMonitor monitor) throws RedmineException;
 	
-	public String checkClientConnection(IProgressMonitor monitor) throws RedmineException;
+	public Version checkClientConnection(IProgressMonitor monitor) throws RedmineException;
 	
 	public void refreshRepositorySettings(TaskRepository repository, AbstractWebLocation location);
 	

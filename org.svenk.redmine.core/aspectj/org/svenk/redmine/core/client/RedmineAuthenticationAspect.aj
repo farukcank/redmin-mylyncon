@@ -217,7 +217,7 @@ public aspect RedmineAuthenticationAspect perthis(this(AbstractRedmineClient)) {
 	}
 	
 	private boolean isCsrfTokenRequired(HttpMethod method) {
-		if (client.vRedmine==null && getRepositoryProperty() || client.vRedmine!=null && client.vRedmine.compareTo(Release.ZEROEIGHTSEVEN)>=0) {
+		if (client.vRedmine==null && getRepositoryProperty() || client.vRedmine!=null && client.vRedmine.compareTo(Release.REDMINE_0_8_7)>=0) {
 			//TODO lookup for string part mylyn  isn't a perfect solution
 			return (!method.getPath().contains("mylyn")); //$NON-NLS-1$
 		}

@@ -1,6 +1,7 @@
 package org.svenk.redmine.core.client.container;
 
 import org.eclipse.mylyn.commons.core.StatusHandler;
+import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.svenk.redmine.core.RedmineCorePlugin;
 
 public class Version {
@@ -10,9 +11,8 @@ public class Version {
 	public Redmine redmine;
 
 	public enum Release {
-		ZEROEIGHT(0, 8),
-		ZEROEIGHTSEVEN(0, 8, 7),
-		WS_TWOSIX(2, 6);
+		REDMINE_0_8_7(0, 8, 7),
+		PLUGIN_2_6(2, 6);
 
 		public final int major;
 		public final int minor;
@@ -28,7 +28,7 @@ public class Version {
 			this.tiny = tiny;
 		}
 	}
-
+	
 	public static class Plugin extends SubVersion {
 
 		public static Plugin fromString(String globalVersionString) {
@@ -64,6 +64,10 @@ public class Version {
 	public static class Redmine extends SubVersion {
 
 		public static Redmine fromString(String globalVersionString) {
+			int vPos = globalVersionString.indexOf("v");
+			if (vPos >= 0) {
+				globalVersionString = globalVersionString.substring(0, vPos);
+			}
 			return fromString(Redmine.class, globalVersionString);
 		}
 
@@ -77,8 +81,6 @@ public class Version {
 
 		public int tiny;
 
-		public String version;
-
 		protected static <T extends SubVersion> T fromString(Class<T> clazz, String globalVersionString) {
 			String[] parts = globalVersionString.split("\\.");
 			if (parts != null && parts.length >= 3) {
@@ -87,7 +89,6 @@ public class Version {
 					version.major = Integer.parseInt(parts[0]);
 					version.minor = Integer.parseInt(parts[1]);
 					version.tiny = Integer.parseInt(parts[2]);
-					version.version = globalVersionString;
 					return version;
 				} catch (Exception e) {
 					StatusHandler.fail(RedmineCorePlugin.toStatus(e, null, e.getMessage()));
@@ -117,12 +118,42 @@ public class Version {
 			}
 			return 0;
 		}
-		
+
+		public int compareTo(SubVersion version) {
+			if (major < version.major) {
+				return -1;
+			}
+			if (major > version.major) {
+				return 1;
+			}
+			if (minor < version.minor) {
+				return -1;
+			}
+			if (minor > version.minor) {
+				return 1;
+			}
+			if (tiny < version.tiny) {
+				return -1;
+			}
+			if (tiny > version.tiny) {
+				return 1;
+			}
+			return 0;
+		}
+
 		@Override
 		public String toString() {
 			return String.format("%d.%d.%d", major, minor, tiny);
 		}
 
+	}
+	
+	@Override
+	public String toString() {
+		if (redmine!=null && plugin!=null) {
+			return redmine.toString() + "v" + plugin.toString();
+		}
+		return TaskRepository.NO_VERSION_SPECIFIED;
 	}
 
 }
