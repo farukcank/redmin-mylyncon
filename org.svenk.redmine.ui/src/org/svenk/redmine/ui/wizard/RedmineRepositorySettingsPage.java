@@ -52,9 +52,9 @@ import org.svenk.redmine.core.exception.RedmineException;
 
 public class RedmineRepositorySettingsPage extends AbstractRepositorySettingsPage {
 
-	private static final String EXTENSION_ID_TEXTILE = "org.eclipse.mylyn.wikitext.tasks.ui.editor.textileTaskEditorExtension";
-	private static final String EXTENSION_ID_PLAIN = "none";
-	private static final String EXTENSION_POINT_CLIENT = "org.svenk.redmine.core.clientInterface";
+	private static final String EXTENSION_ID_TEXTILE = "org.eclipse.mylyn.wikitext.tasks.ui.editor.textileTaskEditorExtension"; //$NON-NLS-1$
+	private static final String EXTENSION_ID_PLAIN = "none"; //$NON-NLS-1$
+	private static final String EXTENSION_POINT_CLIENT = "org.svenk.redmine.core.clientInterface"; //$NON-NLS-1$
 	
 	private String checkedUrl;
 	
@@ -65,7 +65,7 @@ public class RedmineRepositorySettingsPage extends AbstractRepositorySettingsPag
 	private String detectedVersionString;
 
 	public RedmineRepositorySettingsPage(TaskRepository taskRepository) {
-		super("Redmine Repository Settings", "Example: www.your-domain.de/redmine", taskRepository);
+		super(Messages.RedmineRepositorySettingsPage_PAGE_TITLE, Messages.RedmineRepositorySettingsPage_URL_EXAMPLE, taskRepository);
 
 		setNeedsAnonymousLogin(false);
 		setNeedsEncoding(true);
@@ -86,7 +86,7 @@ public class RedmineRepositorySettingsPage extends AbstractRepositorySettingsPag
 
 		//Set Default Encoding
 		if (getRepository()==null) {
-			setEncoding("UTF-8");
+			setEncoding("UTF-8"); //$NON-NLS-1$
 		}
 	}
 	
@@ -97,7 +97,7 @@ public class RedmineRepositorySettingsPage extends AbstractRepositorySettingsPag
 
 	@Override
 	protected void createAdditionalControls(Composite parent) {
-		new Label(parent, SWT.NONE).setText("Redmine plugin:");
+		new Label(parent, SWT.NONE).setText(Messages.RedmineRepositorySettingsPage_CLIENT_IMPL_TITLE);
 		
 		ComboViewer clientImplViewer = new ComboViewer(parent, SWT.READ_ONLY);
 		clientImplViewer.setLabelProvider(new LabelProvider(){
@@ -133,7 +133,7 @@ public class RedmineRepositorySettingsPage extends AbstractRepositorySettingsPag
 		});
 		
 		IExtensionPoint extPoint = Platform.getExtensionRegistry().getExtensionPoint(EXTENSION_POINT_CLIENT);
-		clientImplViewer.add("Select installed plugin");
+		clientImplViewer.add(Messages.RedmineRepositorySettingsPage_CLIENT_IMPL_DO_SELECT);
 		clientImplViewer.add(extPoint.getExtensions());
 		clientImplViewer.getCombo().select(0);
 		
@@ -178,7 +178,7 @@ public class RedmineRepositorySettingsPage extends AbstractRepositorySettingsPag
 			public void run(IProgressMonitor monitor) throws CoreException {
 				detectedVersionString = null;
 				if  (clientImplClassName==null) {
-					throw new CoreException(new Status(IStatus.ERROR, RedmineCorePlugin.PLUGIN_ID, "You have to select the installed Redmine plugin."));
+					throw new CoreException(new Status(IStatus.ERROR, RedmineCorePlugin.PLUGIN_ID, Messages.RedmineRepositorySettingsPage_CLIENT_IMPL_NOT_SELECTED));
 				}
 				
 				repository.setProperty(RedmineClientFactory.CLIENT_IMPLEMENTATION_CLASS, RedmineRepositorySettingsPage.this.clientImplClassName);
@@ -196,7 +196,7 @@ public class RedmineRepositorySettingsPage extends AbstractRepositorySettingsPag
 
 				detectedVersionString = detectedVersion.toString();
 
-				String msg = "Test of connection was successful - Redmine %s with Mylyn-Plugin %s";
+				String msg = Messages.RedmineRepositorySettingsPage_MESSAGE_SUCCESS;
 				msg = String.format(msg, detectedVersion.redmine.toString(), detectedVersion.plugin.toString());
 				this.setStatus(new Status(IStatus.OK, RedmineCorePlugin.PLUGIN_ID, msg));
 			}
@@ -205,15 +205,15 @@ public class RedmineRepositorySettingsPage extends AbstractRepositorySettingsPag
 			protected void validateEditorExtension(TaskRepository repository) throws CoreException {
 				String editorExtension = repository.getProperty(TaskEditorExtensions.REPOSITORY_PROPERTY_EDITOR_EXTENSION);
 				if (!(editorExtension==null || editorExtension.equals(EXTENSION_ID_PLAIN) || editorExtension.equals(EXTENSION_ID_TEXTILE))) {
-					throw new CoreException(new Status(IStatus.WARNING, RedmineCorePlugin.PLUGIN_ID, "Redmine uses Textile as Markup-Language"));
+					throw new CoreException(new Status(IStatus.WARNING, RedmineCorePlugin.PLUGIN_ID, Messages.RedmineRepositorySettingsPage_MESSAGE_WIKI_WARNING));
 				}
 			}
 			
 			protected void validateVersion(Version required, Version detected) throws CoreException {
 				if (detected==null || detected.redmine==null || detected.plugin==null) {
-					throw new CoreException(new Status(IStatus.ERROR, RedmineCorePlugin.PLUGIN_ID, "Can't detect the version of Redmine"));
+					throw new CoreException(new Status(IStatus.ERROR, RedmineCorePlugin.PLUGIN_ID, Messages.RedmineRepositorySettingsPage_MESSAGE_VERSION_UNKNOWN_ERROR));
 				} else if (detected.redmine.compareTo(required.redmine)<0 || detected.plugin.compareTo(required.plugin)<0) {
-					String msg = "Redmine %s with Mylyn-Plugin %s is required, Versions %s and %s detected";
+					String msg = Messages.RedmineRepositorySettingsPage_MESSAGE_VERSION_OUTDATED_ERROR;
 					msg = String.format(msg, required.redmine.toString(), required.plugin.toString(), detected.redmine.toString(), detected.plugin.toString());
 					throw new CoreException(new Status(IStatus.ERROR, RedmineCorePlugin.PLUGIN_ID, msg));
 				}
@@ -223,7 +223,7 @@ public class RedmineRepositorySettingsPage extends AbstractRepositorySettingsPag
 
 	@Override
 	protected boolean isValidUrl(String name) {
-		if ((name.startsWith(URL_PREFIX_HTTPS) || name.startsWith(URL_PREFIX_HTTP)) && !name.contains("eclipse_mylyn_connector") && !name.endsWith("/")) {
+		if ((name.startsWith(URL_PREFIX_HTTPS) || name.startsWith(URL_PREFIX_HTTP)) && !name.endsWith("/")) { //$NON-NLS-1$
 			try {
 				new URL(name);
 				return true;
@@ -246,9 +246,9 @@ public class RedmineRepositorySettingsPage extends AbstractRepositorySettingsPag
 	@SuppressWarnings("unchecked")
 	private static Class<? extends IRedmineClient> implementationFromExtension(IExtension extension) {
 		IConfigurationElement confElem = extension.getConfigurationElements()[0];
-		if ((confElem.getAttribute("class"))!=null) {
+		if ((confElem.getAttribute("class"))!=null) { //$NON-NLS-1$
 			try {
-				return (Class<? extends IRedmineClient>)Class.forName(confElem.getAttribute("class"));
+				return (Class<? extends IRedmineClient>)Class.forName(confElem.getAttribute("class")); //$NON-NLS-1$
 			} catch (Exception e) {
 				RedmineCorePlugin.getDefault().logUnexpectedException(e);
 			}
@@ -260,8 +260,8 @@ public class RedmineRepositorySettingsPage extends AbstractRepositorySettingsPag
 		Version v = new Version();
 		try {
 			IConfigurationElement confElem = extension.getConfigurationElements()[0];
-			v.redmine = Version.Redmine.fromString(confElem.getAttribute("vRedmine"));
-			v.plugin = Version.Plugin.fromString(confElem.getAttribute("vPlugin"));
+			v.redmine = Version.Redmine.fromString(confElem.getAttribute("vRedmine")); //$NON-NLS-1$
+			v.plugin = Version.Plugin.fromString(confElem.getAttribute("vPlugin")); //$NON-NLS-1$
 		} catch (Exception e) {
 			IStatus status = RedmineCorePlugin.toStatus(e, null);
 			StatusHandler.log(status);
