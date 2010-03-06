@@ -105,6 +105,8 @@ public class RedmineCustomField implements Serializable, IRedmineQueryField {
 	
 	private int[] trackerId;
 	
+	private boolean forAll;
+	
 	private String [] listValues;
 	
 	public RedmineCustomField(int id, String fieldType) {
@@ -206,6 +208,14 @@ public class RedmineCustomField implements Serializable, IRedmineQueryField {
 		this.supportFilter = supportFilter;
 	}
 
+	public boolean isForAll() {
+		return forAll;
+	}
+
+	public void setForAll(boolean forAll) {
+		this.forAll = forAll;
+	}
+
 	public int[] getTrackerId() {
 		return trackerId;
 	}
@@ -255,6 +265,6 @@ public class RedmineCustomField implements Serializable, IRedmineQueryField {
 	}
 	
 	public boolean crossProjectUsable() {
-		return false;
+		return isForAll();
 	}
 }

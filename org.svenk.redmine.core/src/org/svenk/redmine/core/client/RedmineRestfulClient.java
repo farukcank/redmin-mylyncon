@@ -63,6 +63,7 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 	protected final static String PATH_SEARCH_TICKETS = "/mylyn/" + PLACEHOLDER + "/search";
 	protected final static String PATH_SEARCH_TICKETS_QUERY_STRING = "query_string";
 	protected final static String PATH_SEARCH_TICKETS_QUERY_ID = "query_id";
+	protected final static String PATH_CROSS_PROJECT_SEARCH = "/mylyn/search";
 
 	protected final static String PATH_GET_CHANGED_TICKETS = "/mylyn/" + PLACEHOLDER + "/updatedsince";
 	protected final static String PATH_GET_CHANGED_TICKETS_PARAM = "unixtime";
@@ -134,7 +135,8 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 	}
 
 	public void search(String searchParam, String projectId, String storedQueryId, List<RedmineTicket> tickets, IProgressMonitor monitor) throws RedmineException {
-		PostMethod method = new PostMethod(PATH_SEARCH_TICKETS.replace(PLACEHOLDER, projectId));
+		String path = projectId.equals("0") ? PATH_CROSS_PROJECT_SEARCH : PATH_SEARCH_TICKETS.replace(PLACEHOLDER, projectId);
+		PostMethod method = new PostMethod(path);
 		
 		if (storedQueryId==null || storedQueryId.equals("0")) {
 			method.setQueryString(new NameValuePair[]{new NameValuePair(PATH_SEARCH_TICKETS_QUERY_STRING, searchParam)});

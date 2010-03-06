@@ -62,6 +62,10 @@ public class RedmineRestfulStaxReaderWS26Test extends TestCase {
 		assertEquals(1, field.getMin());
 		assertEquals(100, field.getMax());
 		assertFalse(field.isRequired());
+		assertTrue(field.isForAll());
+
+		assertFalse(list.get(0).isForAll());
+		assertFalse(list.get(2).isForAll());
 
 		in.close();
 	}

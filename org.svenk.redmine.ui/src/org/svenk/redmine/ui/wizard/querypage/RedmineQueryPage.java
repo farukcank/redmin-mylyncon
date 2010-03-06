@@ -401,7 +401,11 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		IRedmineSearchData listData = this.listData.get(listDataKey);
 		
 		/* Stored queries */
-		storedQueryViewer.setInput(listData.getQueries());
+		if(listData.getQueries()==null) {
+			storedQueryViewer.setInput(QUERY_SELECT_TITLE);
+		} else {
+			storedQueryViewer.setInput(listData.getQueries());
+		}
 		
 		/* Author, AssignedTo */
 		ListViewer list = lstSearchValues.get(SearchField.ASSIGNED_TO);
@@ -433,13 +437,11 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	
 	private void updateCustomFieldFilter(String listDataKey) {
 		LabelProvider labelProvider = new RedmineLabelProvider();
-		java.util.List<RedmineCustomField> customFields = listData.get(listDataKey).getCustomTicketFields();
+		List<RedmineCustomField> customFields = listData.get(listDataKey).getCustomTicketFields();
 		
 
-		java.util.List<IRedmineQueryField> lstKeys 
-			= new ArrayList<IRedmineQueryField>(lstCustomSearchValues.keySet());
-		java.util.List<IRedmineQueryField> txtKeys 
-		= new ArrayList<IRedmineQueryField>(txtCustomSearchValues.keySet());
+		List<IRedmineQueryField> lstKeys = new ArrayList<IRedmineQueryField>(lstCustomSearchValues.keySet());
+		List<IRedmineQueryField> txtKeys = new ArrayList<IRedmineQueryField>(txtCustomSearchValues.keySet());
 
 		Collection<Composite> oldComposites = new ArrayList<Composite>(2);
 		for (Control child : customComposite.getChildren()) {
@@ -678,6 +680,8 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 				
 			}
 		}
+		
+		storedQueryViewer.getControl().setEnabled(state || !crossProjectOnly);
 	}
 	
 	private Object attributeValue2Attribute(IRedmineSearchData queryData, IRedmineQueryField field, String txtValue) {
@@ -839,6 +843,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 					RedmineQueryPage.this.clearSettings();
 					switchOperatorState(false, true);
 					RedmineQueryPage.this.updateProjectAttributes(DATA_KEY_VALUE_CROSS_PROJECT);
+					RedmineQueryPage.this.updateCustomFieldFilter(DATA_KEY_VALUE_CROSS_PROJECT);
 				}
 				
 				if (RedmineQueryPage.this.getContainer()!=null) {
@@ -868,6 +873,8 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	private static class RedmineProjectlessQueryListData extends AbstractRedmineSearchData {
 		protected RedmineClientData clientData;
 		List<RedmineTracker> trackers;
+		
+		List<RedmineCustomField> customFields;
 		
 		public RedmineProjectlessQueryListData(RedmineClientData clientData) {
 			this.clientData = clientData;
@@ -915,9 +922,17 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		}
 
 		public List<RedmineCustomField> getCustomTicketFields() {
-			return null;
+			if(customFields==null) {
+				customFields = new ArrayList<RedmineCustomField>();
+				for (RedmineCustomField cf : clientData.getIssueCustomFields()) {
+					if (cf.crossProjectUsable()) {
+						customFields.add(cf);
+					}
+				}
+				
+			}
+			return customFields;
 		}
-
 	}
 	
 	private static class RedmineProjectQueryListData extends RedmineProjectlessQueryListData {

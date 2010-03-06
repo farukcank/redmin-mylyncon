@@ -56,6 +56,8 @@ public class RedmineContentProvider implements IStructuredContentProvider {
 			return tmp.toArray();
 		} else if (inputElement instanceof String[]) {
 			return (String[])inputElement;
+		} else if (title!=null && inputElement.equals(title)) {
+			return new String[]{title};
 		}
 		return null;
 	}

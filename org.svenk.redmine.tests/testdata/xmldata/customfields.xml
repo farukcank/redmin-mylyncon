@@ -30,6 +30,7 @@
     <defaultValue>Default string</defaultValue>
     <required>false</required>
     <filter>false</filter>
+    <forAll>true</forAll>
 
   </customField>
   <customField id="3">
@@ -50,6 +51,7 @@
     <defaultValue></defaultValue>
     <required>true</required>
     <filter>true</filter>
+    <forAll>true</forAll>
   </customField>
   <customField id="4">
     <name>Phone number</name>

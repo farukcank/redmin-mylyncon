@@ -686,7 +686,7 @@ public class RedmineRestfulStaxReader {
 		}
 	}
 
-	private enum CustomFieldTag {name, type, fieldFormat, minLength, maxLength, regexp, possibleValues, defaultValue, required, filter, trackers;
+	private enum CustomFieldTag {name, type, fieldFormat, minLength, maxLength, regexp, possibleValues, defaultValue, required, filter, forAll, trackers;
 		private static CustomFieldTag fromTagName(String tagName) {
 			for (CustomFieldTag tag : CustomFieldTag.values()) {
 				if (tag.name().equals(tagName)) {
@@ -733,6 +733,7 @@ public class RedmineRestfulStaxReader {
 					case regexp : field.setValidationRegex(reader.getElementText().trim()); break;
 					case defaultValue : field.setDefaultValue(reader.getElementText().trim()); break;
 					case required : field.setRequired(Boolean.parseBoolean(reader.getElementText().trim())); break;
+					case forAll : field.setForAll(Boolean.parseBoolean(reader.getElementText().trim())); break;
 					case filter : field.setSupportFilter(Boolean.parseBoolean(reader.getElementText().trim()));break;
 					case possibleValues :
 						List<String> possibleValues = new ArrayList<String>();

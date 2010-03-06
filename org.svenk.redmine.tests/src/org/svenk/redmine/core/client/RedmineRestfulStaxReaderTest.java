@@ -22,7 +22,6 @@ package org.svenk.redmine.core.client;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
