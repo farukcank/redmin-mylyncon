@@ -71,21 +71,14 @@ import org.svenk.redmine.core.client.RedmineProjectData;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.IRedmineQueryField;
 import org.svenk.redmine.core.model.RedmineCustomField;
-import org.svenk.redmine.core.model.RedmineIssueCategory;
-import org.svenk.redmine.core.model.RedmineMember;
-import org.svenk.redmine.core.model.RedminePriority;
 import org.svenk.redmine.core.model.RedmineProject;
 import org.svenk.redmine.core.model.RedmineSearch;
 import org.svenk.redmine.core.model.RedmineSearchFilter;
 import org.svenk.redmine.core.model.RedmineStoredQuery;
 import org.svenk.redmine.core.model.RedmineTicketAttribute;
-import org.svenk.redmine.core.model.RedmineTicketStatus;
-import org.svenk.redmine.core.model.RedmineTracker;
-import org.svenk.redmine.core.model.RedmineVersion;
 import org.svenk.redmine.core.model.RedmineCustomField.FieldType;
 import org.svenk.redmine.core.model.RedmineSearchFilter.CompareOperator;
 import org.svenk.redmine.core.model.RedmineSearchFilter.SearchField;
-import org.svenk.redmine.core.search.internal.AbstractRedmineSearchData;
 import org.svenk.redmine.core.search.internal.IRedmineSearchData;
 import org.svenk.redmine.ui.wizard.RedmineLabelProvider;
 
@@ -99,7 +92,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 
 	private static final String TITLE_QUERY_TITLE = "Query Title:";
 
-	private static final String PROJECT_SELECT_TITLE = "Select Project";
+	private static final String PROJECT_SELECT_TITLE = "Select a project or create a Cross-Project-Query";
 
 	private static final String QUERY_SELECT_TITLE = "Select a serverside stored query or create a new";
 
@@ -386,7 +379,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		List<RedmineProject> projects = new ArrayList<RedmineProject>(data.getProjects().size());
 		listData = new HashMap<String, IRedmineSearchData>(projects.size()+1);
 
-		listData.put(DATA_KEY_VALUE_CROSS_PROJECT, new RedmineProjectlessQueryListData(data));
+		listData.put(DATA_KEY_VALUE_CROSS_PROJECT, new RedmineCrossProjectQueryListData(data));
 		for (RedmineProjectData projectData : data.getProjects()) {
 			projects.add(projectData.getProject());
 			listData.put(projectData.getProject().getName(), new RedmineProjectQueryListData(projectData, data));
@@ -868,117 +861,6 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 				RedmineQueryPage.this.pageComposite.layout(true, true);
 			}
 		}
-	}
-	
-	private static class RedmineProjectlessQueryListData extends AbstractRedmineSearchData {
-		protected RedmineClientData clientData;
-		List<RedmineTracker> trackers;
-		
-		List<RedmineCustomField> customFields;
-		
-		public RedmineProjectlessQueryListData(RedmineClientData clientData) {
-			this.clientData = clientData;
-		}
-		
-		public List<RedminePriority> getPriorities() {
-			return clientData.getPriorities();
-		}
-		public List<RedmineTicketStatus> getStatus() {
-			return clientData.getStatuses();
-		}
-		
-		public List<RedmineMember> getPersons() {
-			return null;
-		}
-
-		public List<RedmineIssueCategory> getCategories() {
-			return null;
-		}
-
-		public List<RedmineMember> getMembers() {
-			return null;
-		}
-
-		public List<RedmineTracker> getTrackers() {
-			if(trackers==null) {
-				trackers = new ArrayList<RedmineTracker>();
-				for(RedmineProjectData projectData: clientData.getProjects()) {
-					for(RedmineTracker tracker : projectData.getTrackers()) {
-						if(!trackers.contains(tracker)) {
-							trackers.add(tracker);
-						}
-					}
-				}
-			}
-			return trackers;
-		}
-
-		public List<RedmineVersion> getVersions() {
-			return null;
-		}
-
-		public List<RedmineStoredQuery> getQueries() {
-			return null;
-		}
-
-		public List<RedmineCustomField> getCustomTicketFields() {
-			if(customFields==null) {
-				customFields = new ArrayList<RedmineCustomField>();
-				for (RedmineCustomField cf : clientData.getIssueCustomFields()) {
-					if (cf.crossProjectUsable()) {
-						customFields.add(cf);
-					}
-				}
-				
-			}
-			return customFields;
-		}
-	}
-	
-	private static class RedmineProjectQueryListData extends RedmineProjectlessQueryListData {
-
-		protected RedmineProjectData projectData;
-		
-		public RedmineProjectQueryListData(RedmineProjectData projectData, RedmineClientData clientData) {
-			super(clientData);
-			this.projectData = projectData;
-		}
-		
-		@Override
-		public List<RedmineIssueCategory> getCategories() {
-			return projectData.getCategorys();
-		}
-
-		@Override
-		public List<RedmineMember> getPersons() {
-			return projectData.getMembers();
-		}
-
-		@Override
-		public List<RedmineMember> getMembers() {
-			return projectData.getAssignableMembers();
-		}
-
-		@Override
-		public List<RedmineTracker> getTrackers() {
-			return projectData.getTrackers();
-		}
-
-		@Override
-		public List<RedmineVersion> getVersions() {
-			return projectData.getVersions();
-		}
-
-		@Override
-		public List<RedmineStoredQuery> getQueries() {
-			return projectData.getStoredQueries();
-		}
-		
-		@Override
-		public List<RedmineCustomField> getCustomTicketFields() {
-			return projectData.getCustomTicketFields();
-		}
-		
 	}
 	
 }
