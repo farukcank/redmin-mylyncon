@@ -21,6 +21,7 @@ Export-Package: org.svenk.redmine.core,
  org.svenk.redmine.core.data,
  org.svenk.redmine.core.exception,
  org.svenk.redmine.core.model,
+ org.svenk.redmine.core.search.internal;x-friends:="org.svenk.redmine.ui",
  org.svenk.redmine.core.util
 Bundle-ClassPath: .,
  lib/stax2-api-3.0.1.jar,

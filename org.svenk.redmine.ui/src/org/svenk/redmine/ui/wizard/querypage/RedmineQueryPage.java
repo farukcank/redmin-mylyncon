@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -72,6 +73,7 @@ import org.svenk.redmine.core.client.RedmineProjectData;
 import org.svenk.redmine.core.exception.RedmineException;
 import org.svenk.redmine.core.model.IRedmineQueryField;
 import org.svenk.redmine.core.model.RedmineCustomField;
+import org.svenk.redmine.core.model.RedmineProject;
 import org.svenk.redmine.core.model.RedmineSearch;
 import org.svenk.redmine.core.model.RedmineSearchFilter;
 import org.svenk.redmine.core.model.RedmineStoredQuery;
@@ -79,17 +81,20 @@ import org.svenk.redmine.core.model.RedmineTicketAttribute;
 import org.svenk.redmine.core.model.RedmineCustomField.FieldType;
 import org.svenk.redmine.core.model.RedmineSearchFilter.CompareOperator;
 import org.svenk.redmine.core.model.RedmineSearchFilter.SearchField;
+import org.svenk.redmine.core.search.internal.IRedmineSearchData;
 import org.svenk.redmine.ui.wizard.RedmineLabelProvider;
 
 public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 
+	private static final String DATA_KEY_VALUE_CROSS_PROJECT = "_CROSS_PROJECT_"; 
+	
 	private static final String TITLE = "Enter query parameters";
 
 	private static final String DESCRIPTION = "Only predefined filters are supported.";
 
 	private static final String TITLE_QUERY_TITLE = "Query Title:";
 
-	private static final String PROJECT_SELECT_TITLE = "Select Project";
+	private static final String PROJECT_SELECT_TITLE = "Select a project or create a Cross-Project-Query";
 
 	private static final String QUERY_SELECT_TITLE = "Select a serverside stored query or create a new";
 
@@ -114,7 +119,6 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	protected Composite customComposite;
 	
 	protected ComboViewer projectViewer;
-	protected RedmineProjectData projectData;
 
 	protected ComboViewer storedQueryViewer;
 
@@ -126,6 +130,8 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	protected final Map<IRedmineQueryField, ListViewer> lstCustomSearchValues;
 	protected final Map<IRedmineQueryField, Text> txtCustomSearchValues;
 
+	protected Map<String, IRedmineSearchData> listData;
+	
 	protected Button updateButton;
 	protected RedmineClientData data;
 
@@ -375,52 +381,65 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 
 		data = client.getClientData();
 
+		List<RedmineProject> projects = new ArrayList<RedmineProject>(data.getProjects().size());
+		listData = new HashMap<String, IRedmineSearchData>(projects.size()+1);
+
+		listData.put(DATA_KEY_VALUE_CROSS_PROJECT, new RedmineCrossProjectQueryListData(data));
+		for (RedmineProjectData projectData : data.getProjects()) {
+			projects.add(projectData.getProject());
+			listData.put(projectData.getProject().getName(), new RedmineProjectQueryListData(projectData, data));
+		}
+		
 		/* Projects */
-		projectViewer.setInput(data.getProjects());
-
-		/* Status */
-		ListViewer list = lstSearchValues.get(SearchField.STATUS);
-		list.setInput(data.getStatuses());
-
-		/* Priority */
-		list = lstSearchValues.get(SearchField.PRIORITY);
-		list.setInput(data.getPriorities());
+		projectViewer.setInput(projects);
+			
 	}
 
-	protected void updateProjectAttributes(RedmineProjectData projectData) {
+	protected void updateProjectAttributes(String listDataKey) {
+		IRedmineSearchData listData = this.listData.get(listDataKey);
+		
 		/* Stored queries */
-		storedQueryViewer.setInput(projectData.getStoredQueries());
+		if(listData.getQueries()==null) {
+			storedQueryViewer.setInput(QUERY_SELECT_TITLE);
+		} else {
+			storedQueryViewer.setInput(listData.getQueries());
+		}
 		
 		/* Author, AssignedTo */
 		ListViewer list = lstSearchValues.get(SearchField.ASSIGNED_TO);
-		list.setInput(projectData.getAssignableMembers());
+		list.setInput(listData.getMembers());
 		
 		list = lstSearchValues.get(SearchField.AUTHOR);
-		list.setInput(projectData.getMembers());
-
+		list.setInput(listData.getPersons());
+		
 		/* Version */
 		list = lstSearchValues.get(SearchField.FIXED_VERSION);
-		list.setInput(projectData.getVersions());
-
+		list.setInput(listData.getVersions());
+		
 		/* Tracker */
 		list = lstSearchValues.get(SearchField.TRACKER);
-		list.setInput(projectData.getTrackers());
-
+		list.setInput(listData.getTrackers());
+		
 		/* Category */
 		list = lstSearchValues.get(SearchField.CATEGORY);
-		list.setInput(projectData.getCategorys());
+		list.setInput(listData.getCategories());
 
+		/* Status */
+		list = lstSearchValues.get(SearchField.STATUS);
+		list.setInput(listData.getStatus());
+
+		/* Priority */
+		list = lstSearchValues.get(SearchField.PRIORITY);
+		list.setInput(listData.getPriorities());
 	}
 	
-	private void updateCustomFieldFilter(RedmineProjectData projectData) {
+	private void updateCustomFieldFilter(String listDataKey) {
 		LabelProvider labelProvider = new RedmineLabelProvider();
-		java.util.List<RedmineCustomField> customFields = projectData.getCustomTicketFields();
+		List<RedmineCustomField> customFields = listData.get(listDataKey).getCustomTicketFields();
 		
 
-		java.util.List<IRedmineQueryField> lstKeys 
-			= new ArrayList<IRedmineQueryField>(lstCustomSearchValues.keySet());
-		java.util.List<IRedmineQueryField> txtKeys 
-		= new ArrayList<IRedmineQueryField>(txtCustomSearchValues.keySet());
+		List<IRedmineQueryField> lstKeys = new ArrayList<IRedmineQueryField>(lstCustomSearchValues.keySet());
+		List<IRedmineQueryField> txtKeys = new ArrayList<IRedmineQueryField>(txtCustomSearchValues.keySet());
 
 		Collection<Composite> oldComposites = new ArrayList<Composite>(2);
 		for (Control child : customComposite.getChildren()) {
@@ -429,81 +448,83 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			}
 		}
 
-		for (RedmineCustomField customField : customFields) {
-			if (!customField.isSupportFilter()) {
-				continue;
-			}
-			
-			Control control = null;
-			ComboViewer combo = null;
-			SearchField searchfield = null;
-
-			switch(customField.getType()) {
-				case LIST : {
-					ListViewer list = null;
-					if (lstKeys.remove(customField)) {
-						list = lstCustomSearchValues.get(customField);
-						control = list.getControl();
-					} else {
-						list = new ListViewer(customComposite, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
-						list.setLabelProvider(labelProvider);
-						list.setContentProvider(new RedmineContentProvider());
-						control = list.getControl();
-						lstCustomSearchValues.put(customField, list);
-						searchfield = SearchField.fromCustomTicketField(customField);
+		if (customFields!=null) {
+			for (RedmineCustomField customField : customFields) {
+				if (!customField.isSupportFilter()) {
+					continue;
+				}
+				
+				Control control = null;
+				ComboViewer combo = null;
+				SearchField searchfield = null;
+	
+				switch(customField.getType()) {
+					case LIST : {
+						ListViewer list = null;
+						if (lstKeys.remove(customField)) {
+							list = lstCustomSearchValues.get(customField);
+							control = list.getControl();
+						} else {
+							list = new ListViewer(customComposite, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
+							list.setLabelProvider(labelProvider);
+							list.setContentProvider(new RedmineContentProvider());
+							control = list.getControl();
+							lstCustomSearchValues.put(customField, list);
+							searchfield = SearchField.fromCustomTicketField(customField);
+						}
+						list.setInput(customField.getListValues());
+						break;
 					}
-					list.setInput(customField.getListValues());
-					break;
-				}
-				case BOOL : {
-					if (txtKeys.remove(customField)) {
-						control = txtCustomSearchValues.get(customField);
-					} else {
-						txtKeys.remove(customField);
-						Text text = new Text(customComposite, SWT.NONE);
-						text.setText(OPERATOR_BOOLEAN_TRUE);
-						text.setEditable(false);
-						txtCustomSearchValues.put(customField, text);
-						control = text;
-						searchfield = SearchField.fromCustomTicketField(customField);
+					case BOOL : {
+						if (txtKeys.remove(customField)) {
+							control = txtCustomSearchValues.get(customField);
+						} else {
+							txtKeys.remove(customField);
+							Text text = new Text(customComposite, SWT.NONE);
+							text.setText(OPERATOR_BOOLEAN_TRUE);
+							text.setEditable(false);
+							txtCustomSearchValues.put(customField, text);
+							control = text;
+							searchfield = SearchField.fromCustomTicketField(customField);
+						}
+						break;
 					}
-					break;
-				}
-				case STRING :
-				case TEXT :
-				case INT :
-				case DATE :
-				case FLOAT : {
-					if (txtKeys.remove(customField)) {
-						control = txtCustomSearchValues.get(customField);
-					} else {
-						txtKeys.remove(customField);
-						Text text = new Text(customComposite, SWT.BORDER);
-						txtCustomSearchValues.put(customField, text);
-						control = text;
-						searchfield = SearchField.fromCustomTicketField(customField);
+					case STRING :
+					case TEXT :
+					case INT :
+					case DATE :
+					case FLOAT : {
+						if (txtKeys.remove(customField)) {
+							control = txtCustomSearchValues.get(customField);
+						} else {
+							txtKeys.remove(customField);
+							Text text = new Text(customComposite, SWT.BORDER);
+							txtCustomSearchValues.put(customField, text);
+							control = text;
+							searchfield = SearchField.fromCustomTicketField(customField);
+						}
+						break;
 					}
-					break;
 				}
-			}
-			
-			if (searchfield==null) {
-				combo = customSearchOperators.get(customField);
-				combo.getControl().setParent(customComposite);
-				control.setParent(customComposite);
-			} else {
-				control.setEnabled(false);
-				if (customSearchOperators.containsKey(customField)) {
-					customSearchOperators.remove(customField).getControl().dispose();
+				
+				if (searchfield==null) {
+					combo = customSearchOperators.get(customField);
+					combo.getControl().setParent(customComposite);
+					control.setParent(customComposite);
+				} else {
+					control.setEnabled(false);
+					if (customSearchOperators.containsKey(customField)) {
+						customSearchOperators.remove(customField).getControl().dispose();
+					}
+					combo = new ComboViewer(customComposite, SWT.READ_ONLY | SWT.DROP_DOWN);
+					combo.setContentProvider(new RedmineContentProvider(OPERATOR_TITLE));
+					combo.setLabelProvider(labelProvider);
+					combo.setInput(searchfield.getCompareOperators());
+					combo.setSelection(new StructuredSelection(combo.getElementAt(0)));
+					combo.addSelectionChangedListener(
+							new RedmineCompareOperatorSelectionListener(control));
+					customSearchOperators.put(customField, combo);
 				}
-				combo = new ComboViewer(customComposite, SWT.READ_ONLY | SWT.DROP_DOWN);
-				combo.setContentProvider(new RedmineContentProvider(OPERATOR_TITLE));
-				combo.setLabelProvider(labelProvider);
-				combo.setInput(searchfield.getCompareOperators());
-				combo.setSelection(new StructuredSelection(combo.getElementAt(0)));
-				combo.addSelectionChangedListener(
-						new RedmineCompareOperatorSelectionListener(control));
-				customSearchOperators.put(customField, combo);
 			}
 		}
 		
@@ -528,32 +549,45 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	private void restoreQuery(IRepositoryQuery query) {
 		titleText.setText(query.getSummary());
 
-		//TODO handle NPE
-		projectData = data.getProjectFromName(query.getAttribute(RedmineSearch.PROJECT_NAME));
-		projectViewer.setSelection(new StructuredSelection(projectData));
-
-		//NOTE : Don't call updateProjectAttributes(projectData) - projectViewer's SeletionListener call this method !!!
-
-		RedmineSearch search = RedmineSearch.fromSearchQueryParam(projectData, query.getAttribute(RedmineSearch.SEARCH_PARAMS), getTaskRepository().getRepositoryUrl());
-		search.setProject(projectData.getProject());
+		String listDataKey = query.getAttribute(RedmineSearch.DATA_KEY);
+		if(listDataKey==null || !this.listData.containsKey(listDataKey)) {
+			return;
+		}
 		
+		IRedmineSearchData queryData = this.listData.get(listDataKey);
+		RedmineSearch search = RedmineSearch.fromSearchQueryParam(queryData, query.getAttribute(RedmineSearch.SEARCH_PARAMS), getTaskRepository().getRepositoryUrl());
+	
+		RedmineProjectData projectData = data.getProjectFromName(listDataKey);
 
-		String storedQueryIdString = query.getAttribute(RedmineSearch.STORED_QUERY_ID);
-		//TODO handle NumberFormatException
-		int storedQueryId = (storedQueryIdString==null) ? 0 : Integer.parseInt(storedQueryIdString);
-		search.setStoredQueryId(storedQueryId);
-		RedmineStoredQuery storedQuery = (storedQueryId>0) ? projectData.getStoredQuery(storedQueryId) : null;
-		storedQueryViewer.setSelection(new StructuredSelection(storedQuery==null ? QUERY_SELECT_TITLE : storedQuery));
+		//NOTE : Don't call updateProjectAttributes() - projectViewer's SeletionListener call this method !!!
+		if (projectData==null) {
+			//Cross-Project-Query
+			projectViewer.setSelection(new StructuredSelection(PROJECT_SELECT_TITLE));
+		} else {
+			//Project-Query
+			projectViewer.setSelection(new StructuredSelection(projectData.getProject()));
+			search.setProjectId(projectData.getProject().getValue());
+
+			//Check StoredQuery usage
+			String sqIdVal = query.getAttribute(RedmineSearch.STORED_QUERY_ID);
+			int sqId = (sqIdVal==null || !sqIdVal.matches("^\\d+$")) ? 0 : Integer.parseInt(sqIdVal);
+			search.setStoredQueryId(sqId);
+			RedmineStoredQuery storedQuery = null;
+			if(sqId>0) {
+				storedQuery = queryData.getQuery(sqId);
+			}
+			storedQueryViewer.setSelection(new StructuredSelection(storedQuery==null ? QUERY_SELECT_TITLE : storedQuery));
+		}
 		
-		restoreListValues(projectData, search, searchOperators, lstSearchValues);
-		restoreTextValues(projectData, search, searchOperators, txtSearchValues);
-		restoreListValues(projectData, search, customSearchOperators, lstCustomSearchValues);
-		restoreTextValues(projectData, search, customSearchOperators, txtCustomSearchValues);
+		restoreListValues(queryData, search, searchOperators, lstSearchValues);
+		restoreTextValues(queryData, search, searchOperators, txtSearchValues);
+		restoreListValues(queryData, search, customSearchOperators, lstCustomSearchValues);
+		restoreTextValues(queryData, search, customSearchOperators, txtCustomSearchValues);
 		
 		getContainer().updateButtons();
 	}
 	
-	private void restoreListValues(RedmineProjectData projectData, RedmineSearch search, Map<? extends IRedmineQueryField, ComboViewer> operators, Map<? extends IRedmineQueryField, ListViewer> lists) {
+	private void restoreListValues(IRedmineSearchData queryData, RedmineSearch search, Map<? extends IRedmineQueryField, ComboViewer> operators, Map<? extends IRedmineQueryField, ListViewer> lists) {
 		for (Entry<? extends IRedmineQueryField, ListViewer> entry : lists.entrySet()) {
 			IRedmineQueryField queryField = entry.getKey();
 			RedmineSearchFilter searchFilter = search.getFilter(queryField);
@@ -570,7 +604,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 					Object[] selected = new Object[oldValues.size()];
 					for (int i=oldValues.size()-1; i>=0; i--) {
 						try {
-							selected[i] = attributeValue2Attribute(projectData, queryField, oldValues.get(i));
+							selected[i] = attributeValue2Attribute(queryData, queryField, oldValues.get(i));
 						} catch (RuntimeException e) {}
 					}
 					list.setSelection(new StructuredSelection(selected));
@@ -579,7 +613,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		}
 	}
 	
-	private void restoreTextValues(RedmineProjectData projectData, RedmineSearch search, Map<? extends IRedmineQueryField, ComboViewer> operators, Map<? extends IRedmineQueryField, Text> controls) {
+	private void restoreTextValues(IRedmineSearchData queryData, RedmineSearch search, Map<? extends IRedmineQueryField, ComboViewer> operators, Map<? extends IRedmineQueryField, Text> controls) {
 		for (Entry<? extends IRedmineQueryField, Text> entry : controls.entrySet()) {
 			IRedmineQueryField queryField = entry.getKey();
 			RedmineSearchFilter searchFilter = search.getFilter(queryField);
@@ -631,28 +665,46 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		}
 	}
 	
-	private Object attributeValue2Attribute(RedmineProjectData projectData, IRedmineQueryField field, String txtValue) {
+	protected void switchOperatorState(boolean state, boolean crossProjectOnly) {
+		List<Entry<IRedmineQueryField, ComboViewer>> operatorViewer = new ArrayList<Entry<IRedmineQueryField, ComboViewer>>();
+		operatorViewer.addAll(searchOperators.entrySet());
+		operatorViewer.addAll(customSearchOperators.entrySet());
+		
+		for (Entry<IRedmineQueryField, ComboViewer> entry : operatorViewer) {
+			if(state) {
+				entry.getValue().getControl().setEnabled(true);
+			} else if (!(crossProjectOnly && entry.getKey().crossProjectUsable())) {
+				entry.getValue().getControl().setEnabled(false);
+				
+			}
+		}
+		
+		storedQueryViewer.getControl().setEnabled(state || !crossProjectOnly);
+	}
+	
+	private Object attributeValue2Attribute(IRedmineSearchData queryData, IRedmineQueryField field, String txtValue) {
 		if (field instanceof RedmineCustomField) {
 			return txtValue;
 		} else if (field instanceof SearchField) {
-			SearchField searchField = (SearchField)field;
-			//TODO handle NumberFormatException
-			int value = Integer.parseInt(txtValue);
-			switch (searchField) {
-			case STATUS:
-				return data.getStatus(value);
-			case PRIORITY:
-				return data.getPriority(value);
-			case TRACKER:
-				return projectData.getTracker(value);
-			case FIXED_VERSION:
-				return projectData.getVersion(value);
-			case AUTHOR:
-				return projectData.getMember(value);
-			case ASSIGNED_TO:
-				return projectData.getMember(value);
-			case CATEGORY:
-				return projectData.getCategory(value);
+			if (txtValue.matches("^\\d+$")) {
+				SearchField searchField = (SearchField)field;
+				int value = Integer.parseInt(txtValue);
+				switch (searchField) {
+				case STATUS:
+					return queryData.getStatus(value);
+				case PRIORITY:
+					return queryData.getPriority(value);
+				case TRACKER:
+					return queryData.getTracker(value);
+				case FIXED_VERSION:
+					return queryData.getVersion(value);
+				case AUTHOR:
+					return queryData.getPerson(value);
+				case ASSIGNED_TO:
+					return queryData.getMember(value);
+				case CATEGORY:
+					return queryData.getCategory(value);
+				}
 			}
 		}
 		throw new IllegalArgumentException();
@@ -669,9 +721,7 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 	}
 
 	private boolean validate() {
-		boolean returnsw = (titleText != null && titleText.getText().length() > 0);
-		returnsw &= projectData != null;
-		return returnsw;
+		return (titleText != null && titleText.getText().length() > 0);
 	}
 
 	private RedmineTicketAttribute getFirstSelectedEntry(Viewer viewer) {
@@ -689,21 +739,30 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 		query.setSummary(getQueryTitle());
 		
 		RedmineSearch search = buildSearch();
-		query.setAttribute(RedmineSearch.PROJECT_NAME, projectData.getProject().getName());
-		query.setAttribute(RedmineSearch.PROJECT_ID, "" + projectData.getProject().getValue());
+		query.setAttribute(RedmineSearch.PROJECT_ID, "" + search.getProjectId());
 		query.setAttribute(RedmineSearch.SEARCH_PARAMS, search.toSearchQueryParam());
 		query.setAttribute(RedmineSearch.STORED_QUERY_ID, "" + search.getStoredQueryId());
+		if (getFirstSelectedEntry(projectViewer)==null) {
+			query.setAttribute(RedmineSearch.DATA_KEY, DATA_KEY_VALUE_CROSS_PROJECT);
+		} else {
+			query.setAttribute(RedmineSearch.DATA_KEY, getFirstSelectedEntry(projectViewer).getName());
+		}
 		query.setUrl(search.toQuery());
 	}
 
 	private RedmineSearch buildSearch() {
 		RedmineSearch search = new RedmineSearch(getTaskRepository().getRepositoryUrl());
-		search.setProject(projectData.getProject());
-		
-		RedmineTicketAttribute storedQuery = getFirstSelectedEntry(storedQueryViewer);
-		if (storedQuery != null) {
-			search.setStoredQueryId(storedQuery.getValue());
+
+		RedmineTicketAttribute project = getFirstSelectedEntry(projectViewer);
+		if(project!=null) {
+			search.setProjectId(project.getValue());
+			
+			RedmineTicketAttribute storedQuery = getFirstSelectedEntry(storedQueryViewer);
+			if (storedQuery != null) {
+				search.setStoredQueryId(storedQuery.getValue());
+			}
 		}
+
 		
 		buildListValueSearchPart(search, searchOperators, lstSearchValues);
 		buildTextValueSearchPart(search, searchOperators, txtSearchValues);
@@ -771,16 +830,18 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			if (!event.getSelection().isEmpty() && event.getSelection() instanceof IStructuredSelection) {
 				
 				Object selected = ((IStructuredSelection)event.getSelection()).getFirstElement();
-				if (selected instanceof RedmineProjectData) {
-					RedmineProjectData selProjectData = (RedmineProjectData)selected;
-					if (!(projectData != null && projectData.getProject().equals(selProjectData.getProject()))) {
-						RedmineQueryPage.this.clearSettings();
-					}
-					projectData = (RedmineProjectData)selected;
-					RedmineQueryPage.this.updateProjectAttributes(projectData);
-					RedmineQueryPage.this.updateCustomFieldFilter(projectData);
+				if (selected instanceof RedmineProject) {
+					RedmineProject project = (RedmineProject)selected;
+
+					RedmineQueryPage.this.clearSettings();
+					switchOperatorState(true, false);
+					RedmineQueryPage.this.updateProjectAttributes(project.getName());
+					RedmineQueryPage.this.updateCustomFieldFilter(project.getName());
 				} else {
 					RedmineQueryPage.this.clearSettings();
+					switchOperatorState(false, true);
+					RedmineQueryPage.this.updateProjectAttributes(DATA_KEY_VALUE_CROSS_PROJECT);
+					RedmineQueryPage.this.updateCustomFieldFilter(DATA_KEY_VALUE_CROSS_PROJECT);
 				}
 				
 				if (RedmineQueryPage.this.getContainer()!=null) {
@@ -806,4 +867,5 @@ public class RedmineQueryPage extends AbstractRepositoryQueryPage {
 			}
 		}
 	}
+	
 }

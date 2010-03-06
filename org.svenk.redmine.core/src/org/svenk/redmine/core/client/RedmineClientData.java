@@ -65,18 +65,26 @@ public class RedmineClientData implements Serializable {
 	public List<RedmineCustomField> getCustomFields() {
 		return customFields;
 	}
-	
-	public List<RedmineCustomField> getTimeEntryCustomFields() {
+
+	private List<RedmineCustomField> getCustomFields(CustomType type) {
 		//TODO optimize
 		List<RedmineCustomField> fields = new ArrayList<RedmineCustomField>(customFields.size());
-		
 		for (RedmineCustomField customField : customFields) {
-			if (customField.getCustomType()==CustomType.TimeEntryCustomField) {
+			if (customField.getCustomType()==type) {
 				fields.add(customField);
 			}
 		}
-		
 		return fields;
+	}
+
+	public List<RedmineCustomField> getTimeEntryCustomFields() {
+		//TODO optimize
+		return getCustomFields(CustomType.TimeEntryCustomField);
+	}
+
+	public List<RedmineCustomField> getIssueCustomFields() {
+		//TODO optimize
+		return getCustomFields(CustomType.IssueCustomField);
 	}
 	
 	public List<RedmineProjectData> getProjects() {

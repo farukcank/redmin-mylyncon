@@ -28,7 +28,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
-import org.svenk.redmine.core.client.RedmineProjectData;
+import org.svenk.redmine.core.model.RedmineProject;
 import org.svenk.redmine.core.model.RedmineStoredQuery;
 import org.svenk.redmine.core.model.RedmineTicketAttribute;
 
@@ -56,6 +56,8 @@ public class RedmineContentProvider implements IStructuredContentProvider {
 			return tmp.toArray();
 		} else if (inputElement instanceof String[]) {
 			return (String[])inputElement;
+		} else if (title!=null && inputElement.equals(title)) {
+			return new String[]{title};
 		}
 		return null;
 	}
@@ -72,13 +74,11 @@ public class RedmineContentProvider implements IStructuredContentProvider {
 		Object o = selection.getFirstElement();
 		
 		if (o instanceof RedmineTicketAttribute) {
-			if (o instanceof RedmineStoredQuery) {
+			if (o instanceof RedmineStoredQuery || o instanceof RedmineProject) {
 				selectLastOrDefault(viewer, o);
 			} else {
 				reselect(viewer, selection);
 			}
-		} else if (o instanceof RedmineProjectData) {
-			selectLastOrDefault(viewer, o);
 		} else if (o instanceof String) {
 			reselect(viewer, selection);
 		} else if (title!=null) {

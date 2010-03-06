@@ -26,4 +26,5 @@ public interface IRedmineQueryField {
 	
 	public String getLabel();
 	
+	public boolean crossProjectUsable();
 }

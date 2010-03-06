@@ -24,13 +24,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.mylyn.commons.core.StatusHandler;
 import org.svenk.redmine.core.RedmineCorePlugin;
-import org.svenk.redmine.core.client.RedmineProjectData;
+import org.svenk.redmine.core.search.internal.IRedmineSearchData;
 
 public class RedmineSearchFilter {
 
@@ -148,6 +149,8 @@ public class RedmineSearchFilter {
 
 	}
 
+	private final static EnumSet<SearchField> crossProjectUsable = EnumSet.complementOf(EnumSet.of(SearchField.FIXED_VERSION, SearchField.CATEGORY));
+	
 	public enum SearchField implements IRedmineQueryField {
 
 		LIST_BASED("LIST_BASED", true, false, true, CompareOperator.IS, CompareOperator.IS_NOT,
@@ -274,6 +277,10 @@ public class RedmineSearchFilter {
 
 		public String getLabel() {
 			return name();
+		}
+		
+		public boolean crossProjectUsable() {
+			return RedmineSearchFilter.crossProjectUsable.contains(this);
 		}
 		
 		public String toString() {
@@ -458,14 +465,13 @@ public class RedmineSearchFilter {
 		return fields;
 	}
 	
-	public static List<RedmineCustomField> findCustomTicketFieldsFromSearchQueryParam(RedmineProjectData projectData, String param) {
+	public static List<RedmineCustomField> findCustomTicketFieldsFromSearchQueryParam(IRedmineSearchData queryData, String param) {
 		List<RedmineCustomField> fields = new ArrayList<RedmineCustomField>();
 		Matcher matcher = Pattern.compile("&fields\\[\\]=cf_(\\d+)").matcher(param);
 		while (matcher.find()) {
 			try {
 				int id = Integer.parseInt(matcher.group(1));
-				RedmineCustomField customField = 
-					projectData.getCustomTicketField(id);
+				RedmineCustomField customField = queryData.getCustomTicketField(id);
 				if (customField != null) {
 					fields.add(customField);
 				}
