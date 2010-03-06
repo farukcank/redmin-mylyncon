@@ -149,7 +149,7 @@ public class RedmineSearchFilter {
 
 	}
 
-	private final static EnumSet<SearchField> crossProjectUsable = EnumSet.complementOf(EnumSet.of(SearchField.FIXED_VERSION, SearchField.CATEGORY, SearchField.AUTHOR, SearchField.ASSIGNED_TO));
+	private final static EnumSet<SearchField> crossProjectUsable = EnumSet.complementOf(EnumSet.of(SearchField.FIXED_VERSION, SearchField.CATEGORY));
 	
 	public enum SearchField implements IRedmineQueryField {
 
