@@ -36,5 +36,30 @@
             label="RedmineErrorReporter">
       </errorReporter>
    </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:org.eclipse.mylyn.tasks.ui.menu.task.mark?after=group.taskStatus">
+         <dynamic
+               class="org.svenk.redmine.ui.internal.action.RedmineStatusTaskListContributionItem"
+               id="org.svenk.redmine.ui.action.statuscontribution">
+            <visibleWhen
+                  checkEnabled="false">
+               <iterate
+                     operator="and">
+                  <and>
+                     <adapt
+                           type="org.eclipse.mylyn.tasks.core.ITask">
+                        <test
+                              property="org.eclipse.mylyn.task.connectorKind"
+                              value="redmine">
+                        </test>
+                     </adapt>
+                  </and>
+               </iterate>
+            </visibleWhen>
+         </dynamic>
+      </menuContribution>
+   </extension>
 
 </plugin>
