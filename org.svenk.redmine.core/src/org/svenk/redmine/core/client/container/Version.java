@@ -32,6 +32,7 @@ public class Version {
 	public static class Plugin extends SubVersion {
 
 		public static Plugin fromString(String globalVersionString) {
+			globalVersionString = globalVersionString.replace(".devel", "");
 			Plugin p = null;
 			
 			int vPos = globalVersionString.indexOf("v");
@@ -64,6 +65,8 @@ public class Version {
 	public static class Redmine extends SubVersion {
 
 		public static Redmine fromString(String globalVersionString) {
+			globalVersionString = globalVersionString.replace(".devel", "");
+
 			int vPos = globalVersionString.indexOf("v");
 			if (vPos >= 0) {
 				globalVersionString = globalVersionString.substring(0, vPos);
