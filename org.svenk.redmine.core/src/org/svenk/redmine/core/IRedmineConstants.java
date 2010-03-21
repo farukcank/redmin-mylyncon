@@ -21,6 +21,7 @@
 package org.svenk.redmine.core;
 
 
+
 public interface IRedmineConstants {
 
 	public final static double PLUGIN_VERSION_2_2 = 2.2;
@@ -40,6 +41,10 @@ public interface IRedmineConstants {
 	public final static String TASK_ATTRIBUTE_TIMEENTRY_CUSTOMVALUES = "task.redmine.timeentry.customvalues";
 	public final static String TASK_ATTRIBUTE_TIMEENTRY_TOTAL = "task.redmine.timeentry.total";
 	public final static String TASK_ATTRIBUTE_TIMEENTRY_NEW = "task.redmine.timeentry.new";
+	
+	public final static String TASK_ATTRIBUTE_STATUS_CHANGE = "task.redmine.status.change";
+	
+	public final static String TASK_ATTRIBUTE_OPERATION_RESTORE = "task.redmine.operation.restorevalue";
 	
 	public final static String TASK_KEY_PREFIX_TICKET_CF = "task.redmine.custom.";
 	public final static String TASK_KEY_PREFIX_TIMEENTRY_CF = "task.redmine.timeentry.custom.";
@@ -85,5 +90,7 @@ public interface IRedmineConstants {
 	public final static String REDMINE_URL_TICKET_EDIT = "/issues/edit/";
 	public final static String REDMINE_URL_REVISION = "/repositories/revision/";
 	public final static String REDMINE_URL_ATTACHMENT_DOWNLOAD = "/attachments/download/";
+	
+	public final static String REGEX_INTEGER = "^\\d+$";
 
 }

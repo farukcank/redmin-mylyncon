@@ -79,7 +79,7 @@ public class RedmineNewTimeEntryEditorPart extends AbstractTaskEditorPart {
 		AbstractAttributeEditor attributeEditor;
 		TaskAttribute attribute;
 
-		attribute = root.getAttribute(RedmineAttribute.TIME_ENTRY_HOURS.getRedmineKey());
+		attribute = root.getAttribute(RedmineAttribute.TIME_ENTRY_HOURS.getTaskKey());
 		if (attribute != null) {
 			attributeList.add(attribute.getId());
 			attributeEditor = createAttributeEditor(attribute);
@@ -89,7 +89,7 @@ public class RedmineNewTimeEntryEditorPart extends AbstractTaskEditorPart {
 			editorToolkit.adapt(attributeEditor);
 		}
 
-		attribute = root.getAttribute(RedmineAttribute.TIME_ENTRY_ACTIVITY.getRedmineKey());
+		attribute = root.getAttribute(RedmineAttribute.TIME_ENTRY_ACTIVITY.getTaskKey());
 		if (attribute != null) {
 			attributeList.add(attribute.getId());
 			attributeEditor = createAttributeEditor(attribute);
@@ -99,7 +99,7 @@ public class RedmineNewTimeEntryEditorPart extends AbstractTaskEditorPart {
 			editorToolkit.adapt(attributeEditor);
 		}
 		
-		attribute = root.getAttribute(RedmineAttribute.TIME_ENTRY_COMMENTS.getRedmineKey());
+		attribute = root.getAttribute(RedmineAttribute.TIME_ENTRY_COMMENTS.getTaskKey());
 		if (attribute != null) {
 			attributeList.add(attribute.getId());
 			attributeEditor = createAttributeEditor(attribute);

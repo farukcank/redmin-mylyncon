@@ -80,14 +80,14 @@ public class RedmineStatusTaskListContributionItem extends AbstractRedmineTaskLi
 				
 				if (repositoryUrl!=null && taskDataManager.hasTaskData(firstTask)) {
 					TaskData taskData = taskDataManager.getTaskData(firstTask);
-					TaskAttribute attribute = taskData.getRoot().getAttribute(RedmineAttribute.STATUS.getRedmineKey());
+					TaskAttribute attribute = taskData.getRoot().getAttribute(RedmineAttribute.STATUS.getTaskKey());
 					Set<String> commonIds = new HashSet<String>(attribute.getOptions().keySet());
 					
 					for (ITask task : tasks) {
 						if (task.getRepositoryUrl().equals(repositoryUrl)) { //Same-Repository-Policy
 							if (taskDataManager.hasTaskData(task)) {
 								taskData = taskDataManager.getTaskData(task);
-								attribute = taskData.getRoot().getAttribute(RedmineAttribute.STATUS.getRedmineKey());
+								attribute = taskData.getRoot().getAttribute(RedmineAttribute.STATUS.getTaskKey());
 								commonIds.retainAll(attribute.getOptions().keySet());
 							}
 						} else {

@@ -24,6 +24,7 @@ import static org.svenk.redmine.core.IRedmineConstants.TASK_ATTRIBUTE_TIMEENTRY_
 import static org.svenk.redmine.core.IRedmineConstants.TASK_ATTRIBUTE_TIMEENTRY_COMMENTS;
 import static org.svenk.redmine.core.IRedmineConstants.TASK_ATTRIBUTE_TIMEENTRY_HOURS;
 import static org.svenk.redmine.core.IRedmineConstants.TASK_ATTRIBUTE_TIMEENTRY_TOTAL;
+import static org.svenk.redmine.core.IRedmineConstants.TASK_ATTRIBUTE_STATUS_CHANGE;
 
 import java.util.EnumSet;
 
@@ -45,13 +46,14 @@ public enum RedmineAttribute {
 	PROJECT(Key.PROJECT, "Project:", TaskAttribute.PRODUCT, TaskAttribute.TYPE_SHORT_TEXT, Flag.REQUIRED, Flag.READ_ONLY),
 	PRIORITY(Key.PRIORITY, "Priority:", TaskAttribute.PRIORITY, TaskAttribute.TYPE_SINGLE_SELECT, Flag.HIDDEN, Flag.REQUIRED),
 	CATEGORY(Key.CATEGORY, "Category:", RedmineAttribute.TASK_KEY_CATEGORY, TaskAttribute.TYPE_SINGLE_SELECT),
-	VERSION(Key.VERSION, "Target version:", RedmineAttribute.TASK_KEY_VERSION, TaskAttribute.TYPE_SINGLE_SELECT),
+	VERSION(Key.VERSION, "Target version:", TaskAttribute.VERSION, TaskAttribute.TYPE_SINGLE_SELECT),
 	TRACKER(Key.TRACKER, "Tracker:", RedmineAttribute.TASK_KEY_TRACKER, TaskAttribute.TYPE_SINGLE_SELECT, Flag.REQUIRED, Flag.READ_ONLY),
-	STATUS(Key.STATUS, "Status:", TaskAttribute.STATUS, TaskAttribute.TYPE_SINGLE_SELECT, Flag.REQUIRED),
+	STATUS(Key.STATUS, "Status:", TaskAttribute.STATUS, TaskAttribute.TYPE_SINGLE_SELECT, Flag.REQUIRED, Flag.HIDDEN),
+	STATUS_CHG(Key.STATUS, "Status:", TASK_ATTRIBUTE_STATUS_CHANGE, TaskAttribute.TYPE_SINGLE_SELECT, Flag.OPERATION),
 	COMMENT(Key.COMMENT, "Comment: ", TaskAttribute.COMMENT_NEW, TaskAttribute.TYPE_LONG_RICH_TEXT, Flag.HIDDEN),
 	PROGRESS(Key.DONE_RATIO, "Done ratio: ", RedmineAttribute.TASK_KEY_PROGRESS, TaskAttribute.TYPE_SINGLE_SELECT),
 	ESTIMATED(Key.ESTIMATED_HOURS, "Estimated hours: ", RedmineAttribute.TASK_KEY_ESTIMATE, IRedmineConstants.EDITOR_TYPE_ESTIMATED, Flag.HIDDEN),
-	RELATION(Key.RELATIONSHIPS, "Relationship", null, RedmineAttribute.TASK_KEY_RELATION, Flag.HIDDEN),
+	RELATION(Key.RELATIONSHIPS, "Relationship", RedmineAttribute.TASK_KEY_RELATION, null, Flag.HIDDEN, Flag.READ_ONLY),
 	
 	TIME_ENTRY_TOTAL(Key.TIME_ENTRY_TOTAL, "Total (hours):", TASK_ATTRIBUTE_TIMEENTRY_TOTAL, TaskAttribute.TYPE_SHORT_TEXT, Flag.HIDDEN, Flag.READ_ONLY),
 	TIME_ENTRY_HOURS(Key.TIME_ENTRY_HOURS, "Spent time (hours):", TASK_ATTRIBUTE_TIMEENTRY_HOURS, TaskAttribute.TYPE_SHORT_TEXT, Flag.HIDDEN),
@@ -123,6 +125,15 @@ public enum RedmineAttribute {
 		return null;
 	}
 	
+	public static RedmineAttribute fromTaskKey(String taskKey) {
+		for (RedmineAttribute attr : RedmineAttribute.values()) {
+			if (attr.getTaskKey()!=null && attr.getTaskKey().equals(taskKey)) {
+				return attr;
+			}
+		}
+		return null;
+	}
+	
 	public String getKind() {
 		if (isHidden()) {
 			return null;
@@ -150,6 +161,10 @@ public enum RedmineAttribute {
 	
 	public boolean isRequired() {
 		return flags.contains(Flag.REQUIRED);
+	}
+	
+	public boolean isOperationValue() {
+		return flags.contains(Flag.OPERATION);
 	}
 	
 	@Override

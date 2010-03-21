@@ -36,6 +36,11 @@ import org.eclipse.mylyn.tasks.ui.editors.AbstractTaskEditorPart;
 import org.eclipse.mylyn.tasks.ui.editors.AttributeEditorFactory;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditorPartDescriptor;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.forms.IManagedForm;
@@ -43,6 +48,7 @@ import org.eclipse.ui.forms.editor.FormEditor;
 import org.svenk.redmine.core.IRedmineConstants;
 import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.RedmineCorePlugin;
+import org.svenk.redmine.core.RedmineOperation;
 import org.svenk.redmine.core.RedmineRepositoryConnector;
 import org.svenk.redmine.core.util.RedmineTaskDataValidator;
 import org.svenk.redmine.core.util.RedmineTaskDataValidator.RedmineTaskDataValidatorResult;
@@ -59,35 +65,80 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 	private final static String TASK_EDITOR_PART_TIMEENTRIES = "org.svenk.redmine.ui.editor.part.timeentries";
 	private final static String TASK_EDITOR_PART_NEWTIMEENTRY = "org.svenk.redmine.ui.editor.part.newtimeentry";
 	
-//	private final Map<TaskAttribute, AbstractAttributeEditor> attributeEditorMap;
-	
 	private final IRedmineAttributeChangedListener STATUS_LISTENER;
+	
+	private final TaskDataModelListener MODEL_LISTENER;
 
 	private RedmineTaskDataValidator validator;
+	
+	private AbstractAttributeEditor statusChangeEditor;
 	
 	public RedmineTaskEditorPage(TaskEditor editor) {
 		super(editor, RedmineCorePlugin.REPOSITORY_KIND);
 
-//		this.attributeEditorMap = new HashMap<TaskAttribute, AbstractAttributeEditor>();
-		
 		setNeedsPrivateSection(true);
 		setNeedsSubmitButton(true);
 		
 		STATUS_LISTENER = new IRedmineAttributeChangedListener() {
 			public void attributeChanged(ITask task, TaskAttribute attribute) {
 				if(getTask()==task) {
-					if(attribute.getId().equals(RedmineAttribute.STATUS.getRedmineKey())) {
+					if(attribute.getId().equals(RedmineAttribute.STATUS_CHG.getTaskKey())) {
 						TaskDataModel model = getModel();
 						TaskAttribute modelAttribute = model.getTaskData().getRoot().getAttribute(attribute.getId());
 						
 						if(!modelAttribute.getValue().equals(attribute.getValue())) {
 							modelAttribute.setValue(attribute.getValue());
 							model.attributeChanged(modelAttribute);
+							
 						}
 					}
 				}
 			}
 		};
+	
+		MODEL_LISTENER = new TaskDataModelListener() {
+			@Override
+			public void attributeChanged(TaskDataModelEvent event) {
+				RedmineTaskDataValidatorResult result = validator.validateTaskAttribute(getModel().getTaskData(), event.getTaskAttribute());
+				if(result.hasErrors()) {
+					getTaskEditor().setMessage(result.getFirstErrorMessage(), IMessageProvider.WARNING);
+				} else {
+					getTaskEditor().setMessage("", IMessageProvider.NONE);
+				}
+				
+				TaskAttribute changedAttribute = event.getTaskAttribute();
+				if(changedAttribute.getId().equals(RedmineAttribute.STATUS_CHG.getTaskKey())) {
+					TaskDataModel model = event.getModel();
+					TaskAttribute markasOperation = model.getTaskData().getRoot().getAttribute(TaskAttribute.PREFIX_OPERATION + RedmineOperation.markas.toString());
+					if(markasOperation!=null) {
+						TaskAttribute operation = model.getTaskData().getRoot().getAttribute(TaskAttribute.OPERATION);
+						model.getTaskData().getAttributeMapper().setValue(operation, RedmineOperation.markas.toString());
+						model.attributeChanged(operation);
+						
+						if(statusChangeEditor!=null) {
+							Control control = statusChangeEditor.getControl();
+							if(control!=null && control instanceof CCombo) {
+								Listener[] listeners = control.getListeners(SWT.Selection);
+								if(listeners!=null && listeners.length==2) {
+									Event e = new Event();
+									e.widget = control;
+									e.type = SWT.Selection;
+									/*
+									 * Excpected listeners:
+									 * 0: AttributeEditor
+									 * 1: ActionButton
+									 */
+									listeners[1].handleEvent(e);
+								}
+							}
+						}
+					}
+				}
+			}
+		};
+		
+
+		
 	}
 
 	@Override
@@ -99,28 +150,19 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 		if (connector instanceof RedmineRepositoryConnector) {
 			validator = ((RedmineRepositoryConnector)connector).createNewTaskDataValidator(repository);
 
-			getModel().addModelListener(new TaskDataModelListener() {
-				@Override
-				public void attributeChanged(TaskDataModelEvent event) {
-					RedmineTaskDataValidatorResult result = validator.validateTaskAttribute(getModel().getTaskData(), event.getTaskAttribute());
-					if(result.hasErrors()) {
-						getTaskEditor().setMessage(result.getFirstErrorMessage(), IMessageProvider.WARNING);
-					} else {
-						getTaskEditor().setMessage("", IMessageProvider.NONE);
-					}
-				}
-			});
+			getModel().addModelListener(MODEL_LISTENER);
 		}
 
 		RedmineUiPlugin.getDefault().addAttributeChangedListener(STATUS_LISTENER);
 	}
 	
 	@Override
-	public void close() {
-		super.close();
+	public void dispose() {
+		getModel().removeModelListener(MODEL_LISTENER);
 		RedmineUiPlugin.getDefault().removeAttributeChangedListener(STATUS_LISTENER);
+		super.dispose();
 	}
-
+	
 	@Override
 	protected Set<TaskEditorPartDescriptor> createPartDescriptors() {
 		Set<TaskEditorPartDescriptor> descriptors = super.createPartDescriptors();
@@ -134,7 +176,7 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 			}
 		}.setPath(PATH_ATTRIBUTES));
 
-		if (rootAttribute.getAttribute(RedmineAttribute.TIME_ENTRY_TOTAL.getRedmineKey())!=null) {
+		if (rootAttribute.getAttribute(RedmineAttribute.TIME_ENTRY_TOTAL.getTaskKey())!=null) {
 			//TODO change ID
 			descriptors.add(new TaskEditorPartDescriptor(TASK_EDITOR_PART_TIMEENTRIES) {
 				@Override
@@ -144,7 +186,7 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 			}.setPath(PATH_COMMENTS));
 		}
 
-		if (!getModel().getTask().isCompleted() && rootAttribute.getAttribute(RedmineAttribute.TIME_ENTRY_HOURS.getRedmineKey())!=null) {
+		if (!getModel().getTask().isCompleted() && rootAttribute.getAttribute(RedmineAttribute.TIME_ENTRY_HOURS.getTaskKey())!=null) {
 			//TODO change ID
 			descriptors.add(new TaskEditorPartDescriptor(TASK_EDITOR_PART_NEWTIMEENTRY) {
 				@Override
@@ -178,11 +220,14 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 			@Override
 			public AbstractAttributeEditor createEditor(String type, final TaskAttribute taskAttribute) {
 				AbstractAttributeEditor editor;
-				if (IRedmineConstants.EDITOR_TYPE_ESTIMATED.equals(type)) {
+				if(IRedmineConstants.EDITOR_TYPE_ESTIMATED.equals(type)) {
 					editor = new RedmineEstimatedEditor(getModel(), taskAttribute);
 				} else {
 					editor = super.createEditor(type, taskAttribute);
-					if (TaskAttribute.TYPE_BOOLEAN.equals(type)) {
+					
+					if(taskAttribute.getId().equals(RedmineAttribute.STATUS_CHG.getTaskKey())) {
+						statusChangeEditor = editor;
+					} else if (TaskAttribute.TYPE_BOOLEAN.equals(type)) {
 						editor.setDecorationEnabled(false);
 					}
 				}
@@ -194,37 +239,9 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 		return factory;
 	}
 
-//	@Override
-//	protected void createParts() {
-//		attributeEditorMap.clear();
-//		super.createParts();
-//	}
-//
-//	private void addToAttributeEditorMap(TaskAttribute attribute, AbstractAttributeEditor editor) {
-//		if (attributeEditorMap.containsKey(attribute)) {
-//			attributeEditorMap.remove(attribute);
-//		}
-//		attributeEditorMap.put(attribute, editor);
-//	}
-//
-//	private AbstractAttributeEditor getEditorForAttribute(TaskAttribute attribute) {
-//		return attributeEditorMap.get(attribute);
-//	}
-//
-//	private void refresh(TaskAttribute attributeComponent) {
-//		AbstractAttributeEditor editor = getEditorForAttribute(attributeComponent);
-//		if (editor != null) {
-//			try {
-//				editor.refresh();
-//			} catch (UnsupportedOperationException e) {
-//				// ignore
-//			}
-//		}
-//	}
-
 	@Override
 	public void doSubmit() {
-		TaskAttribute attribute = getModel().getTaskData().getRoot().getMappedAttribute(RedmineAttribute.SUMMARY.getRedmineKey());
+		TaskAttribute attribute = getModel().getTaskData().getRoot().getMappedAttribute(RedmineAttribute.SUMMARY.getTaskKey());
 		if (attribute != null && attribute.getValue().trim().length() == 0) {
 			getTaskEditor().setMessage(REQUIRED_MESSAGE_SUMMARY, IMessageProvider.ERROR);
 			AbstractTaskEditorPart part = getPart(ID_PART_SUMMARY);
@@ -234,7 +251,7 @@ public class RedmineTaskEditorPage extends AbstractTaskEditorPage {
 			return;
 		}
 
-		attribute = getModel().getTaskData().getRoot().getMappedAttribute(RedmineAttribute.DESCRIPTION.getRedmineKey());
+		attribute = getModel().getTaskData().getRoot().getMappedAttribute(RedmineAttribute.DESCRIPTION.getTaskKey());
 		if (attribute != null && attribute.getValue().trim().length() == 0) {
 			getTaskEditor().setMessage(REQUIRED_MESSAGE_DESCRIPTION, IMessageProvider.ERROR);
 			AbstractTaskEditorPart part = getPart(ID_PART_DESCRIPTION);

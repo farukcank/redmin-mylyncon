@@ -80,7 +80,7 @@ public class RedminePlanningEditorPart extends AbstractTaskEditorPart {
 		AbstractAttributeEditor attributeEditor;
 		TaskAttribute attribute;
 
-		attribute = rootAttribute.getAttribute(RedmineAttribute.DATE_START.getRedmineKey());
+		attribute = rootAttribute.getAttribute(RedmineAttribute.DATE_START.getTaskKey());
 		if (attribute != null) {
 			attributeEditor = createAttributeEditor(attribute);
 			attributeEditor.createLabelControl(timeComposite, toolkit);
@@ -88,7 +88,7 @@ public class RedminePlanningEditorPart extends AbstractTaskEditorPart {
 			editorToolkit.adapt(attributeEditor);
 		}
 
-		attribute = rootAttribute.getAttribute(RedmineAttribute.DATE_DUE.getRedmineKey());
+		attribute = rootAttribute.getAttribute(RedmineAttribute.DATE_DUE.getTaskKey());
 		if (attribute != null) {
 			attributeEditor = createAttributeEditor(attribute);
 			attributeEditor.createLabelControl(timeComposite, toolkit);
@@ -96,7 +96,7 @@ public class RedminePlanningEditorPart extends AbstractTaskEditorPart {
 			editorToolkit.adapt(attributeEditor);
 		}
 
-		attribute = rootAttribute.getAttribute(RedmineAttribute.ESTIMATED.getRedmineKey());
+		attribute = rootAttribute.getAttribute(RedmineAttribute.ESTIMATED.getTaskKey());
 		if (attribute != null) {
 			attributeEditor = createAttributeEditor(attribute);
 			attributeEditor.createLabelControl(timeComposite, toolkit);
@@ -118,7 +118,7 @@ public class RedminePlanningEditorPart extends AbstractTaskEditorPart {
 		TaskAttribute rootAttribute = getTaskData().getRoot();
 		TaskAttribute attribute = null;
 
-		attribute = rootAttribute.getAttribute(RedmineAttribute.DATE_DUE.getRedmineKey());
+		attribute = rootAttribute.getAttribute(RedmineAttribute.DATE_DUE.getTaskKey());
 		if(getModel().getChangedAttributes().contains(attribute)) {
 			String dueValue = attribute.getValue();
 
@@ -138,7 +138,7 @@ public class RedminePlanningEditorPart extends AbstractTaskEditorPart {
 		modelListener = new TaskDataModelListener() {
 			@Override
 			public void attributeChanged(TaskDataModelEvent event) {
-				if (RedmineAttribute.DATE_DUE.getRedmineKey().equals(event.getTaskAttribute().getId())) {						
+				if (RedmineAttribute.DATE_DUE.getTaskKey().equals(event.getTaskAttribute().getId())) {						
 					RedminePlanningEditorPart.this.markDirty();
 				}
 			}
@@ -147,7 +147,7 @@ public class RedminePlanningEditorPart extends AbstractTaskEditorPart {
 
 		TaskAttribute rootAttribute = getTaskData().getRoot();
 		for (RedmineAttribute redmineAttribute : PLANNING_ATTRIBUTES) {
-			TaskAttribute attribute = rootAttribute.getAttribute(redmineAttribute.getRedmineKey());
+			TaskAttribute attribute = rootAttribute.getAttribute(redmineAttribute.getTaskKey());
 			if (attribute != null && getModel().hasIncomingChanges(attribute)) {
 				hasIncoming = true;
 				break;

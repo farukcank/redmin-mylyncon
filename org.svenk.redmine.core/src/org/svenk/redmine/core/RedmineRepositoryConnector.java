@@ -178,7 +178,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 	public boolean hasTaskChanged(TaskRepository taskRepository, ITask task,
 			TaskData taskData) {
 		
-		TaskAttribute attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.DATE_UPDATED.getRedmineKey());
+		TaskAttribute attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.DATE_UPDATED.getTaskKey());
 		String repositoryDate = attribute.getValue();
 		Date localeDate = task.getModificationDate();
 		if (localeDate!=null) {
@@ -230,13 +230,13 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 		Assert.isNotNull(clientData);
 
 		//Set CompletionDate, if Closed-Status
-		TaskAttribute attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.STATUS.getRedmineKey());
+		TaskAttribute attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.STATUS.getTaskKey());
 		try {
 			RedmineTicketStatus status = clientData.getStatus(Integer.parseInt(attribute.getValue()));
 			if (status.isClosed()) {
 				Date date = task.getCompletionDate();
 				if (date==null) {
-					attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.DATE_UPDATED.getRedmineKey());
+					attribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.DATE_UPDATED.getTaskKey());
 					if((date=RedmineUtil.parseDate(attribute.getValue()))==null) {
 						date = new Date(0);
 					}
@@ -255,7 +255,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 		}
 		
 		try {
-			String projectName = taskData.getRoot().getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey()).getValue();
+			String projectName = taskData.getRoot().getMappedAttribute(RedmineAttribute.PROJECT.getTaskKey()).getValue();
 			int projectId = clientData.getProjectFromName(projectName).getProject().getValue();
 			task.setAttribute(TaskAttribute.PRODUCT, ""+projectId);
 		} catch (NullPointerException e) {
@@ -269,7 +269,7 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 	@Override
 	public Collection<TaskRelation> getTaskRelations(TaskData taskData) {
 		TaskAttribute attr = taskData.getRoot().getMappedAttribute(
-				RedmineAttribute.RELATION.getRedmineKey());
+				RedmineAttribute.RELATION.getTaskKey());
 		if (attr!=null) {
 			Map<String, String> options = attr.getOptions();
 			Collection<TaskRelation> relations = 

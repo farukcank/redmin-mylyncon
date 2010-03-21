@@ -62,6 +62,11 @@ public aspect RedmineReadonlyAttributeAspect {
 			return;
 		}
 		
+		//reopen possible?
+		if(redmineAttribute==RedmineAttribute.STATUS_CHG && taskAttribute.getOptions().size()>1) {
+			return;
+		}
+		
 		//closed Ticket - set all attributes to readonly
 		if (ticket.isClosed()) {
 			taskAttribute.getMetaData().setReadOnly(true);
@@ -118,7 +123,7 @@ public aspect RedmineReadonlyAttributeAspect {
 		&& args(taskData, RedmineCustomField);
 	
 	after(TaskData taskData) returning(TaskAttribute attr) : createCustomAttribute(taskData) {
-		TaskAttribute referenceAttribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.CATEGORY.getRedmineKey());
+		TaskAttribute referenceAttribute = taskData.getRoot().getMappedAttribute(RedmineAttribute.CATEGORY.getTaskKey());
 		attr.getMetaData().setReadOnly(referenceAttribute.getMetaData().isReadOnly());
 	}
 	

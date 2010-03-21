@@ -63,12 +63,12 @@ public class RedmineTaskDataValidator {
 
 		if (attribute.getId().startsWith(IRedmineConstants.TASK_KEY_PREFIX_TICKET_CF)) {
 			TaskAttribute rootAttr = taskData.getRoot();
-			TaskAttribute projAttr = rootAttr.getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey());
+			TaskAttribute projAttr = rootAttr.getMappedAttribute(RedmineAttribute.PROJECT.getTaskKey());
 			RedmineProjectData projectData = clientData.getProjectFromName(projAttr.getValue());
 
 			String valStr = null;
 			try {
-				valStr = rootAttr.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue();
+				valStr = rootAttr.getMappedAttribute(RedmineAttribute.TRACKER.getTaskKey()).getValue();
 				List<RedmineCustomField> ticketFields = projectData.getCustomTicketFields(Integer.parseInt(valStr));
 				
 				valStr = attribute.getId().substring(IRedmineConstants.TASK_KEY_PREFIX_TICKET_CF.length());
@@ -99,7 +99,7 @@ public class RedmineTaskDataValidator {
 			}
 			
 		} else {
-			if (attribute.getId().equals(RedmineAttribute.ESTIMATED.getRedmineKey())) {
+			if (attribute.getId().equals(RedmineAttribute.ESTIMATED.getTaskKey())) {
 				validateDefaultAttributeEsimatedHours(attribute.getValue(), result);
 			}
 		}
@@ -109,7 +109,7 @@ public class RedmineTaskDataValidator {
 	protected void validateDefaultAttributes(TaskData taskData, RedmineTaskDataValidatorResult result) {
 		validateRequiredDefaultAttributes(taskData, result);
 		
-		TaskAttribute estimatedAttr = taskData.getRoot().getMappedAttribute(RedmineAttribute.ESTIMATED.getRedmineKey());
+		TaskAttribute estimatedAttr = taskData.getRoot().getMappedAttribute(RedmineAttribute.ESTIMATED.getTaskKey());
 		if (estimatedAttr != null) {
 			validateDefaultAttributeEsimatedHours(estimatedAttr.getValue(), result);
 		}
@@ -122,7 +122,11 @@ public class RedmineTaskDataValidator {
 		
 		for (RedmineAttribute redmineAttribute : RedmineAttribute.values()) {
 			if (redmineAttribute.isRequired()) {
-				taskAttr = rootAttr.getMappedAttribute(redmineAttribute.getRedmineKey());
+				if(redmineAttribute==RedmineAttribute.STATUS && taskData.isNew())  {
+					redmineAttribute=RedmineAttribute.STATUS_CHG;
+				}
+				
+				taskAttr = rootAttr.getMappedAttribute(redmineAttribute.getTaskKey());
 				attributeValue = (taskAttr!=null) ? taskAttr.getValue().trim() : null;
 				if (attributeValue==null || attributeValue.length()<1) {
 					result.addErrorMessage(redmineAttribute.toString() + " is required");
@@ -145,12 +149,12 @@ public class RedmineTaskDataValidator {
 
 	protected void validateCustomAttributes(TaskData taskData, RedmineTaskDataValidatorResult result) {
 		TaskAttribute rootAttr = taskData.getRoot();
-		TaskAttribute projAttr = rootAttr.getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey());
+		TaskAttribute projAttr = rootAttr.getMappedAttribute(RedmineAttribute.PROJECT.getTaskKey());
 		RedmineProjectData projectData = clientData.getProjectFromName(projAttr.getValue());
 
 		String valStr = null;
 		try {
-			valStr = rootAttr.getMappedAttribute(RedmineAttribute.TRACKER.getRedmineKey()).getValue();
+			valStr = rootAttr.getMappedAttribute(RedmineAttribute.TRACKER.getTaskKey()).getValue();
 			List<RedmineCustomField> ticketFields = projectData.getCustomTicketFields(Integer.parseInt(valStr));
 			
 			String attributeValue = null;

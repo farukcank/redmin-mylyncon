@@ -34,7 +34,7 @@ public class RevisionHyperlink implements IHyperlink {
 	}
 
 	public String getHyperlinkText() {
-		return "Open revision " + revision + " in " + taskRepository.getRepositoryLabel();
+		return String.format(Messages.RevisionHyperlink_OPEN_REVISION_INTEGER_STRING, revision, taskRepository.getRepositoryLabel());
 	}
 
 	public String getTypeLabel() {
@@ -48,7 +48,7 @@ public class RevisionHyperlink implements IHyperlink {
 		if(product==null) {
 			try {
 				TaskData taskData = TasksUi.getTaskDataManager().getTaskData(task);
-				product = taskData.getRoot().getMappedAttribute(RedmineAttribute.PROJECT.getRedmineKey()).getValue();
+				product = taskData.getRoot().getMappedAttribute(RedmineAttribute.PROJECT.getTaskKey()).getValue();
 				
 				AbstractRepositoryConnector reposConn = TasksUi.getRepositoryConnector(taskRepository.getConnectorKind());
 				if (reposConn instanceof RedmineRepositoryConnector) {
@@ -56,13 +56,13 @@ public class RevisionHyperlink implements IHyperlink {
 					if(clientData != null) {
 						RedmineProjectData project = clientData.getProjectFromName(product);
 						if(project != null) {
-							product = ""+project.getProject().getValue();
+							product = ""+project.getProject().getValue(); //$NON-NLS-1$
 						}
 					}
 					
 				}
 			} catch (Exception e) {
-				product = "";
+				product = ""; //$NON-NLS-1$
 			}
 			
 		}
@@ -70,7 +70,7 @@ public class RevisionHyperlink implements IHyperlink {
 		StringBuilder builder = new StringBuilder(taskRepository.getRepositoryUrl());
 		builder.append(IRedmineConstants.REDMINE_URL_REVISION);
 		builder.append(product);
-		builder.append("?rev=");
+		builder.append("?rev="); //$NON-NLS-1$
 		builder.append(revision);
 		TasksUiUtil.openUrl(builder.toString());
 	}

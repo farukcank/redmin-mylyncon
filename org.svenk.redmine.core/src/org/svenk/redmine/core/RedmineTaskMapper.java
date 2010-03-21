@@ -61,10 +61,10 @@ public class RedmineTaskMapper extends TaskMapper implements IRedmineTaskMapping
 	}
 
 	public void setTracker(String value) {
-		setValue(RedmineAttribute.TRACKER.getRedmineKey(), value);
+		setValue(RedmineAttribute.TRACKER.getTaskKey(), value);
 	}
 	
 	public String getTracker() {
-		return getValue(RedmineAttribute.TRACKER.getRedmineKey());
+		return getValue(RedmineAttribute.TRACKER.getTaskKey());
 	}
 }

@@ -58,6 +58,19 @@ public class RedmineClientData implements Serializable {
 		return statuses;
 	}
 
+	public RedmineTicketStatus getDefaultStatus() {
+		if (!this.statuses.isEmpty()) {
+			for (RedmineTicketStatus status : this.statuses) {
+				if (status.isDefaultStatus()) {
+					return status;
+				}
+			}
+			return this.statuses.get(0);
+		}
+		
+		return null;
+	}
+
 	public List<RedmineActivity> getActivities() {
 		return activities;
 	}

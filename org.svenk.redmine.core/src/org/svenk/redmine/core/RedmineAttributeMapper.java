@@ -38,7 +38,7 @@ public class RedmineAttributeMapper extends TaskAttributeMapper {
 	private RedmineClientData clientData;
 	
 	enum Flag {
-		READ_ONLY, HIDDEN, CUSTOM_FIELD, REQUIRED
+		READ_ONLY, HIDDEN, CUSTOM_FIELD, REQUIRED, OPERATION
 	}
 	
 	public RedmineAttributeMapper(TaskRepository taskRepository, RedmineClientData clientData) {
@@ -57,15 +57,15 @@ public class RedmineAttributeMapper extends TaskAttributeMapper {
 	
 	@Override
 	public String mapToRepositoryKey(TaskAttribute parent, String key) {
-		RedmineAttribute attribute = RedmineAttribute.getByTaskKey(key);
-		return (attribute != null) ? attribute.getRedmineKey() : key;
+		RedmineAttribute attribute = RedmineAttribute.fromRedmineKey(key);
+		return (attribute != null) ? attribute.getTaskKey() : key;
 	}
 	
 	@Override
 	public IRepositoryPerson getRepositoryPerson(TaskAttribute taskAttribute) {
 		IRepositoryPerson person =  super.getRepositoryPerson(taskAttribute);
 		
-		if (clientData==null || person.getPersonId()==null || !person.getPersonId().matches("^\\d+$")) {
+		if (clientData==null || person.getPersonId()==null || !person.getPersonId().matches(IRedmineConstants.REGEX_INTEGER)) {
 			return person;
 		}
 		

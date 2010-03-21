@@ -81,7 +81,7 @@ public class RedmineTimeEntryEditorPart extends AbstractTaskEditorPart {
 		StringBuilder nameDetail = new StringBuilder(section.getText());
 		nameDetail.append(" (").append(timeEntryAttributes.size()); //$NON-NLS-1$
 		
-		TaskAttribute totalAttribute = getTaskData().getRoot().getAttribute(RedmineAttribute.TIME_ENTRY_TOTAL.getRedmineKey());
+		TaskAttribute totalAttribute = getTaskData().getRoot().getAttribute(RedmineAttribute.TIME_ENTRY_TOTAL.getTaskKey());
 		if(totalAttribute!=null && totalAttribute.getValue()!="") { //$NON-NLS-1$
 			nameDetail.append(" - ").append(Messages.RedmineTimeEntryEditorPart_TIME_ENTRIES_TOTAL); //$NON-NLS-1$
 			nameDetail.append(": ").append(totalAttribute.getValue()); //$NON-NLS-1$

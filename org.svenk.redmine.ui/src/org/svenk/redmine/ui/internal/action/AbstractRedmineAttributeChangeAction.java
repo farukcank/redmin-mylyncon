@@ -20,16 +20,12 @@
  *******************************************************************************/
 package org.svenk.redmine.ui.internal.action;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.mylyn.commons.core.StatusHandler;
-import org.eclipse.mylyn.internal.tasks.ui.util.TasksUiInternal;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.core.data.ITaskDataManager;
@@ -38,11 +34,8 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
 import org.eclipse.mylyn.tasks.core.data.TaskData;
 import org.eclipse.mylyn.tasks.core.data.TaskDataModel;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
-import org.eclipse.mylyn.tasks.ui.editors.TaskEditor;
 import org.eclipse.mylyn.tasks.ui.editors.TaskEditorInput;
 import org.eclipse.swt.SWT;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
@@ -75,10 +68,6 @@ public abstract class AbstractRedmineAttributeChangeAction extends Action {
 		this.tasks = tasks;
 	}
 	
-	protected void changeAttributeValue(String value) {
-		
-	}
-
 	@Override
 	public void run() {
 		ITaskDataManager taskDataManager = TasksUi.getTaskDataManager();
@@ -89,17 +78,19 @@ public abstract class AbstractRedmineAttributeChangeAction extends Action {
 				try {
 					TaskAttribute attribute = null;
 					if(isTaskOpen(task)) {
-						attribute = taskDataManager.getTaskData(task).getRoot().getAttribute(this.attribute.getRedmineKey());
-						attribute.setValue(value);
+						TaskData taskData = taskDataManager.getTaskData(task);
+						attribute = taskData.getRoot().getAttribute(this.attribute.getTaskKey());
+						setOpenTaskValue(attribute, value, taskData);
 					} else {
 						ITaskDataWorkingCopy copy = taskDataManager.getWorkingCopy(task);
 						TaskDataModel model = new TaskDataModel(repository, task, copy);
 						TaskData taskData = model.getTaskData();
 						
-						attribute = taskData.getRoot().getAttribute(this.attribute.getRedmineKey());
-						attribute.setValue(value);
-						model.attributeChanged(attribute);
-						model.save(new NullProgressMonitor());
+						attribute = taskData.getRoot().getAttribute(this.attribute.getTaskKey());
+						if(!attribute.getValue().equals(value)) {
+							setClosedTaskValue(attribute, value, taskData, model);
+							model.save(new NullProgressMonitor());
+						}
 					}
 					
 					RedmineUiPlugin.getDefault().notifyAttributeChanged(task, attribute);
@@ -109,6 +100,15 @@ public abstract class AbstractRedmineAttributeChangeAction extends Action {
 				}
 			}
 		}
+	}
+	
+	protected void setClosedTaskValue(TaskAttribute attribute, String value, TaskData taskData, TaskDataModel model) {
+		attribute.setValue(value);
+		model.attributeChanged(attribute);
+	}
+
+	protected void setOpenTaskValue(TaskAttribute attribute, String value, TaskData taskData) {
+		attribute.setValue(value);
 	}
 	
 	private boolean isTaskOpen(ITask task) {
