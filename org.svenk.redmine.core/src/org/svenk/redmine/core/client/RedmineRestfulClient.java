@@ -159,7 +159,7 @@ public class RedmineRestfulClient extends AbstractRedmineClient {
 	public boolean supportTimeEntries() {
 		return vPlugin!=null && vPlugin.compareTo(Release.PLUGIN_2_6)>=0;
 	}
-	
+
 	public synchronized void updateAttributes(boolean force, IProgressMonitor monitor) throws RedmineException {
 		if (!force && hasAttributes()) {
 			return;

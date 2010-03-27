@@ -33,58 +33,46 @@ import org.svenk.redmine.core.IRedmineConstants;
 import org.svenk.redmine.core.RedmineAttribute;
 import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.RedmineOperation;
-import org.svenk.redmine.core.client.RedmineClientData;
-import org.svenk.redmine.core.client.RedmineProjectData;
 import org.svenk.redmine.core.exception.RedmineStatusException;
 import org.svenk.redmine.core.model.RedmineCustomField.CustomType;
 import org.svenk.redmine.core.util.RedmineUtil;
 
 public class RedmineTaskDataReader {
 
-	public static Map<String, String> readTask(TaskData taskData, Set<TaskAttribute> oldAttributes, RedmineClientData clientData) throws RedmineStatusException {
-		TaskAttribute rootAttribute = taskData.getRoot();
+	public static Map<String, String> readTask(TaskData taskData, Set<TaskAttribute> oldAttributes) throws RedmineStatusException {
 		try {
-			Map<String, TaskAttribute> attributeValues = rootAttribute.getAttributes();
+			Map<String, TaskAttribute> attributeValues = taskData.getRoot().getAttributes();
 			Map<String, String> postValues = new HashMap<String, String>(attributeValues.size()); 
-
-			//usable CustomFields
-			RedmineProjectData projectData = clientData.getProjectFromName(rootAttribute.getAttribute(RedmineAttribute.PROJECT.getTaskKey()).getValue());
-			Set<Integer> usableCfs = projectData.getCustomFieldIds(Integer.parseInt(rootAttribute.getAttribute(RedmineAttribute.TRACKER.getTaskKey()).getValue()));
-
+			
 			for (Entry<String, TaskAttribute> entry : attributeValues.entrySet()) {
 				TaskAttribute taskAttribute = entry.getValue();
 				String attributeId = entry.getKey();
 				RedmineAttribute redmineAttribute = RedmineAttribute.fromTaskKey(attributeId);
 				
-				if (redmineAttribute==null) {
-					//customFields
-
+				if (redmineAttribute == null) {
+					//custom
 					if (taskAttribute.getMetaData().isReadOnly()) {
 						continue;
 					}
 					
 					String key;
-					int cfId = -1;
+					int len;
 					if(attributeId.startsWith(CustomType.IssueCustomField.taskKeyPrefix)) {
-						cfId = Integer.parseInt(attributeId.substring(CustomType.IssueCustomField.taskKeyPrefix.length()));
-						if(!usableCfs.contains(cfId)) {
-							continue;
-						}
 						key = IRedmineConstants.CLIENT_FIELD_ISSUE_CUSTOM;
+						len = CustomType.IssueCustomField.taskKeyPrefix.length();
 					} else if (attributeId.startsWith(CustomType.TimeEntryCustomField.taskKeyPrefix)) {
-						cfId = Integer.parseInt(attributeId.substring(CustomType.TimeEntryCustomField.taskKeyPrefix.length()));
 						key = IRedmineConstants.CLIENT_FIELD_TIMEENTRY_CF;
+						len = CustomType.TimeEntryCustomField.taskKeyPrefix.length();
 					} else {
 						continue;
 					}
 					
-					if(cfId>0) {
-						key = String.format(key, cfId);
-						String attributeValue = parseValue(taskAttribute.getValue(), taskAttribute.getMetaData().getType());
-						postValues.put(key, attributeValue);
-					}
+					key = String.format(key, Integer.parseInt(attributeId.substring(len)));
+					String attributeValue = parseValue(taskAttribute.getValue(), taskAttribute.getMetaData().getType());
+					
+					postValues.put(key, attributeValue);
 				} else {
-					//standard attributes
+					//standard
 					if (redmineAttribute.isReadOnly() || taskAttribute.getMetaData().isReadOnly() || redmineAttribute.isOperationValue()) {
 						continue;
 					}
@@ -95,18 +83,18 @@ public class RedmineTaskDataReader {
 					postValues.put(key, attributeValue);
 				}
 			}
+
 			
-			
-			TaskAttribute operationAttribute = rootAttribute.getMappedAttribute(TaskAttribute.OPERATION);
+			TaskAttribute operationAttribute = taskData.getRoot().getMappedAttribute(TaskAttribute.OPERATION);
 			if (operationAttribute != null) {
 				
 				RedmineOperation redmineOperation = RedmineOperation.valueOf(operationAttribute.getValue());
-				TaskAttribute selectedOperation = rootAttribute.getAttribute(TaskAttribute.PREFIX_OPERATION + operationAttribute.getValue());
+				TaskAttribute selectedOperation = taskData.getRoot().getAttribute(TaskAttribute.PREFIX_OPERATION + operationAttribute.getValue());
 				if(redmineOperation!=null && selectedOperation!=null) {
 					String value = null;
 					
 					if(redmineOperation.isAssociated()) {
-						TaskAttribute inputAttribute = rootAttribute.getAttribute(redmineOperation.getInputId());
+						TaskAttribute inputAttribute = operationAttribute.getTaskData().getRoot().getAttribute(redmineOperation.getInputId());
 						if(inputAttribute!=null) {
 							value = inputAttribute.getValue();
 						}
@@ -124,18 +112,18 @@ public class RedmineTaskDataReader {
 			
 			return postValues;
 		} catch (NumberFormatException e) {
-			IStatus status = RedmineCorePlugin.toStatus(e, null, Messages.RedmineTaskDataReader_INVALID_ATTRIBUTE_ID);
+			IStatus status = RedmineCorePlugin.toStatus(e, null, "Invalid Integer value");
 			throw new RedmineStatusException(status);
 		}
 	}
 	
 	private static String parseValue(String value, String type) {
-		if (type.equals(TaskAttribute.TYPE_DATE) && !value.equals("")) { //$NON-NLS-1$
+		if (type.equals(TaskAttribute.TYPE_DATE) && !value.equals("")) {
 			return RedmineUtil.toFormatedRedmineDate(RedmineUtil.parseDate(value));
 		}
 		
-		if (type.equals(TaskAttribute.TYPE_BOOLEAN) && !value.equals("")) { //$NON-NLS-1$
-			return Boolean.parseBoolean(value) ? "1" : "0"; //$NON-NLS-1$ //$NON-NLS-2$
+		if (type.equals(TaskAttribute.TYPE_BOOLEAN) && !value.equals("")) {
+			return Boolean.parseBoolean(value) ? "1" : "0";
 		}
 		
 		return value;

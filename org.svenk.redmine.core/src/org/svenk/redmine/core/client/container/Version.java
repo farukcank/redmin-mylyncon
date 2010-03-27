@@ -12,7 +12,6 @@ public class Version {
 
 	public enum Release {
 		REDMINE_0_8_7(0, 8, 7),
-		REDMINE_0_9(0, 9),
 		PLUGIN_2_6(2, 6);
 
 		public final int major;

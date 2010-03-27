@@ -64,6 +64,4 @@ public boolean hasAttributes();
 	public boolean supportStartDueDate();
 
 	public boolean supportTimeEntries();
-	
-	public boolean supportTrackerChange();
 }

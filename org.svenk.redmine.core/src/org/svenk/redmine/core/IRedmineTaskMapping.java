@@ -18,18 +18,11 @@
  * Contributors:
  *     Sven Krzyzak - adapted Trac implementation for Redmine
  *******************************************************************************/
-package org.svenk.redmine.core.util.internal;
+package org.svenk.redmine.core;
 
-import org.eclipse.osgi.util.NLS;
+import org.eclipse.mylyn.tasks.core.ITaskMapping;
 
-public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "org.svenk.redmine.core.util.internal.messages"; //$NON-NLS-1$
-	public static String RedmineTaskDataReader_INVALID_ATTRIBUTE_ID;
-	static {
-		// initialize resource bundle
-		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
-	}
+public interface IRedmineTaskMapping extends ITaskMapping {
 
-	private Messages() {
-	}
+	public String getTracker();
 }

@@ -77,7 +77,6 @@ import org.eclipse.mylyn.tasks.core.data.TaskAttachmentPartSource;
 import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.client.container.Version;
-import org.svenk.redmine.core.client.container.Version.Release;
 import org.svenk.redmine.core.exception.RedmineAuthenticationException;
 import org.svenk.redmine.core.exception.RedmineErrorException;
 import org.svenk.redmine.core.exception.RedmineException;
@@ -157,10 +156,6 @@ abstract public class AbstractRedmineClient implements IRedmineClient {
 		return false;
 	}
 	
-	public boolean supportTrackerChange() {
-		return vRedmine!=null && vRedmine.compareTo(Release.REDMINE_0_9)>=0;
-	}
-
 	public InputStream getAttachmentContent(int attachmentId, IProgressMonitor monitor) throws RedmineException {
 		GetMethod method = new GetMethod(REDMINE_URL_ATTACHMENT_DOWNLOAD + attachmentId);
 		return executeMethod(method, attachmentParser, monitor);

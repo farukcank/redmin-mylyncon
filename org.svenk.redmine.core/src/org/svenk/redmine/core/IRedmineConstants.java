@@ -93,8 +93,4 @@ public interface IRedmineConstants {
 	
 	public final static String REGEX_INTEGER = "^\\d+$";
 
-	public final static String TASK_EDITOR_PART_PLANNING = "org.svenk.redmine.ui.editor.part.planning";
-	public final static String TASK_EDITOR_PART_TIMEENTRIES = "org.svenk.redmine.ui.editor.part.timeentries";
-	public final static String TASK_EDITOR_PART_NEWTIMEENTRY = "org.svenk.redmine.ui.editor.part.newtimeentry";
-
 }
