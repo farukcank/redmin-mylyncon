@@ -22,12 +22,12 @@ package org.svenk.redmine.ui.wizard;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.mylyn.tasks.core.ITaskMapping;
+import org.eclipse.mylyn.tasks.core.TaskMapping;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.mylyn.tasks.ui.wizards.NewTaskWizard;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.INewWizard;
-import org.svenk.redmine.core.AbstractRedmineTaskMapping;
 import org.svenk.redmine.core.IRedmineClient;
 import org.svenk.redmine.core.RedmineCorePlugin;
 import org.svenk.redmine.core.RedmineRepositoryConnector;
@@ -36,8 +36,6 @@ import org.svenk.redmine.core.exception.RedmineException;
 public class NewRedmineTaskWizard extends NewTaskWizard implements INewWizard {
 
 	private RedmineProjectPage projectPage;
-	
-	private RedmineTrackerPage trackerPage;
 	
 	public NewRedmineTaskWizard(TaskRepository taskRepository, ITaskMapping taskSelection) {
 		super(taskRepository, taskSelection);
@@ -57,9 +55,7 @@ public class NewRedmineTaskWizard extends NewTaskWizard implements INewWizard {
 			Assert.isNotNull(client);
 			
 			projectPage = new RedmineProjectPage(client, getTaskRepository());
-			trackerPage = new RedmineTrackerPage(client);
 			addPage(projectPage);
-			addPage(trackerPage);
 		} catch (RedmineException e) {}
 
 	}
@@ -67,15 +63,11 @@ public class NewRedmineTaskWizard extends NewTaskWizard implements INewWizard {
 	@Override
 	protected ITaskMapping getInitializationData() {
 		final String product = projectPage.getSelectedProjectName();
-		final int trackerId = trackerPage.getSelectedTracker().getValue();
 		
-		return new AbstractRedmineTaskMapping() {
+		return new TaskMapping() {
 			@Override
 			public String getProduct() {
 				return product;
-			}
-			public String getTracker() {
-				return ""+trackerId;
 			}
 			
 		};
