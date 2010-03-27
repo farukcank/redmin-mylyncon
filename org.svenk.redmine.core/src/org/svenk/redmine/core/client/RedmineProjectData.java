@@ -23,7 +23,9 @@ package org.svenk.redmine.core.client;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.svenk.redmine.core.model.RedmineCustomField;
 import org.svenk.redmine.core.model.RedmineIssueCategory;
@@ -93,6 +95,16 @@ public class RedmineProjectData implements Serializable {
 			}
 		}
 		return Collections.unmodifiableList(customTicketValues);
+	}
+	
+	public Set<Integer> getCustomFieldIds(int trackerId) {
+		Set<Integer> ids = new HashSet<Integer>();
+		for (RedmineCustomField v : this.customTicketFields) {
+			if (v.usableForTracker(trackerId)) {
+				ids.add(v.getId());
+			}
+		}
+		return ids;
 	}
 
 	public RedmineCustomField getCustomTicketField(int id) {

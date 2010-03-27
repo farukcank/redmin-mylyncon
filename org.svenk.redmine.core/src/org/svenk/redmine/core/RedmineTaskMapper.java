@@ -26,7 +26,7 @@ import org.eclipse.mylyn.tasks.core.data.TaskMapper;
 import org.svenk.redmine.core.client.RedmineClientData;
 import org.svenk.redmine.core.model.RedminePriority;
 
-public class RedmineTaskMapper extends TaskMapper implements IRedmineTaskMapping {
+public class RedmineTaskMapper extends TaskMapper {
 
 	private final RedmineClientData clientData;
 	
@@ -58,13 +58,5 @@ public class RedmineTaskMapper extends TaskMapper implements IRedmineTaskMapping
 		}
 
 		return level;
-	}
-
-	public void setTracker(String value) {
-		setValue(RedmineAttribute.TRACKER.getTaskKey(), value);
-	}
-	
-	public String getTracker() {
-		return getValue(RedmineAttribute.TRACKER.getTaskKey());
 	}
 }

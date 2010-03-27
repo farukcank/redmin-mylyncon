@@ -273,7 +273,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		
 		try {
 			IRedmineClient client = connector.getClientManager().getRedmineClient(repository);
-			Map<String, String> postValues = RedmineTaskDataReader.readTask(taskData, oldAttributes);
+			Map<String, String> postValues = RedmineTaskDataReader.readTask(taskData, oldAttributes, client.getClientData());
 			
 			if (taskData.isNew() || taskData.getTaskId().equals("")) { //$NON-NLS-1$
 				//set read-only attributes Project
@@ -327,17 +327,10 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 			
 			//Input from wizard
 			RedmineProjectData projectData = client.getClientData().getProjectFromName(initializationData.getProduct());
-			int trackerId = 0;
-			try {
-				trackerId = Integer.parseInt(((IRedmineTaskMapping)initializationData).getTracker());
-			} catch (NumberFormatException e) {
-				throw new CoreException(RedmineCorePlugin.toStatus(e, repository, "INVALID_TRACKER_ID {0}", ((IRedmineTaskMapping)initializationData).getTracker()));
-			}
 
 			//Initialize new ticket
 			RedmineTicket ticket = new RedmineTicket();
 			ticket.putBuiltinValue(RedmineTicket.Key.PROJECT, projectData.getProject().getValue());
-			ticket.putBuiltinValue(RedmineTicket.Key.TRACKER, trackerId);
 
 			createDefaultAttributes(data, client, ticket, projectData);
 			createOperations(data, client.getClientData(), null);
@@ -346,11 +339,10 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 			TaskAttribute attr = data.getRoot().getMappedAttribute(RedmineAttribute.PROJECT.getTaskKey());
 			attr.setValue(projectData.getProject().getName());
 			attr = data.getRoot().getMappedAttribute(RedmineAttribute.TRACKER.getTaskKey());
-			attr.setValue(""+trackerId); //$NON-NLS-1$
 						
 			createCustomAttributes(data, client, ticket, projectData);
 			
-			//set default value for attributes Status,Priority and Progress(DoneRatio)
+			//set default value for attributes Status,Priority,Tracker and Progress(DoneRatio)
 			attr = data.getRoot().getMappedAttribute(RedmineAttribute.STATUS_CHG.getTaskKey());
 			RedmineTicketStatus defStatus = client.getClientData().getDefaultStatus();
 			if(defStatus != null) {
@@ -361,6 +353,11 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 				if (priority.isDefaultPriority()) {
 					attr.setValue("" + priority.getValue()); //$NON-NLS-1$
 				}
+			}
+			attr = data.getRoot().getMappedAttribute(RedmineAttribute.TRACKER.getTaskKey());
+			Map<String, String> trackerOptions =  attr.getOptions();
+			if(trackerOptions!=null && !trackerOptions.isEmpty()) {
+				attr.setValue(trackerOptions.keySet().iterator().next());
 			}
 			attr = data.getRoot().getMappedAttribute(RedmineAttribute.PROGRESS.getTaskKey());
 			attr.setValue(RedmineTicketProgress.getDefaultValue());
@@ -427,7 +424,8 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		createAttribute(data, RedmineAttribute.CATEGORY, projectData.getCategorys(), true);
 		createAttribute(data, RedmineAttribute.VERSION, projectData.getVersions(), true);
 		createAttribute(data, RedmineAttribute.ASSIGNED_TO, projectData.getMembers(), !existingTask);
-		createAttribute(data, RedmineAttribute.TRACKER, projectData.getTrackers(), false);
+		createAttribute(data, RedmineAttribute.TRACKER, projectData.getTrackers(), false)
+			.getMetaData().setReadOnly(!data.isNew() && !client.supportTrackerChange());
 		createAttribute(data, RedmineAttribute.PROGRESS, RedmineTicketProgress.availableValues(), false);
 
 		//Attributes for new a TimeEntry
@@ -476,12 +474,8 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 	}
 
 	private static void createCustomAttributes(TaskData data, IRedmineClient client, RedmineTicket ticket, RedmineProjectData projectData) throws RedmineException {
-		try {
-			List<RedmineCustomField> customFields = projectData.getCustomTicketFields(Integer.parseInt(ticket.getValue(Key.TRACKER)));
-			createCustomAttributes(data, customFields, false);
-		} catch (NumberFormatException e) {
-			throw new RedmineException("INVALID_TRACKER_ID", e);
-		};
+		List<RedmineCustomField> customFields = projectData.getCustomTicketFields();
+		createCustomAttributes(data, customFields, false);
 	}
 	
 	private static void createCustomAttributes(TaskData data, List<RedmineCustomField> customFields, boolean hide) {
