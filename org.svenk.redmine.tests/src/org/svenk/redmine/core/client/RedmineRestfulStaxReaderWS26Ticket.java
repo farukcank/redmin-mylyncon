@@ -70,6 +70,9 @@ public class RedmineRestfulStaxReaderWS26Ticket extends TestCase {
 		InputStream in = getClass().getResourceAsStream("/xmldata/issue_4.xml");
 		RedmineTicket ticket = testee.readTicket(in);
 		assertNotNull(ticket);
+		
+		assertTrue(ticket.getUseDoneratioField());
+
 		in.close();
 	}
 	
@@ -99,6 +102,8 @@ public class RedmineRestfulStaxReaderWS26Ticket extends TestCase {
 		//attachments
 		//issueRelations
 		//timeEntries
+		
+		assertFalse(ticket.getUseDoneratioField());
 	}
 	
 	@SuppressWarnings("unchecked")

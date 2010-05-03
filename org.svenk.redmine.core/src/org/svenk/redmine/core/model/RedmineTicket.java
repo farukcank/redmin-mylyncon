@@ -121,6 +121,8 @@ public class RedmineTicket {
 
 	private Date lastChanged;
 	
+	private boolean useDonerationField = true;
+	
 	private Map<Key, String> valueByKey = new HashMap<Key, String>();
 
 	private HashMap<Integer, String> valueByCustomFieldId = new HashMap<Integer, String>();
@@ -297,5 +299,13 @@ public class RedmineTicket {
 	public void setLastChanged(Date lastChanged) {
 		this.lastChanged = lastChanged;
 	}
-	
+
+	public boolean getUseDoneratioField() {
+		return useDonerationField;
+	}
+
+	public void setUseDoneratioField(boolean val) {
+		useDonerationField = val;
+	}
+
 }

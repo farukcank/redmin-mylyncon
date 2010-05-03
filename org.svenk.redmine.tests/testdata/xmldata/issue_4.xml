@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issue xmlns="http://redmin-mylyncon.sf.net/schemas/WS-API-2.6" id="4">
+<issue xmlns="http://redmin-mylyncon.sf.net/schemas/WS-API-2.6" id="4" useDoneratioField="true">
   <subject>Issue on project 2</subject>
   <description>Issue on project 2</description>
   <author>John Smith</author>

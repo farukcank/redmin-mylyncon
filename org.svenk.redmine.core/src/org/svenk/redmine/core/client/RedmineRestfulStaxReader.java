@@ -383,6 +383,9 @@ public class RedmineRestfulStaxReader {
 		RedmineTicket ticket = null;
 		try {
 			ticket = new RedmineTicket(Integer.parseInt(reader.getAttributeValue(NS_PREFIX, "id")));
+			
+			String useDoneration = reader.getAttributeValue(NS_PREFIX, "useDoneratioField");
+			ticket.setUseDoneratioField(useDoneration==null || Boolean.valueOf(useDoneration));
 
 			while(reader.nextTag()==XMLStreamConstants.START_ELEMENT) {
 				Key key = Key.fromTagName(reader.getLocalName());

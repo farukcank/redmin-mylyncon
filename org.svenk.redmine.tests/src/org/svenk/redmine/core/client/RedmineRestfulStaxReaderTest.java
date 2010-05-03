@@ -239,6 +239,7 @@ public class RedmineRestfulStaxReaderTest extends TestCase {
 		assertEquals("1", ticket.getValue(Key.ASSIGNED_TO));
 		assertEquals("20", ticket.getValue(Key.DONE_RATIO));
 		assertEquals("5", ticket.getValue(Key.ESTIMATED_HOURS));
+		assertTrue(ticket.getUseDoneratioField());
 		
 		Field field = ticket.getClass().getDeclaredField("availableStatus");
 		field.setAccessible(true);

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<issue xmlns="http://redmin-mylyncon.sf.net/schemas/WS-API-2.6" id="3">
+<issue xmlns="http://redmin-mylyncon.sf.net/schemas/WS-API-2.6" id="3" useDoneratioField="false" >
   <subject>Error 281 when updating a recipe</subject>
   <description>Error 281 is encountered when saving a recipe</description>
   <author>John Smith</author>
