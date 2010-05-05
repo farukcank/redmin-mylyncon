@@ -27,6 +27,7 @@ public class Messages extends NLS {
 	public static String RedmineRepositorySettingsPage_CLIENT_IMPL_DO_SELECT;
 	public static String RedmineRepositorySettingsPage_CLIENT_IMPL_NOT_SELECTED;
 	public static String RedmineRepositorySettingsPage_CLIENT_IMPL_TITLE;
+	public static String RedmineRepositorySettingsPage_INVALID_CREDENTIALS;
 	public static String RedmineRepositorySettingsPage_MESSAGE_SUCCESS;
 	public static String RedmineRepositorySettingsPage_MESSAGE_VERSION_OUTDATED_ERROR;
 	public static String RedmineRepositorySettingsPage_MESSAGE_VERSION_UNKNOWN_ERROR;

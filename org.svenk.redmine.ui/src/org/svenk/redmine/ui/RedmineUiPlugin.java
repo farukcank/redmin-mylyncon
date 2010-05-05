@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
+import org.eclipse.mylyn.tasks.ui.TaskRepositoryLocationUiFactory;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.ISelectionService;
@@ -103,6 +104,7 @@ public class RedmineUiPlugin extends AbstractUIPlugin {
 		
 		RedmineCorePlugin corePlugin = RedmineCorePlugin.getDefault();
 		
+		corePlugin.getConnector().setTaskRepositoryLocationFactory(new TaskRepositoryLocationUiFactory());
 		TasksUi.getRepositoryManager().addListener(corePlugin.getConnector().getClientManager());
 		
 		try {

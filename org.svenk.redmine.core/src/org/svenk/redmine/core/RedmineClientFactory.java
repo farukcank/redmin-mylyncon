@@ -37,8 +37,12 @@ public class RedmineClientFactory {
 	protected static TaskRepositoryLocationFactory repositoryLocationFactory = new TaskRepositoryLocationFactory();
 	
 	public static IRedmineClient createClient(TaskRepository repository, RedmineClientData clientData) throws RedmineException {
+		AbstractWebLocation location = repositoryLocationFactory.createWebLocation(repository);
+		return createClient(repository, location, clientData);
+	}
+
+	public static IRedmineClient createClient(TaskRepository repository, AbstractWebLocation location, RedmineClientData clientData) throws RedmineException {
 		try {
-			AbstractWebLocation location = repositoryLocationFactory.createWebLocation(repository);
 			if(clientData==null) {
 				clientData = new RedmineClientData();
 			}

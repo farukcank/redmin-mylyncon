@@ -44,6 +44,7 @@ import org.eclipse.mylyn.tasks.core.AbstractRepositoryConnector;
 import org.eclipse.mylyn.tasks.core.IRepositoryQuery;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
+import org.eclipse.mylyn.tasks.core.TaskRepositoryLocationFactory;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskAttachmentHandler;
 import org.eclipse.mylyn.tasks.core.data.AbstractTaskDataHandler;
 import org.eclipse.mylyn.tasks.core.data.TaskAttribute;
@@ -67,6 +68,8 @@ import org.svenk.redmine.core.util.RedmineUtil;
 public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 
 	private RedmineClientManager clientManager;
+	
+	private TaskRepositoryLocationFactory locationFactory;
 	
 	private RedmineTaskDataHandler taskDataHandler;
 
@@ -419,10 +422,14 @@ public class RedmineRepositoryConnector extends AbstractRepositoryConnector {
 		return new RedmineTaskMapper(taskData, clientData);
 	}
 
+	public void setTaskRepositoryLocationFactory(TaskRepositoryLocationFactory locationFactory) {
+		this.locationFactory = locationFactory;
+	}
+
 	public synchronized RedmineClientManager getClientManager() {
 		if (clientManager == null) {
 			IPath path = RedmineCorePlugin.getDefault().getRepostioryAttributeCachePath();
-			clientManager = new RedmineClientManager(path.toFile());
+			clientManager = new RedmineClientManager(locationFactory, path.toFile());
 		}
 		return clientManager;
 	}

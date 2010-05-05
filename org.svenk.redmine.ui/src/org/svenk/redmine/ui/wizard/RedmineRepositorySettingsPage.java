@@ -38,6 +38,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.mylyn.commons.core.StatusHandler;
+import org.eclipse.mylyn.commons.net.UnsupportedRequestException;
 import org.eclipse.mylyn.internal.tasks.ui.editors.TaskEditorExtensions;
 import org.eclipse.mylyn.tasks.core.TaskRepository;
 import org.eclipse.mylyn.tasks.ui.wizards.AbstractRepositorySettingsPage;
@@ -187,6 +188,9 @@ public class RedmineRepositorySettingsPage extends AbstractRepositorySettingsPag
 					IRedmineClient client = RedmineClientFactory.createClient(repository, null);
 					detectedVersion = client.checkClientConnection(monitor);
 				} catch (RedmineException e) {
+					if(e.getCause() instanceof UnsupportedRequestException) {
+						throw new CoreException(new Status(IStatus.ERROR, RedmineCorePlugin.PLUGIN_ID, Messages.RedmineRepositorySettingsPage_INVALID_CREDENTIALS));
+					}
 					throw new CoreException(RedmineCorePlugin.toStatus(e, repository));
 				}
 				checkedUrl = repository.getRepositoryUrl();
