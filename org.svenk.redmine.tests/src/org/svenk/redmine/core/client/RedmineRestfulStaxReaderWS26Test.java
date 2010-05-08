@@ -27,6 +27,7 @@ import junit.framework.TestCase;
 
 import org.svenk.redmine.core.model.RedmineActivity;
 import org.svenk.redmine.core.model.RedmineCustomField;
+import org.svenk.redmine.core.model.RedmineVersion;
 import org.svenk.redmine.core.model.RedmineCustomField.FieldType;
 
 public class RedmineRestfulStaxReaderWS26Test extends TestCase {
@@ -108,12 +109,14 @@ public class RedmineRestfulStaxReaderWS26Test extends TestCase {
 //		assertEquals(3, trackers.size());
 //		assertEquals(2, trackers.get(1).getValue());
 //		assertEquals("Feature", trackers.get(1).getName());
-//		
-//		List<RedmineVersion> versions = data.getVersions();
-//		assertEquals(2, versions.size());
-//		assertEquals(2, versions.get(0).getValue());
-//		assertEquals("version 2", versions.get(0).getName());
-//		
+		
+		List<RedmineVersion> versions = data.getVersions();
+		assertEquals(3, versions.size());
+		assertEquals(2, versions.get(0).getValue());
+		assertEquals("0.1", versions.get(1).getName());
+		assertTrue(versions.get(0).isOpen());
+		assertFalse(versions.get(1).isOpen());
+		
 //		List<RedmineMember> members = data.getMembers();
 //		assertEquals(1, members.size());
 //		assertEquals(3, members.get(0).getValue());

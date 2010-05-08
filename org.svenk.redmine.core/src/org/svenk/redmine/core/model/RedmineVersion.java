@@ -22,11 +22,22 @@ package org.svenk.redmine.core.model;
 
 public class RedmineVersion extends RedmineTicketAttribute {
 
-	private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 3L;
+	
+	//TODO completed is wrong, must be called closed in API 2.7
+	private boolean open = true;
 
 	public RedmineVersion(String name, int value) {
 		super(name, value);
 		// TODO Auto-generated constructor stub
 	}
 
+	public boolean isOpen() {
+		return open;
+	}
+
+	public void setOpen(boolean open) {
+		this.open = open;
+	}
+	
 }

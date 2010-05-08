@@ -22,6 +22,7 @@ package org.svenk.redmine.core.client;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -73,6 +74,17 @@ public class RedmineProjectData implements Serializable {
 		return Collections.unmodifiableList(versions);
 	}
 
+	public List<RedmineVersion> getAssignableVersions(int... requiredVersionIds) {
+		Arrays.sort(requiredVersionIds);
+		List<RedmineVersion> list = new ArrayList<RedmineVersion>(versions.size());
+		for (RedmineVersion version : versions) {
+			if(version.isOpen() || Arrays.binarySearch(requiredVersionIds, version.getValue())>=0) {
+				list.add(version);
+			}
+		}
+		return list;
+	}
+	
 	public List<RedmineMember> getMembers() {
 		return Collections.unmodifiableList(members);
 	}

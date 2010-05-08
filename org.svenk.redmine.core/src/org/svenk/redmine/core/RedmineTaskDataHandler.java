@@ -422,7 +422,12 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		
 		createAttribute(data, RedmineAttribute.PRIORITY, client.getClientData().getPriorities());
 		createAttribute(data, RedmineAttribute.CATEGORY, projectData.getCategorys(), true);
-		createAttribute(data, RedmineAttribute.VERSION, projectData.getVersions(), true);
+		
+		if (existingTask && RedmineUtil.parseInteger(ticket.getValue(RedmineAttribute.VERSION.getTicketKey()))!=null) {
+			createAttribute(data, RedmineAttribute.VERSION, projectData.getAssignableVersions(RedmineUtil.parseInteger(ticket.getValue(RedmineAttribute.VERSION.getTicketKey()))), true);
+		} else {
+			createAttribute(data, RedmineAttribute.VERSION, projectData.getAssignableVersions(), true);
+		}
 		createAttribute(data, RedmineAttribute.ASSIGNED_TO, projectData.getMembers(), !existingTask);
 		createAttribute(data, RedmineAttribute.TRACKER, projectData.getTrackers(), false).getMetaData().setReadOnly(!data.isNew() && !client.supportTrackerChange());
 		if (existingTask && ticket.getUseDoneratioField()) {

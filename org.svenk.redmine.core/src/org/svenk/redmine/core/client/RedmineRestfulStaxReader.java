@@ -637,7 +637,11 @@ public class RedmineRestfulStaxReader {
 			reader.nextTag();
 			version = new RedmineVersion(reader.getElementText(), id);
 			
-			//skip completed
+			reader.nextTag();
+			if(reader.getLocalName().equals("open")) {
+				version.setOpen(Boolean.valueOf(reader.getElementText()));
+			}
+			
 		} finally {
 			skipToEndTag("version", reader);
 		}

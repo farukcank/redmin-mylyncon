@@ -21,15 +21,15 @@
   <versions>
 <version id="2">
   <name>1.0</name>
-  <completed>false</completed>
+  <open>true</open>
 </version>
 <version id="1">
   <name>0.1</name>
-  <completed>true</completed>
+  <open>false</open>
 </version>
 <version id="3">
   <name>2.0</name>
-  <completed>false</completed>
+  <open>true</open>
 </version>
   </versions>
   <members>

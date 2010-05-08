@@ -68,4 +68,8 @@ public class RedmineUtil {
 	public static Boolean parseBoolean(String value) {
 		return value.trim().equals("1") ? Boolean.TRUE : Boolean.parseBoolean(value);
 	}
+
+	public static Integer parseInteger(String value) {
+		return value!=null && value.trim().matches("^\\d$") ? Integer.parseInt(value) : null;
+	}
 }

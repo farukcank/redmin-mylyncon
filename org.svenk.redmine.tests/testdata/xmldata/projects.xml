@@ -21,11 +21,11 @@
 		<versions>
 			<version id="2">
 				<name>version 2</name>
-				<completed>true</completed>
+				<open>false</open>
 			</version>
 			<version id="1">
 				<name>version 1</name>
-				<completed>true</completed>
+				<open>false</open>
 			</version>
 		</versions>
 		<members>
@@ -113,11 +113,11 @@
 		<versions>
 			<version id="2">
 				<name>version 2</name>
-				<completed>true</completed>
+				<open>false</open>
 			</version>
 			<version id="1">
 				<name>version 1</name>
-				<completed>true</completed>
+				<open>false</open>
 			</version>
 		</versions>
 		<members>
