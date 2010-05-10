@@ -390,6 +390,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 	
 	private static void createDefaultAttributes(TaskData data, IRedmineClient client, RedmineTicket ticket, RedmineProjectData projectData) {
 		boolean existingTask = ticket.getId()>0;
+		TaskAttribute attribute;
 		
 		createAttribute(data, RedmineAttribute.SUMMARY);
 		createAttribute(data, RedmineAttribute.DESCRIPTION);
@@ -430,8 +431,10 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 		}
 		createAttribute(data, RedmineAttribute.ASSIGNED_TO, projectData.getMembers(), !existingTask);
 		createAttribute(data, RedmineAttribute.TRACKER, projectData.getTrackers(), false).getMetaData().setReadOnly(!data.isNew() && !client.supportTrackerChange());
-		if (existingTask && ticket.getUseDoneratioField()) {
-			createAttribute(data, RedmineAttribute.PROGRESS, RedmineTicketProgress.availableValues(), false);
+
+		attribute = createAttribute(data, RedmineAttribute.PROGRESS, RedmineTicketProgress.availableValues(), false);
+		if (!(existingTask && ticket.getUseDoneratioField())) {
+			attribute.getMetaData().setType(null);
 		}
 
 		//Attributes for new a TimeEntry
