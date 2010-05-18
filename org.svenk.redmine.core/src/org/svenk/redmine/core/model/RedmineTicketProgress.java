@@ -46,7 +46,7 @@ public class RedmineTicketProgress extends RedmineTicketAttribute {
 	}
 	
 	public static String getDefaultValue() {
-		return availableValues.get(0).getValue() + "";
+		return availableValues().get(0).getValue() + "";
 	}
 	
 }

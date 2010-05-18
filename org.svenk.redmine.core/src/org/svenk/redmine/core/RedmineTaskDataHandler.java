@@ -434,6 +434,7 @@ public class RedmineTaskDataHandler extends AbstractTaskDataHandler {
 
 		attribute = createAttribute(data, RedmineAttribute.PROGRESS, RedmineTicketProgress.availableValues(), false);
 		if (!(existingTask && ticket.getUseDoneratioField())) {
+			attribute.getMetaData().setReadOnly(true);
 			attribute.getMetaData().setType(null);
 		}
 
