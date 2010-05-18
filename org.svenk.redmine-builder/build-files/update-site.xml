@@ -29,7 +29,7 @@
 
 		<!-- Generate p2 metadata -->
 		<java classname="org.eclipse.equinox.launcher.Main" fork="true" 
-			failonerror="false" maxmemory="256" >
+			failonerror="true" >
 			<arg line="-application org.eclipse.equinox.p2.metadata.generator.EclipseGenerator" />
 			<arg line=" -updateSite ${updatesite}/ -site file:${updatesite}/site.xml" />
 			<arg line=" -metadataRepository file:${updatesite}/ -metadataRepositoryName &quot;Redmine-Mylyn Update Site&quot;" />
